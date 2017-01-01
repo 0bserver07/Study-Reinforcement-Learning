@@ -1,4 +1,6 @@
-## Reinforcement Learning & (Deep RL) Study List:
+## Study Reinforcement Learning & (Deep RL) Guide:
+
+* Simple guide and collective to study RL/DeepRL in one to 2.5 months of time.
 
 ### Talks to check out first:
 ----
