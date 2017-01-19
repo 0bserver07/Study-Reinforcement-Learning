@@ -15,6 +15,31 @@
 		- actions (Probabilistic effects)
 		- Reward function
 		- Initial state distribution
+			```
+			                             +-----------------+
+			      +--------------------- |                 |
+			      |                      |      Agent      |
+			      |                      |                 | +---------------------+
+			      |         +----------> |                 |                       |
+			      |         |            +-----------------+                       |
+			      |         |                                                      |
+			state |         | reward                                               | action
+			S(t)  |         | r(t)                                                 | a(t)
+			      |         |                                                      |
+			      |         | +                                                    |
+			      |         | |  r(t+1) +----------------------------+             |
+			      |         +-----------+                            |             |
+			      |           |         |                            | <-----------+
+			      |           |         |      Environment           |
+			      |           |  S(t+1) |                            |
+			      +---------------------+                            |
+			                  |         +----------------------------+
+			                  +
+
+			* Sutton and Barto (1998)
+
+			```
+
 	* Explanation of the Markov Property:
 	* Why Maximizing utility in:
 		- Episodic tasks
