@@ -107,6 +107,8 @@
 ### Books:
 ---
 
+- Before starting out the books, here is a neat overview by Yuxi Li about Deep RL:
+	- [Deep Reinforcement Learning: An Overview](https://arxiv.org/abs/1701.07274v2)
 - [Reinforcement Learning: An Introduction by Richard S. Sutton and Andrew G. Barto](http://webdocs.cs.ualberta.ca/~sutton/book/ebook/the-book.html)
 - [Algorithms for Reinforcement Learning.](https://sites.ualberta.ca/~szepesva/papers/RLAlgsInMDPs.pdf)
 - [Reinforcement Learning and Dynamic Programming using Function Approximators.](https://orbi.ulg.ac.be/bitstream/2268/27963/1/book-FA-RL-DP.pdf)
