@@ -130,9 +130,19 @@
 	* Lecture 9: Exploration and Exploitation
 	* Lecture 10: Case Study: RL in Classic Games
 
-* [CS294 Deep Reinforcement Learning](http://rll.berkeley.edu/deeprlcourse/#lecture-videos) by John Schulman and Pieter Abbeel.
-	* Lecture 1: intro, derivative free optimization
-	* Lecture 2: score function gradient estimation and policy gradients
-	* Lecture 3: actor critic methods
-	* Lecture 4: trust region and natural gradient methods, open problems
+* [CS 294: Deep Reinforcement Learning, Spring 2017](http://rll.berkeley.edu/deeprlcoursesp17/#lecture-videos) by John Schulman and Pieter Abbeel.
+	* Instructors: Sergey Levine, John Schulman, Chelsea Finn:
+	* [My Notes](/CS294-Spring17-RL)
 
+
+
+
+
+
+
+
+
+
+-----
+
+![cc](https://licensebuttons.net/l/by-nc-nd/3.0/88x31.png)
