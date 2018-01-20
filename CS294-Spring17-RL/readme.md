@@ -1,6 +1,14 @@
 ## Notes taken from CS 294: Deep Reinforcement Learning, Spring 2017 (Berkeley)
 
-### 1 Introduction and course overview (Levine (L), Finn (F), Schulman (S)):
+Outline:
+----
+1. [lec 1](#lec1)
+2. [lec 2](#lec2)
+
+----
+
+
+### <a name='#lec1'>1-</a> Introduction and course overview (Levine (L), Finn (F), Schulman (S)):
 
 * L: Course information and todos:
 	* Overall the course will cover:
@@ -80,3 +88,32 @@ process (POMDP)
 	+ Atari DeepQ, policy gradients, DAgger
 		+ policy search
 		+ AlphaGo:  supervised learning + policy gradients + value functions + Monte-Carlo tree search
+
+----
+
+### <a name='#lec2'>2-</a> Supervised learning and decision making (L):
+* Supervised Learning of Behaviors: Deep Learning, Dynamical Systems, and Behavior Cloning:
+	* Understand definitions & notation
+	* Understand basic imitation learning algorithms
+	* Understand their strengths & weaknesses
+* notations:
+	* xt: state
+	* ot: observations
+	* ut: action
+	* pi = π(ut|ot) - Policy
+	* c(xt,ut) - cost func
+	* r(xt,ut) - reward func
++ Imitation Learning,
+	+ Driving: [Nvidia's example](https://github.com/0bserver07/Nvidia-Autopilot-Keras)
+	+ Learning from a stabilizing controller (deep-neuro env)
++ DAgger
+	+ Case study 1: trail following as classification
+	+ Case study 2: DAgger & domain adaptation
+	+ Case study 3: Imitation with LSTMs
+- Other imitation learning:
+	- Structured prediction
+	- Interaction & active learning
+	- Inverse reinforcement learning
+		- figure out the goal
+* cost function -> imitation?
+* The trouble with cost & reward functions
