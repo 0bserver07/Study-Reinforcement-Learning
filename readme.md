@@ -132,7 +132,7 @@
 
 * [CS 294: Deep Reinforcement Learning, Spring 2017](http://rll.berkeley.edu/deeprlcoursesp17/#lecture-videos) by John Schulman and Pieter Abbeel.
 	* Instructors: Sergey Levine, John Schulman, Chelsea Finn:
-	* [My Bad Notes](/CS294-Spring17-RL)
+	* [My Bad Notes](./CS294-Spring17-RL)
 
 
 

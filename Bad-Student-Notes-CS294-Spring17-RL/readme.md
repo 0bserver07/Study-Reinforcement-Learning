@@ -105,7 +105,7 @@ process (POMDP)
 	* r(Xt,Ut) - reward function
 	* Note (those letters should be lower-case and the "t"s should be a subscript, representing TIME)
 
-	* ![img](./rl-imitation-learning.png)
+	* ![img](./imgs/rl-imitation-learning.png)
 
 + Imitation Learning,
 	+ Examples:
@@ -116,7 +116,7 @@ process (POMDP)
 			- It only sees expert level and it will fail at edge cases.
 			- We can predict this from Dynamical Systems intuition.
 		* How can we fix this? (Nvidia's case)
-			* ![img](./nvidia-case.png)
+			* ![img](./imgs/nvidia-case.png)
 			* They stitch multiple cameras to each other?
 			* The policy alone does not know how to fix mistakes, due to this it deviates from the working trajectory. However, if we have a distribution of the trajectories and we pick from those trajectories, then we can have a stable trajectory.
 				* Augmenting the data by left and right.
@@ -180,7 +180,7 @@ process (POMDP)
 	+ keep in mind the 2nd order method helps in above step (google it if you need 34 page proof)
 
 * Important equation:
-	* Linear Case (LQR): ![lqr](./linear-lqr.png)
+	* Linear Case (LQR): ![lqr](./imgs/linear-lqr.png)
 
 * Examples of Trajectory optimization:
 	* Example 1: nonlinear model-predictive control (synthesis and stabilization of complex behaviors through online trajectory)
