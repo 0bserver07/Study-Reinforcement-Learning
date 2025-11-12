@@ -2,6 +2,8 @@
 
 A comprehensive collection of resources for studying Reinforcement Learning, from foundational concepts to cutting-edge applications in Large Language Models and Program Synthesis.
 
+**🚀 New here? [Start with GETTING_STARTED.md](./GETTING_STARTED.md) to find your learning path!**
+
 ---
 
 ## 📚 Repository Structure
@@ -9,13 +11,23 @@ A comprehensive collection of resources for studying Reinforcement Learning, fro
 ### 🆕 Modern RL Research (2022-2025)
 Cutting-edge research on RL applied to LLMs, code generation, and program synthesis:
 - **[LLM + RL for Program Synthesis](./Modern-RL-Research/LLM-RL-Program-Synthesis/)** - AlphaCode, CodeRL, and competition-level code generation
+  - 📄 50 recent papers collected
 - **[LLM Code Generation with RL](./Modern-RL-Research/LLM-Code-Generation/)** - Practical applications, safety, and real-world deployment
+  - 📄 271 recent papers collected
 - **[RLHF and Alignment](./Modern-RL-Research/RLHF-and-Alignment/)** - PPO, DPO, GRPO, and aligning code models with human preferences
+  - 📄 111 recent papers collected
+
+**📊 Total: 432 papers automatically collected from arXiv!**
 
 ### 📦 Archive - Classic RL Resources
 Foundational materials and course notes from 2017:
 - **[CS294 Deep RL (Berkeley 2017)](./Archive/2017-Course-Notes/CS294-DeepRL-Berkeley/)** - Notes from Levine, Schulman, and Abbeel
 - **[Elements of RL](./Archive/2017-Course-Notes/Elements-Of-RL/)** - Core concepts from Sutton & Barto
+
+### 🤖 Research Automation
+- **[ArXiv Paper Collector](./scripts/)** - Automatically fetch and organize latest RL+LLM papers
+  - Run `python3 scripts/arxiv_paper_collector.py` to update
+  - Keep your research collection current with monthly runs!
 
 ---
 
