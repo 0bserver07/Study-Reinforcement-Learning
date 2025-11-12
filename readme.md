@@ -1,6 +1,50 @@
-## Study Reinforcement Learning & (Deep RL) Guide:
+## Study Reinforcement Learning & Deep RL Guide
 
-* Simple guide and collective to study RL/DeepRL in one to 2.5 months of time.
+A comprehensive collection of resources for studying Reinforcement Learning, from foundational concepts to cutting-edge applications in Large Language Models and Program Synthesis.
+
+---
+
+## 📚 Repository Structure
+
+### 🆕 Modern RL Research (2022-2025)
+Cutting-edge research on RL applied to LLMs, code generation, and program synthesis:
+- **[LLM + RL for Program Synthesis](./Modern-RL-Research/LLM-RL-Program-Synthesis/)** - AlphaCode, CodeRL, and competition-level code generation
+- **[LLM Code Generation with RL](./Modern-RL-Research/LLM-Code-Generation/)** - Practical applications, safety, and real-world deployment
+- **[RLHF and Alignment](./Modern-RL-Research/RLHF-and-Alignment/)** - PPO, DPO, GRPO, and aligning code models with human preferences
+
+### 📦 Archive - Classic RL Resources
+Foundational materials and course notes from 2017:
+- **[CS294 Deep RL (Berkeley 2017)](./Archive/2017-Course-Notes/CS294-DeepRL-Berkeley/)** - Notes from Levine, Schulman, and Abbeel
+- **[Elements of RL](./Archive/2017-Course-Notes/Elements-Of-RL/)** - Core concepts from Sutton & Barto
+
+---
+
+## 🚀 Quick Start Paths
+
+### Path 1: New to RL? Start with Fundamentals
+1. Watch the introductory talks (below)
+2. Read Sutton & Barto's book (below)
+3. Take David Silver's course (below)
+4. Check out the archived CS294 notes
+
+### Path 2: Interested in LLMs + RL?
+1. Review basic RL concepts (talks and books below)
+2. Dive into [Modern RL Research](./Modern-RL-Research/)
+3. Start with [RLHF and Alignment](./Modern-RL-Research/RLHF-and-Alignment/)
+4. Explore [Program Synthesis](./Modern-RL-Research/LLM-RL-Program-Synthesis/)
+
+---
+
+## 🎯 What's New in RL (2024-2025)
+
+The field has seen explosive growth in applying RL to language models:
+- **RLHF** (Reinforcement Learning from Human Feedback) is now standard for LLM training
+- **Code Generation**: Models like AlphaCode achieve near-human performance on competitive programming
+- **Reasoning Models**: OpenAI o1, DeepSeek R1, Claude Sonnet use RL for chain-of-thought reasoning
+- **New Methods**: DPO and GRPO offer alternatives to traditional PPO-based RLHF
+- **Safety Focus**: Secure sandboxing and constitutional AI for safe code generation
+
+---
 
 ### Talks to check out first:
 ----
@@ -132,7 +176,7 @@
 
 * [CS 294: Deep Reinforcement Learning, Spring 2017](http://rll.berkeley.edu/deeprlcoursesp17/#lecture-videos) by John Schulman and Pieter Abbeel.
 	* Instructors: Sergey Levine, John Schulman, Chelsea Finn:
-	* [My Bad Notes](./CS294-Spring17-RL)
+	* [My Notes from 2017](./Archive/2017-Course-Notes/CS294-DeepRL-Berkeley/) (archived)
 
 
 
@@ -143,6 +187,40 @@
 
 
 
------
+---
+
+## 🔬 Modern RL Resources (2024-2025)
+
+### Recent Courses
+* **[Deep RL Course by Hugging Face](https://huggingface.co/learn/deep-rl-course/unit0/introduction)** (2024) - Free, hands-on course with modern tools
+* **[CS 285: Deep Reinforcement Learning (Berkeley)](https://rail.eecs.berkeley.edu/deeprlcourse/)** - Updated version of CS294 with recent advances
+* **[Spinning Up in Deep RL (OpenAI)](https://spinningup.openai.com/)** - Comprehensive educational resource
+
+### Key Papers for Modern RL + LLMs
+* **AlphaCode** (Science 2022) - Competition-level code generation
+* **CodeRL** (NeurIPS 2022) - RL for program synthesis
+* **Direct Preference Optimization** (2023) - Alternative to PPO for RLHF
+* **"RL for Safe LLM Code Generation"** (Berkeley 2025) - Safety in code generation
+
+### Communities and Resources
+* [r/reinforcementlearning](https://reddit.com/r/reinforcementlearning) - Active community
+* [Hugging Face RL](https://huggingface.co/learn/deep-rl-course) - Practical tutorials
+* [Papers with Code - RL](https://paperswithcode.com/area/reinforcement-learning) - Latest benchmarks
+
+---
+
+## 🤝 Contributing
+
+This repository is continually updated with new resources. Feel free to suggest additions or corrections via issues or pull requests.
+
+---
+
+## 📄 License
 
 ![cc](https://licensebuttons.net/l/by-nc-nd/3.0/88x31.png)
+
+This work is licensed under a Creative Commons Attribution-NonCommercial-NoDerivs 3.0 Unported License.
+
+---
+
+*Last Updated: 2025*
