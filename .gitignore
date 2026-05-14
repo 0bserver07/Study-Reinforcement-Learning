@@ -1,0 +1,35 @@
+# macOS
+.DS_Store
+**/.DS_Store
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.venv/
+venv/
+env/
+
+# Secrets — never commit real keys
+*.env
+!*.env.example
+tools/content-pipeline/config/api_keys.env
+
+# Editors
+.vscode/
+.idea/
+*.swp
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Local notes the author doesn't want tracked
+SCRATCH.md
+scratch/
+
+# lit-builder working data (regenerable)
+tools/lit-builder/data/
+tools/lit-builder/docs/papers/
+tools/lit-builder/docs/topics/
