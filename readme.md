@@ -22,6 +22,45 @@ This is a personal study repo, not a library. It mixes notes a person wrote (som
 
 For the foundational external material the repo has always pointed at — talks, books, courses — see below. It's still the best starting point if you want lectures from the people who built the field.
 
+## The landscape
+
+Everything in the lecture series is the same underlying object: an MDP, where an agent picks actions and some signal tells it whether things are going well. What changes between sub-fields is mostly *what that signal is* and *who provides it*. Classical RL gets a reward from the environment. RLHF infers a reward from human preference labels. RLAIF replaces the human with an LLM judge or a written constitution. RLVR skips the learned reward model entirely and uses a verifier — a checker for math, a test suite for code. Agentic RL puts the model in a multi-turn loop with an environment that tells it whether the task ultimately succeeded. Offline RL works from logged data only, no fresh interaction.
+
+The map below shows where each family fits. The lectures fill in the details; [`CURRICULUM.md`](./CURRICULUM.md) is the suggested order.
+
+```mermaid
+flowchart TD
+    MDP["<b>The MDP framework</b><br/>states · actions · transitions · reward · γ<br/><i>Lectures 01, 19</i>"]
+
+    MDP --> ENV["Environment hands you a reward"]
+    MDP --> LLM["Language model is the policy"]
+    MDP --> OFF["Only logged data,<br/>no fresh interaction"]
+
+    ENV --> EClass["<b>Classical RL</b><br/>Lectures 02–08<br/><br/>Value-based: Q-learning, DQN<br/>Policy gradients: REINFORCE, TRPO, PPO<br/>Actor-critic: A2C, SAC, TD3<br/>Model-based"]
+
+    LLM --> Source{"What is the<br/>reward signal?"}
+    Source -->|"human preference labels"| S1["<b>RLHF</b><br/>Lectures 09–13<br/><br/>reward model + PPO<br/>DPO, GRPO, IPO, KTO, ORPO<br/>RLHF for code"]
+    Source -->|"AI judge or written constitution"| S2["<b>RLAIF</b><br/>Lectures 14, 18<br/><br/>Constitutional AI<br/>self-rewarding LMs<br/>distillation of reasoning"]
+    Source -->|"a checker — math, code, proofs"| S3["<b>RLVR</b><br/>Lecture 15<br/><br/>GRPO with rule-based reward<br/>DeepSeek-R1, o1-style reasoning<br/>process vs outcome reward models"]
+    Source -->|"outcome of a multi-step task"| S4["<b>Agentic RL</b><br/>Lecture 16<br/><br/>tool use, ReAct<br/>multi-turn rollouts<br/>SWE-bench-style training"]
+
+    LLM -.->|"online vs offline,<br/>iterative loops"| ITER["<b>Online &amp; iterative<br/>preference optimization</b><br/>Lecture 17"]
+
+    OFF --> OFFM["<b>Offline RL</b><br/>Lecture 19<br/><br/>BCQ · BEAR · CQL · IQL<br/>Decision Transformer<br/>(DPO is its preference-data cousin)"]
+
+    OFFM -.->|"DPO is offline preference learning"| S1
+
+    classDef root fill:#f4f4f4,stroke:#444,stroke-width:2px,color:#111
+    classDef branch fill:#fafafa,stroke:#666,color:#111
+    classDef leaf fill:#ffffff,stroke:#888,color:#111
+    classDef question fill:#fffbe8,stroke:#a59a4a,color:#111
+
+    class MDP root
+    class ENV,LLM,OFF branch
+    class EClass,S1,S2,S3,S4,ITER,OFFM leaf
+    class Source question
+```
+
 ---
 
 ## Talks to start with
