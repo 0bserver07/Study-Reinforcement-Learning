@@ -29,36 +29,55 @@ Everything in the lecture series is the same underlying object: an MDP, where an
 The map below shows where each family fits. The lectures fill in the details; [`CURRICULUM.md`](./CURRICULUM.md) is the suggested order.
 
 ```mermaid
-flowchart TD
-    MDP["<b>The MDP framework</b><br/>states · actions · transitions · reward · γ<br/><i>Lectures 01, 19</i>"]
+---
+config:
+  look: handDrawn
+  theme: base
+  themeVariables:
+    fontFamily: "ui-sans-serif, system-ui, sans-serif"
+    fontSize: "15px"
+    primaryColor: "#fdf6e3"
+    primaryTextColor: "#1f2933"
+    primaryBorderColor: "#586e75"
+    lineColor: "#52606d"
+    edgeLabelBackground: "#fffaf0"
+---
+flowchart LR
+    MDP((("MDP<br/>S · A · P · R · γ")))
 
-    MDP --> ENV["Environment hands you a reward"]
-    MDP --> LLM["Language model is the policy"]
-    MDP --> OFF["Only logged data,<br/>no fresh interaction"]
+    MDP ==> Q{"where does the<br/>reward signal<br/>come from?"}
 
-    ENV --> EClass["<b>Classical RL</b><br/>Lectures 02–08<br/><br/>Value-based: Q-learning, DQN<br/>Policy gradients: REINFORCE, TRPO, PPO<br/>Actor-critic: A2C, SAC, TD3<br/>Model-based"]
+    Q -- the environment --> ENV[/"<b>Classical RL</b><br/>L02 – L08<br/><br/>value-based · Q-learning, DQN<br/>policy gradients · REINFORCE → PPO<br/>actor-critic · A2C, SAC, TD3<br/>model-based"/]
 
-    LLM --> Source{"What is the<br/>reward signal?"}
-    Source -->|"human preference labels"| S1["<b>RLHF</b><br/>Lectures 09–13<br/><br/>reward model + PPO<br/>DPO, GRPO, IPO, KTO, ORPO<br/>RLHF for code"]
-    Source -->|"AI judge or written constitution"| S2["<b>RLAIF</b><br/>Lectures 14, 18<br/><br/>Constitutional AI<br/>self-rewarding LMs<br/>distillation of reasoning"]
-    Source -->|"a checker — math, code, proofs"| S3["<b>RLVR</b><br/>Lecture 15<br/><br/>GRPO with rule-based reward<br/>DeepSeek-R1, o1-style reasoning<br/>process vs outcome reward models"]
-    Source -->|"outcome of a multi-step task"| S4["<b>Agentic RL</b><br/>Lecture 16<br/><br/>tool use, ReAct<br/>multi-turn rollouts<br/>SWE-bench-style training"]
+    Q -- human preference labels --> RLHF(["<b>RLHF</b><br/>L09 – L13<br/><br/>reward model + PPO<br/>DPO · GRPO · IPO · KTO · ORPO"])
 
-    LLM -.->|"online vs offline,<br/>iterative loops"| ITER["<b>Online &amp; iterative<br/>preference optimization</b><br/>Lecture 17"]
+    Q -- an LLM judge or<br/>a written constitution --> RLAIF(["<b>RLAIF</b><br/>L14, L18<br/><br/>Constitutional AI<br/>self-rewarding LMs<br/>distillation of reasoning"])
 
-    OFF --> OFFM["<b>Offline RL</b><br/>Lecture 19<br/><br/>BCQ · BEAR · CQL · IQL<br/>Decision Transformer<br/>(DPO is its preference-data cousin)"]
+    Q -- a checker<br/>math · code · proofs --> RLVR(["<b>RLVR</b><br/>L15<br/><br/>GRPO + rule-based reward<br/>DeepSeek-R1 recipe<br/>process vs outcome RM"])
 
-    OFFM -.->|"DPO is offline preference learning"| S1
+    Q -- outcome of a<br/>multi-step task --> AGT(["<b>Agentic RL</b><br/>L16<br/><br/>tool use · ReAct<br/>multi-turn rollouts<br/>SWE-bench-style"])
 
-    classDef root fill:#f4f4f4,stroke:#444,stroke-width:2px,color:#111
-    classDef branch fill:#fafafa,stroke:#666,color:#111
-    classDef leaf fill:#ffffff,stroke:#888,color:#111
-    classDef question fill:#fffbe8,stroke:#a59a4a,color:#111
+    Q -- logged data only,<br/>no fresh interaction --> OFF[\"<b>Offline RL</b><br/>L19<br/><br/>BCQ · BEAR · CQL · IQL<br/>Decision Transformer"\]
+
+    RLHF -. iterating it
+            on-policy .-> ITER(["<b>Online &amp; iterative</b><br/>preference optimization<br/>L17"])
+
+    OFF -. DPO is its
+           offline cousin .-> RLHF
+
+    classDef root fill:#2c3e50,stroke:#1a252f,stroke-width:3px,color:#fdf6e3
+    classDef question fill:#fff3cd,stroke:#7d6608,stroke-width:2.5px,color:#5d4e00
+    classDef llmfam fill:#fde4cf,stroke:#a0522d,stroke-width:2px,color:#3e1f0f
+    classDef classical fill:#d4e8f7,stroke:#2c5f8d,stroke-width:2px,color:#0f2a47
+    classDef offline fill:#d6ead8,stroke:#3a7d44,stroke-width:2px,color:#143a1f
+    classDef link fill:#f5e1d8,stroke:#a0522d,stroke-width:1.5px,stroke-dasharray:5 3,color:#3e1f0f
 
     class MDP root
-    class ENV,LLM,OFF branch
-    class EClass,S1,S2,S3,S4,ITER,OFFM leaf
-    class Source question
+    class Q question
+    class ENV classical
+    class RLHF,RLAIF,RLVR,AGT llmfam
+    class OFF offline
+    class ITER link
 ```
 
 ---
