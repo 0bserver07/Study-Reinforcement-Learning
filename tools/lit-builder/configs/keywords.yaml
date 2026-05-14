@@ -1,0 +1,80 @@
+# Keyword pre-filter for the modern-RL / RL-for-LLMs lens used by the
+# Study-Reinforcement-Learning repo. A paper passes if ANY term in ANY group
+# hits its title / abstract / tldr / keywords / primary_area (case-insensitive
+# substring; terms with \b are regex word-boundary matches). Recall > precision
+# -- the LLM `score` stage filters again.
+
+groups:
+  rl_core:
+    - reinforcement learning
+    - policy gradient
+    - actor-critic
+    - actor critic
+    - q-learning
+    - bellman
+    - markov decision process
+    - '\bPPO\b'
+    - '\bTRPO\b'
+    - '\bGAE\b'
+    - '\bSAC\b'
+    - '\bTD3\b'
+    - '\bDDPG\b'
+    - off-policy
+    - on-policy
+    - replay buffer
+    - model-based reinforcement learning
+    - offline reinforcement learning
+  rlhf_and_preference:
+    - rlhf
+    - reinforcement learning from human feedback
+    - '\bDPO\b'
+    - direct preference optimization
+    - preference optimization
+    - '\bIPO\b'
+    - '\bKTO\b'
+    - '\bORPO\b'
+    - '\bGRPO\b'
+    - '\bRRHF\b'
+    - reward model
+    - reward modeling
+    - reward hacking
+    - reward over-optimization
+    - bradley-terry
+    - human feedback
+    - ai feedback
+    - rlaif
+    - constitutional ai
+  reasoning_rl:
+    - verifiable reward
+    - '\bRLVR\b'
+    - process reward
+    - outcome reward
+    - reasoning model
+    - rejection sampling
+    - '\bSTaR\b'
+    - '\bReST\b'
+    - test-time compute
+    - inference-time scaling
+    - deepseek-r1
+    - reasoning rl
+    - long chain-of-thought
+  agentic_rl:
+    - agentic
+    - tool use
+    - tool-use
+    - tool learning
+    - '\bReAct\b'
+    - multi-turn reinforcement
+    - language agent
+    - '\bLLM agent'
+    - swe-bench
+    - code agent
+    - web agent
+    - long-horizon
+  self_improvement:
+    - self-play
+    - self-rewarding
+    - iterative dpo
+    - online dpo
+    - self-training
+    - self-improvement

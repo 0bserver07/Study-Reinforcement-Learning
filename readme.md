@@ -1,65 +1,30 @@
-## Study Reinforcement Learning & Deep RL Guide
+# Study Reinforcement Learning
 
-A comprehensive collection of resources for studying Reinforcement Learning, from foundational concepts to cutting-edge applications in Large Language Models and Program Synthesis.
+Notes, lectures, and exercises for learning reinforcement learning and how it's used to train language models — from MDPs and policy gradients through RLHF, DPO, and GRPO.
 
-**🚀 New here? [Start with GETTING_STARTED.md](./GETTING_STARTED.md) to find your learning path!**
+This is a personal study repo, not a library. It mixes notes a person wrote (some going back to a 2017 Berkeley course) with a newer lecture series that hasn't been reviewed yet. Every doc under `notes/` and `reference/` says at the top whether it's `hand-written`, `reviewed`, or `unreviewed`. See [`AGENTS.md`](./AGENTS.md) for how the repo is organized and how to work in it — with a coding agent or on your own.
 
----
+## What's here
 
-## 📚 Repository Structure
+- **`notes/`** — the lecture series (`notes/lectures/`), plus cheat sheets and diagrams. Currently unreviewed; see [`notes/README.md`](./notes/README.md) for the index and review status.
+- **`exercises/`** — small coding exercises with tests and reference solutions. Built to be worked through step by step, with a coding agent or on your own.
+- **`CURRICULUM.md`** — the ordered path through the lectures and exercises.
+- **`Archive/`** — the original 2017 course notes (CS294 Deep RL, Berkeley) and a short Sutton & Barto digest. Kept as written.
+- **`reference/papers/`** — reading lists of recent papers, collected from arXiv by the script in `tools/`.
+- **`tools/`** — `arxiv-collector/` (fetches arXiv papers), `lit-builder/` (conference-paper triage — a retuned copy of `iclr-lit-builder`: fetches ICLR/NeurIPS/ICML paper lists, keyword-filters, LLM-scores 0–3 with a reason), and `content-pipeline/` (drafts blog posts / threads from papers; auxiliary).
 
-### 🆕 Modern RL Research (2022-2025)
-Cutting-edge research on RL applied to LLMs, code generation, and program synthesis:
-- **[LLM + RL for Program Synthesis](./Modern-RL-Research/LLM-RL-Program-Synthesis/)** - AlphaCode, CodeRL, and competition-level code generation
-  - 📄 50 recent papers collected
-- **[LLM Code Generation with RL](./Modern-RL-Research/LLM-Code-Generation/)** - Practical applications, safety, and real-world deployment
-  - 📄 271 recent papers collected
-- **[RLHF and Alignment](./Modern-RL-Research/RLHF-and-Alignment/)** - PPO, DPO, GRPO, and aligning code models with human preferences
-  - 📄 111 recent papers collected
+## Start here
 
-**📊 Total: 432 papers automatically collected from arXiv!**
+- New to RL: read [`CURRICULUM.md`](./CURRICULUM.md), then start `notes/lectures/01-mdps-bellman.md`. Do the exercises as you go.
+- Know RL, here for the LLM part: skim lectures 1–5, then 9 onward (reward modeling → PPO for LLMs → DPO → GRPO).
+- Want the original 2017 notes: `Archive/2017-Course-Notes/`.
+- Working in this repo with Claude Code or Codex? Read [`AGENTS.md`](./AGENTS.md) first.
 
-### 📦 Archive - Classic RL Resources
-Foundational materials and course notes from 2017:
-- **[CS294 Deep RL (Berkeley 2017)](./Archive/2017-Course-Notes/CS294-DeepRL-Berkeley/)** - Notes from Levine, Schulman, and Abbeel
-- **[Elements of RL](./Archive/2017-Course-Notes/Elements-Of-RL/)** - Core concepts from Sutton & Barto
-
-### 🤖 Research Automation
-- **[ArXiv Paper Collector](./scripts/)** - Automatically fetch and organize latest RL+LLM papers
-  - Run `python3 scripts/arxiv_paper_collector.py` to update
-  - Keep your research collection current with monthly runs!
+For the foundational external material the repo has always pointed at — talks, books, courses — see below. It's still the best starting point if you want lectures from the people who built the field.
 
 ---
 
-## 🚀 Quick Start Paths
-
-### Path 1: New to RL? Start with Fundamentals
-1. Watch the introductory talks (below)
-2. Read Sutton & Barto's book (below)
-3. Take David Silver's course (below)
-4. Check out the archived CS294 notes
-
-### Path 2: Interested in LLMs + RL?
-1. Review basic RL concepts (talks and books below)
-2. Dive into [Modern RL Research](./Modern-RL-Research/)
-3. Start with [RLHF and Alignment](./Modern-RL-Research/RLHF-and-Alignment/)
-4. Explore [Program Synthesis](./Modern-RL-Research/LLM-RL-Program-Synthesis/)
-
----
-
-## 🎯 What's New in RL (2024-2025)
-
-The field has seen explosive growth in applying RL to language models:
-- **RLHF** (Reinforcement Learning from Human Feedback) is now standard for LLM training
-- **Code Generation**: Models like AlphaCode achieve near-human performance on competitive programming
-- **Reasoning Models**: OpenAI o1, DeepSeek R1, Claude Sonnet use RL for chain-of-thought reasoning
-- **New Methods**: DPO and GRPO offer alternatives to traditional PPO-based RLHF
-- **Safety Focus**: Secure sandboxing and constitutional AI for safe code generation
-
----
-
-### Talks to check out first:
-----
+## Talks to start with
 
 * [Introduction to Reinforcement Learning](http://videolectures.net/deeplearning2016_pineau_reinforcement_learning/) by Joelle Pineau, McGill University:
 	* Applications of RL.
@@ -146,35 +111,27 @@ The field has seen explosive growth in applying RL to language models:
 
 	- Explanation with Implementation for some of the topics mentioned in the Deep Reinforcement Learning talk, written by [Arthur Juliani](https://github.com/awjuliani)
 		* The TF / Python implementations [can be found here](https://github.com/awjuliani/DeepRL-Agents).
-		* [Part 0 — Q-Learning Agents](https://medium.com/emergent-future/simple-reinforcement-learning-with-tensorflow-part-0-q-learning-with-tables-and-neural-networks-d195264329d0#.kghmcex46)
-		* [Part 1 — Two-Armed Bandit](https://medium.com/@awjuliani/super-simple-reinforcement-learning-tutorial-part-1-fd544fab149#.bqvzsrvh7)
-		* [Part 1.5 — Contextual Bandits](https://medium.com/emergent-future/simple-reinforcement-learning-with-tensorflow-part-1-5-contextual-bandits-bff01d1aad9c#.h2c63t3om)
-		* [Part 2 — Policy-Based Agents](https://medium.com/@awjuliani/super-simple-reinforcement-learning-tutorial-part-2-ded33892c724#.v0hnvh4tw)
-		* [Part 3 — Model-Based RL](https://medium.com/@awjuliani/simple-reinforcement-learning-with-tensorflow-part-3-model-based-rl-9a6fe0cce99#.i8pgqg8xa)
-		* [Part 4 — Deep Q-Networks and Beyond](https://medium.com/@awjuliani/simple-reinforcement-learning-with-tensorflow-part-4-deep-q-networks-and-beyond-8438a3e2b8df#.qecef59on)
-		* [Part 5 — Visualizing an Agent’s Thoughts and Actions](https://medium.com/@awjuliani/simple-reinforcement-learning-with-tensorflow-part-5-visualizing-an-agents-thoughts-and-actions-4f27b134bb2a#.60nyejzep)
-		* [Part 6 — Partial Observability and Deep Recurrent Q-Networks](https://medium.com/emergent-future/simple-reinforcement-learning-with-tensorflow-part-6-partial-observability-and-deep-recurrent-q-68463e9aeefc#.w22xh551q)
-		* [Part 7 — Action-Selection Strategies for Exploration](https://medium.com/emergent-future/simple-reinforcement-learning-with-tensorflow-part-7-action-selection-strategies-for-exploration-d3a97b7cceaf#.vxsnvalt7)
-		* [Part 8 — Asynchronous Actor-Critic Agents (A3C)](https://medium.com/emergent-future/simple-reinforcement-learning-with-tensorflow-part-8-asynchronous-actor-critic-agents-a3c-c88f72a5e9f2#.9nns6digz)
+		* [Part 0 — Q-Learning Agents](https://medium.com/emergent-future/simple-reinforcement-learning-with-tensorflow-part-0-q-learning-with-tables-and-neural-networks-d195264329d0#.kghmcex46)
+		* [Part 1 — Two-Armed Bandit](https://medium.com/@awjuliani/super-simple-reinforcement-learning-tutorial-part-1-fd544fab149#.bqvzsrvh7)
+		* [Part 1.5 — Contextual Bandits](https://medium.com/emergent-future/simple-reinforcement-learning-with-tensorflow-part-1-5-contextual-bandits-bff01d1aad9c#.h2c63t3om)
+		* [Part 2 — Policy-Based Agents](https://medium.com/@awjuliani/super-simple-reinforcement-learning-tutorial-part-2-ded33892c724#.v0hnvh4tw)
+		* [Part 3 — Model-Based RL](https://medium.com/@awjuliani/simple-reinforcement-learning-with-tensorflow-part-3-model-based-rl-9a6fe0cce99#.i8pgqg8xa)
+		* [Part 4 — Deep Q-Networks and Beyond](https://medium.com/@awjuliani/simple-reinforcement-learning-with-tensorflow-part-4-deep-q-networks-and-beyond-8438a3e2b8df#.qecef59on)
+		* [Part 5 — Visualizing an Agent’s Thoughts and Actions](https://medium.com/@awjuliani/simple-reinforcement-learning-with-tensorflow-part-5-visualizing-an-agents-thoughts-and-actions-4f27b134bb2a#.60nyejzep)
+		* [Part 6 — Partial Observability and Deep Recurrent Q-Networks](https://medium.com/emergent-future/simple-reinforcement-learning-with-tensorflow-part-6-partial-observability-and-deep-recurrent-q-68463e9aeefc#.w22xh551q)
+		* [Part 7 — Action-Selection Strategies for Exploration](https://medium.com/emergent-future/simple-reinforcement-learning-with-tensorflow-part-7-action-selection-strategies-for-exploration-d3a97b7cceaf#.vxsnvalt7)
+		* [Part 8 — Asynchronous Actor-Critic Agents (A3C)](https://medium.com/emergent-future/simple-reinforcement-learning-with-tensorflow-part-8-asynchronous-actor-critic-agents-a3c-c88f72a5e9f2#.9nns6digz)
 
+## Books
 
+- A short overview of Deep RL by Yuxi Li: [Deep Reinforcement Learning: An Overview](https://arxiv.org/abs/1701.07274v2)
+- [Reinforcement Learning: An Introduction by Richard S. Sutton and Andrew G. Barto](http://incompleteideas.net/book/the-book.html)
+- [Algorithms for Reinforcement Learning](https://sites.ualberta.ca/~szepesva/papers/RLAlgsInMDPs.pdf) (Szepesvári)
+- [Reinforcement Learning and Dynamic Programming using Function Approximators](https://orbi.uliege.be/bitstream/2268/27963/1/book-FA-RL-DP.pdf) (Buşoniu et al.)
 
+## Courses
 
-### Books:
----
-
-- Before starting out the books, here is a neat overview by Yuxi Li about Deep RL:
-	- [Deep Reinforcement Learning: An Overview](https://arxiv.org/abs/1701.07274v2)
-- [Reinforcement Learning: An Introduction by Richard S. Sutton and Andrew G. Barto](http://webdocs.cs.ualberta.ca/~sutton/book/ebook/the-book.html)
-- [Algorithms for Reinforcement Learning.](https://sites.ualberta.ca/~szepesva/papers/RLAlgsInMDPs.pdf)
-- [Reinforcement Learning and Dynamic Programming using Function Approximators.](https://orbi.ulg.ac.be/bitstream/2268/27963/1/book-FA-RL-DP.pdf)
-
-
-
-### Courses:
----
-
-* [Reinforcement Learning](http://www0.cs.ucl.ac.uk/staff/d.silver/web/Teaching.html) by David Silver.
+* [Reinforcement Learning](https://www.davidsilver.uk/teaching/) by David Silver (UCL):
 	* Lecture 1: Introduction to Reinforcement Learning
 	* Lecture 2: Markov Decision Processes
 	* Lecture 3: Planning by Dynamic Programming
@@ -186,53 +143,40 @@ The field has seen explosive growth in applying RL to language models:
 	* Lecture 9: Exploration and Exploitation
 	* Lecture 10: Case Study: RL in Classic Games
 
-* [CS 294: Deep Reinforcement Learning, Spring 2017](http://rll.berkeley.edu/deeprlcoursesp17/#lecture-videos) by John Schulman and Pieter Abbeel.
-	* Instructors: Sergey Levine, John Schulman, Chelsea Finn:
-	* [My Notes from 2017](./Archive/2017-Course-Notes/CS294-DeepRL-Berkeley/) (archived)
+* [CS 294: Deep Reinforcement Learning, Spring 2017](https://rll.berkeley.edu/deeprlcourse-fa17/) by Sergey Levine, John Schulman, Chelsea Finn. My notes are archived at [`Archive/2017-Course-Notes/CS294-DeepRL-Berkeley/`](./Archive/2017-Course-Notes/CS294-DeepRL-Berkeley/).
 
+* [CS 285: Deep Reinforcement Learning (Berkeley)](https://rail.eecs.berkeley.edu/deeprlcourse/) — the current version of CS294, updated each year.
 
+* [Deep RL Course (Hugging Face)](https://huggingface.co/learn/deep-rl-course/unit0/introduction) — hands-on, uses current tooling.
 
+* [Spinning Up in Deep RL (OpenAI)](https://spinningup.openai.com/) — explanations plus reference implementations.
 
+## Some landmark papers in RL for LLMs
 
+(With identifiers so you can check them. The lecture series goes into these.)
 
+* AlphaCode — *Competition-level code generation with AlphaCode*, Li et al., Science 2022. [arXiv:2203.07814](https://arxiv.org/abs/2203.07814)
+* CodeRL — *CodeRL: Mastering Code Generation through Pretrained Models and Deep Reinforcement Learning*, Le et al., NeurIPS 2022. [arXiv:2207.01780](https://arxiv.org/abs/2207.01780)
+* InstructGPT — *Training language models to follow instructions with human feedback*, Ouyang et al., 2022. [arXiv:2203.02155](https://arxiv.org/abs/2203.02155)
+* DPO — *Direct Preference Optimization: Your Language Model is Secretly a Reward Model*, Rafailov et al., 2023. [arXiv:2305.18290](https://arxiv.org/abs/2305.18290)
+* DeepSeek-R1 — *DeepSeek-R1: Incentivizing Reasoning Capability in LLMs via Reinforcement Learning*, DeepSeek-AI, 2025. [arXiv:2501.12948](https://arxiv.org/abs/2501.12948)
 
+More, organized by topic, in [`reference/papers/`](./reference/papers/).
 
+## Communities
 
-
----
-
-## 🔬 Modern RL Resources (2024-2025)
-
-### Recent Courses
-* **[Deep RL Course by Hugging Face](https://huggingface.co/learn/deep-rl-course/unit0/introduction)** (2024) - Free, hands-on course with modern tools
-* **[CS 285: Deep Reinforcement Learning (Berkeley)](https://rail.eecs.berkeley.edu/deeprlcourse/)** - Updated version of CS294 with recent advances
-* **[Spinning Up in Deep RL (OpenAI)](https://spinningup.openai.com/)** - Comprehensive educational resource
-
-### Key Papers for Modern RL + LLMs
-* **AlphaCode** (Science 2022) - Competition-level code generation
-* **CodeRL** (NeurIPS 2022) - RL for program synthesis
-* **Direct Preference Optimization** (2023) - Alternative to PPO for RLHF
-* **"RL for Safe LLM Code Generation"** (Berkeley 2025) - Safety in code generation
-
-### Communities and Resources
-* [r/reinforcementlearning](https://reddit.com/r/reinforcementlearning) - Active community
-* [Hugging Face RL](https://huggingface.co/learn/deep-rl-course) - Practical tutorials
-* [Papers with Code - RL](https://paperswithcode.com/area/reinforcement-learning) - Latest benchmarks
+* [r/reinforcementlearning](https://www.reddit.com/r/reinforcementlearning/)
+* [Papers with Code — Reinforcement Learning](https://paperswithcode.com/area/reinforcement-learning)
+* [Hugging Face — RL](https://huggingface.co/learn/deep-rl-course)
 
 ---
 
-## 🤝 Contributing
+## Contributing
 
-This repository is continually updated with new resources. Feel free to suggest additions or corrections via issues or pull requests.
+Suggestions and corrections welcome via issues or pull requests. If you fix an error in an unreviewed lecture, note what was wrong — that's the most useful kind of contribution here.
 
----
-
-## 📄 License
+## License
 
 ![cc](https://licensebuttons.net/l/by-nc-nd/3.0/88x31.png)
 
-This work is licensed under a Creative Commons Attribution-NonCommercial-NoDerivs 3.0 Unported License.
-
----
-
-*Last Updated: 2025*
+Licensed under [Creative Commons Attribution-NonCommercial-NoDerivs 3.0 Unported](./license.md).

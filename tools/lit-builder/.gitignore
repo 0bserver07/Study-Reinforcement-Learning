@@ -1,0 +1,35 @@
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+.env
+.env.local
+*.egg-info/
+dist/
+build/
+.pytest_cache/
+.ruff_cache/
+
+# data artifacts
+data/raw/*.json
+data/raw/*.json.gz
+data/db/*.sqlite
+data/db/*.sqlite-journal
+data/db/*.sqlite-shm
+data/db/*.sqlite-wal
+
+# generated docs
+site/
+_site/
+_site_test/
+docs/papers/*.md
+docs/topics/*.md
+!docs/papers/.gitkeep
+!docs/topics/.gitkeep
+# Hand-written index pages for Papers / Topics navigation.
+# These wrap the auto-generated per-venue indexes (e.g. docs/papers/iclr2026/index.md).
+!docs/papers/index.md
+!docs/topics/index.md
+
+.DS_Store
