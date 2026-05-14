@@ -1,0 +1,200 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 720" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0d1117;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#161b22;stop-opacity:1" />
+    </linearGradient>
+    <marker id="arr-gold" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#d4a017" opacity="0.75"/>
+    </marker>
+    <marker id="arr-blue" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#6c8ebf" opacity="0.7"/>
+    </marker>
+    <marker id="arr-purple" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#b8a9c9" opacity="0.65"/>
+    </marker>
+    <marker id="arr-green" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#3fb950" opacity="0.7"/>
+    </marker>
+    <marker id="arr-sage" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#7fa68f" opacity="0.7"/>
+    </marker>
+    <marker id="arr-slate" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#7c8a99" opacity="0.7"/>
+    </marker>
+  </defs>
+
+  <!-- background -->
+  <rect width="1080" height="720" fill="url(#bg)" rx="10"/>
+
+  <!-- ───── header ───── -->
+  <text x="540" y="36" font-size="11" fill="#8b949e" text-anchor="middle" letter-spacing="3" font-weight="600">THE LANDSCAPE</text>
+  <text x="540" y="58" font-size="13" fill="#e6edf3" text-anchor="middle">what changes between RL sub-fields is mostly the reward signal — and who provides it</text>
+
+  <!-- ───── MDP hero ───── -->
+  <rect x="430" y="84" width="220" height="64" rx="8" fill="#21262d" stroke="#d4a017" stroke-width="1.6"/>
+  <text x="540" y="105" font-size="12" fill="#d4a017" text-anchor="middle" font-weight="600">MDP</text>
+  <text x="540" y="124" font-family="'SF Mono', monospace" font-size="11" fill="#e6edf3" text-anchor="middle">S · A · P · R · γ</text>
+  <text x="540" y="140" font-family="'SF Mono', monospace" font-size="9" fill="#8b949e" text-anchor="middle">Lecture 01</text>
+
+  <line x1="540" y1="148" x2="540" y2="174" stroke="#d4a017" stroke-width="1.4" marker-end="url(#arr-gold)" opacity="0.75"/>
+
+  <!-- ───── question ───── -->
+  <rect x="370" y="178" width="340" height="56" rx="8" fill="#1a1f26" stroke="#d4a017" stroke-width="1.4" stroke-dasharray="5,3"/>
+  <text x="540" y="201" font-size="13" fill="#d4a017" text-anchor="middle" font-style="italic">where does the reward signal come from?</text>
+  <text x="540" y="220" font-size="10" fill="#8b949e" text-anchor="middle">that's the axis the rest of the map is organized on</text>
+
+  <!-- ───── fan-out arrows ───── -->
+  <line x1="540" y1="234" x2="102" y2="294" stroke="#6c8ebf" stroke-width="1.2" marker-end="url(#arr-blue)" opacity="0.55"/>
+  <line x1="540" y1="234" x2="277" y2="294" stroke="#d4a017" stroke-width="1.2" marker-end="url(#arr-gold)" opacity="0.6"/>
+  <line x1="540" y1="234" x2="452" y2="294" stroke="#b8a9c9" stroke-width="1.2" marker-end="url(#arr-purple)" opacity="0.55"/>
+  <line x1="540" y1="234" x2="627" y2="294" stroke="#3fb950" stroke-width="1.2" marker-end="url(#arr-green)" opacity="0.6"/>
+  <line x1="540" y1="234" x2="802" y2="294" stroke="#7fa68f" stroke-width="1.2" marker-end="url(#arr-sage)" opacity="0.6"/>
+  <line x1="540" y1="234" x2="977" y2="294" stroke="#7c8a99" stroke-width="1.2" marker-end="url(#arr-slate)" opacity="0.6"/>
+
+  <!-- ═══════ COLUMN 1: CLASSICAL RL (blue) ═══════ -->
+  <text x="102" y="270" font-size="10" fill="#d4a017" text-anchor="middle" font-style="italic">the environment</text>
+  <text x="102" y="284" font-size="10" fill="#d4a017" text-anchor="middle" font-style="italic">gives a reward</text>
+  <rect x="30" y="298" width="145" height="346" rx="8" fill="#161b22" stroke="#6c8ebf" stroke-width="1.5"/>
+  <text x="102" y="320" font-size="12" fill="#6c8ebf" text-anchor="middle" font-weight="600" letter-spacing="1">CLASSICAL RL</text>
+  <text x="102" y="336" font-family="'SF Mono', monospace" font-size="9" fill="#8b949e" text-anchor="middle">L02 — L08</text>
+  <line x1="50" y1="348" x2="155" y2="348" stroke="#30363d" stroke-width="1"/>
+  <text x="42" y="370" font-family="'SF Mono', monospace" font-size="10" fill="#6c8ebf">value-based</text>
+  <text x="42" y="384" font-family="'SF Mono', monospace" font-size="9" fill="#e6edf3">  Q-learning, DQN</text>
+  <text x="42" y="408" font-family="'SF Mono', monospace" font-size="10" fill="#6c8ebf">policy gradients</text>
+  <text x="42" y="422" font-family="'SF Mono', monospace" font-size="9" fill="#e6edf3">  REINFORCE</text>
+  <text x="42" y="434" font-family="'SF Mono', monospace" font-size="9" fill="#e6edf3">  TRPO, PPO</text>
+  <text x="42" y="458" font-family="'SF Mono', monospace" font-size="10" fill="#6c8ebf">actor-critic</text>
+  <text x="42" y="472" font-family="'SF Mono', monospace" font-size="9" fill="#e6edf3">  A2C, SAC, TD3</text>
+  <text x="42" y="496" font-family="'SF Mono', monospace" font-size="10" fill="#6c8ebf">model-based</text>
+  <text x="42" y="510" font-family="'SF Mono', monospace" font-size="9" fill="#e6edf3">  PETS, MBPO</text>
+  <text x="42" y="522" font-family="'SF Mono', monospace" font-size="9" fill="#e6edf3">  Dreamer, MuZero</text>
+  <line x1="50" y1="546" x2="155" y2="546" stroke="#30363d" stroke-width="1" stroke-dasharray="2,3"/>
+  <text x="102" y="566" font-size="9" fill="#484f58" text-anchor="middle" font-style="italic">env → state → reward</text>
+  <text x="102" y="580" font-size="9" fill="#484f58" text-anchor="middle" font-style="italic">→ next state. that loop.</text>
+
+  <!-- ═══════ COLUMN 2: RLHF (gold) ═══════ -->
+  <text x="277" y="270" font-size="10" fill="#d4a017" text-anchor="middle" font-style="italic">humans rate</text>
+  <text x="277" y="284" font-size="10" fill="#d4a017" text-anchor="middle" font-style="italic">two outputs</text>
+  <rect x="205" y="298" width="145" height="346" rx="8" fill="#161b22" stroke="#d4a017" stroke-width="1.5"/>
+  <text x="277" y="320" font-size="12" fill="#d4a017" text-anchor="middle" font-weight="600" letter-spacing="1">RLHF</text>
+  <text x="277" y="336" font-family="'SF Mono', monospace" font-size="9" fill="#8b949e" text-anchor="middle">L09 — L13</text>
+  <line x1="225" y1="348" x2="330" y2="348" stroke="#30363d" stroke-width="1"/>
+  <text x="217" y="370" font-family="'SF Mono', monospace" font-size="10" fill="#d4a017">reward model</text>
+  <text x="217" y="384" font-family="'SF Mono', monospace" font-size="9" fill="#e6edf3">  Bradley-Terry</text>
+  <text x="217" y="396" font-family="'SF Mono', monospace" font-size="9" fill="#e6edf3">  on (chosen, rejected)</text>
+  <text x="217" y="420" font-family="'SF Mono', monospace" font-size="10" fill="#d4a017">+ PPO</text>
+  <text x="217" y="434" font-family="'SF Mono', monospace" font-size="9" fill="#e6edf3">  InstructGPT</text>
+  <text x="217" y="446" font-family="'SF Mono', monospace" font-size="9" fill="#e6edf3">  with KL to ref</text>
+  <text x="217" y="470" font-family="'SF Mono', monospace" font-size="10" fill="#d4a017">DPO &amp; cousins</text>
+  <text x="217" y="484" font-family="'SF Mono', monospace" font-size="9" fill="#e6edf3">  DPO, GRPO, IPO</text>
+  <text x="217" y="496" font-family="'SF Mono', monospace" font-size="9" fill="#e6edf3">  KTO, ORPO, RRHF</text>
+  <text x="217" y="520" font-family="'SF Mono', monospace" font-size="10" fill="#d4a017">RLHF for code</text>
+  <text x="217" y="534" font-family="'SF Mono', monospace" font-size="9" fill="#e6edf3">  AlphaCode, CodeRL</text>
+  <line x1="225" y1="546" x2="330" y2="546" stroke="#30363d" stroke-width="1" stroke-dasharray="2,3"/>
+  <text x="277" y="566" font-size="9" fill="#484f58" text-anchor="middle" font-style="italic">a learned reward</text>
+  <text x="277" y="580" font-size="9" fill="#484f58" text-anchor="middle" font-style="italic">stands in for the env</text>
+
+  <!-- ═══════ COLUMN 3: RLAIF (purple) ═══════ -->
+  <text x="452" y="270" font-size="10" fill="#d4a017" text-anchor="middle" font-style="italic">an LLM judge</text>
+  <text x="452" y="284" font-size="10" fill="#d4a017" text-anchor="middle" font-style="italic">or a constitution</text>
+  <rect x="380" y="298" width="145" height="346" rx="8" fill="#161b22" stroke="#b8a9c9" stroke-width="1.5"/>
+  <text x="452" y="320" font-size="12" fill="#b8a9c9" text-anchor="middle" font-weight="600" letter-spacing="1">RLAIF</text>
+  <text x="452" y="336" font-family="'SF Mono', monospace" font-size="9" fill="#8b949e" text-anchor="middle">L14, L18</text>
+  <line x1="400" y1="348" x2="505" y2="348" stroke="#30363d" stroke-width="1"/>
+  <text x="392" y="370" font-family="'SF Mono', monospace" font-size="10" fill="#b8a9c9">Constitutional AI</text>
+  <text x="392" y="384" font-family="'SF Mono', monospace" font-size="9" fill="#e6edf3">  critique → revise</text>
+  <text x="392" y="396" font-family="'SF Mono', monospace" font-size="9" fill="#e6edf3">  against principles</text>
+  <text x="392" y="420" font-family="'SF Mono', monospace" font-size="10" fill="#b8a9c9">LLM-as-judge</text>
+  <text x="392" y="434" font-family="'SF Mono', monospace" font-size="9" fill="#e6edf3">  pairwise scoring</text>
+  <text x="392" y="446" font-family="'SF Mono', monospace" font-size="9" fill="#e6edf3">  watch for biases</text>
+  <text x="392" y="470" font-family="'SF Mono', monospace" font-size="10" fill="#b8a9c9">self-rewarding</text>
+  <text x="392" y="484" font-family="'SF Mono', monospace" font-size="9" fill="#e6edf3">  model judges itself</text>
+  <text x="392" y="496" font-family="'SF Mono', monospace" font-size="9" fill="#e6edf3">  SPIN, self-play</text>
+  <text x="392" y="520" font-family="'SF Mono', monospace" font-size="10" fill="#b8a9c9">distillation</text>
+  <text x="392" y="534" font-family="'SF Mono', monospace" font-size="9" fill="#e6edf3">  R1 → small models</text>
+  <line x1="400" y1="546" x2="505" y2="546" stroke="#30363d" stroke-width="1" stroke-dasharray="2,3"/>
+  <text x="452" y="566" font-size="9" fill="#484f58" text-anchor="middle" font-style="italic">replace the human</text>
+  <text x="452" y="580" font-size="9" fill="#484f58" text-anchor="middle" font-style="italic">labeler with an AI</text>
+
+  <!-- ═══════ COLUMN 4: RLVR (green) ═══════ -->
+  <text x="627" y="270" font-size="10" fill="#d4a017" text-anchor="middle" font-style="italic">a checker says</text>
+  <text x="627" y="284" font-size="10" fill="#d4a017" text-anchor="middle" font-style="italic">correct / not</text>
+  <rect x="555" y="298" width="145" height="346" rx="8" fill="#161b22" stroke="#3fb950" stroke-width="1.5"/>
+  <text x="627" y="320" font-size="12" fill="#3fb950" text-anchor="middle" font-weight="600" letter-spacing="1">RLVR</text>
+  <text x="627" y="336" font-family="'SF Mono', monospace" font-size="9" fill="#8b949e" text-anchor="middle">L15</text>
+  <line x1="575" y1="348" x2="680" y2="348" stroke="#30363d" stroke-width="1"/>
+  <text x="567" y="370" font-family="'SF Mono', monospace" font-size="10" fill="#3fb950">GRPO</text>
+  <text x="567" y="384" font-family="'SF Mono', monospace" font-size="9" fill="#e6edf3">  group-relative adv</text>
+  <text x="567" y="396" font-family="'SF Mono', monospace" font-size="9" fill="#e6edf3">  no value network</text>
+  <text x="567" y="420" font-family="'SF Mono', monospace" font-size="10" fill="#3fb950">DeepSeek-R1</text>
+  <text x="567" y="434" font-family="'SF Mono', monospace" font-size="9" fill="#e6edf3">  R1-Zero: pure RL</text>
+  <text x="567" y="446" font-family="'SF Mono', monospace" font-size="9" fill="#e6edf3">  on a base model</text>
+  <text x="567" y="470" font-family="'SF Mono', monospace" font-size="10" fill="#3fb950">o1-style scaling</text>
+  <text x="567" y="484" font-family="'SF Mono', monospace" font-size="9" fill="#e6edf3">  RL on chain-of-thought</text>
+  <text x="567" y="496" font-family="'SF Mono', monospace" font-size="9" fill="#e6edf3">  + inference compute</text>
+  <text x="567" y="520" font-family="'SF Mono', monospace" font-size="10" fill="#3fb950">process vs outcome</text>
+  <text x="567" y="534" font-family="'SF Mono', monospace" font-size="9" fill="#e6edf3">  step RM vs final RM</text>
+  <line x1="575" y1="546" x2="680" y2="546" stroke="#30363d" stroke-width="1" stroke-dasharray="2,3"/>
+  <text x="627" y="566" font-size="9" fill="#484f58" text-anchor="middle" font-style="italic">no learned RM —</text>
+  <text x="627" y="580" font-size="9" fill="#484f58" text-anchor="middle" font-style="italic">a verifier IS the reward</text>
+
+  <!-- ═══════ COLUMN 5: AGENTIC RL (sage) ═══════ -->
+  <text x="802" y="270" font-size="10" fill="#d4a017" text-anchor="middle" font-style="italic">multi-step task</text>
+  <text x="802" y="284" font-size="10" fill="#d4a017" text-anchor="middle" font-style="italic">outcome</text>
+  <rect x="730" y="298" width="145" height="346" rx="8" fill="#161b22" stroke="#7fa68f" stroke-width="1.5"/>
+  <text x="802" y="320" font-size="12" fill="#7fa68f" text-anchor="middle" font-weight="600" letter-spacing="1">AGENTIC RL</text>
+  <text x="802" y="336" font-family="'SF Mono', monospace" font-size="9" fill="#8b949e" text-anchor="middle">L16</text>
+  <line x1="750" y1="348" x2="855" y2="348" stroke="#30363d" stroke-width="1"/>
+  <text x="742" y="370" font-family="'SF Mono', monospace" font-size="10" fill="#7fa68f">the loop</text>
+  <text x="742" y="384" font-family="'SF Mono', monospace" font-size="9" fill="#e6edf3">  read → plan → act</text>
+  <text x="742" y="396" font-family="'SF Mono', monospace" font-size="9" fill="#e6edf3">  → check → repeat</text>
+  <text x="742" y="420" font-family="'SF Mono', monospace" font-size="10" fill="#7fa68f">scaffold</text>
+  <text x="742" y="434" font-family="'SF Mono', monospace" font-size="9" fill="#e6edf3">  ReAct, ToolFormer</text>
+  <text x="742" y="446" font-family="'SF Mono', monospace" font-size="9" fill="#e6edf3">  RL fine-tunes inside it</text>
+  <text x="742" y="470" font-family="'SF Mono', monospace" font-size="10" fill="#7fa68f">the env IS the reward</text>
+  <text x="742" y="484" font-family="'SF Mono', monospace" font-size="9" fill="#e6edf3">  tests pass = +1</text>
+  <text x="742" y="496" font-family="'SF Mono', monospace" font-size="9" fill="#e6edf3">  task done = +1</text>
+  <text x="742" y="520" font-family="'SF Mono', monospace" font-size="10" fill="#7fa68f">benchmarks</text>
+  <text x="742" y="534" font-family="'SF Mono', monospace" font-size="9" fill="#e6edf3">  SWE-bench, WebGPT</text>
+  <line x1="750" y1="546" x2="855" y2="546" stroke="#30363d" stroke-width="1" stroke-dasharray="2,3"/>
+  <text x="802" y="566" font-size="9" fill="#484f58" text-anchor="middle" font-style="italic">long horizons →</text>
+  <text x="802" y="580" font-size="9" fill="#484f58" text-anchor="middle" font-style="italic">credit assignment is hard</text>
+
+  <!-- ═══════ COLUMN 6: OFFLINE RL (slate) ═══════ -->
+  <text x="977" y="270" font-size="10" fill="#d4a017" text-anchor="middle" font-style="italic">none — only</text>
+  <text x="977" y="284" font-size="10" fill="#d4a017" text-anchor="middle" font-style="italic">logged data</text>
+  <rect x="905" y="298" width="145" height="346" rx="8" fill="#161b22" stroke="#7c8a99" stroke-width="1.5"/>
+  <text x="977" y="320" font-size="12" fill="#7c8a99" text-anchor="middle" font-weight="600" letter-spacing="1">OFFLINE RL</text>
+  <text x="977" y="336" font-family="'SF Mono', monospace" font-size="9" fill="#8b949e" text-anchor="middle">L19</text>
+  <line x1="925" y1="348" x2="1030" y2="348" stroke="#30363d" stroke-width="1"/>
+  <text x="917" y="370" font-family="'SF Mono', monospace" font-size="10" fill="#7c8a99">policy constraints</text>
+  <text x="917" y="384" font-family="'SF Mono', monospace" font-size="9" fill="#e6edf3">  BCQ, BEAR</text>
+  <text x="917" y="396" font-family="'SF Mono', monospace" font-size="9" fill="#e6edf3">  stay near μ</text>
+  <text x="917" y="420" font-family="'SF Mono', monospace" font-size="10" fill="#7c8a99">value pessimism</text>
+  <text x="917" y="434" font-family="'SF Mono', monospace" font-size="9" fill="#e6edf3">  CQL — penalize OOD</text>
+  <text x="917" y="446" font-family="'SF Mono', monospace" font-size="9" fill="#e6edf3">  Q values</text>
+  <text x="917" y="470" font-family="'SF Mono', monospace" font-size="10" fill="#7c8a99">implicit Q</text>
+  <text x="917" y="484" font-family="'SF Mono', monospace" font-size="9" fill="#e6edf3">  IQL — never query</text>
+  <text x="917" y="496" font-family="'SF Mono', monospace" font-size="9" fill="#e6edf3">  out-of-data actions</text>
+  <text x="917" y="520" font-family="'SF Mono', monospace" font-size="10" fill="#7c8a99">sequence model</text>
+  <text x="917" y="534" font-family="'SF Mono', monospace" font-size="9" fill="#e6edf3">  Decision Transformer</text>
+  <line x1="925" y1="546" x2="1030" y2="546" stroke="#30363d" stroke-width="1" stroke-dasharray="2,3"/>
+  <text x="977" y="566" font-size="9" fill="#484f58" text-anchor="middle" font-style="italic">DPO is offline RL</text>
+  <text x="977" y="580" font-size="9" fill="#484f58" text-anchor="middle" font-style="italic">on preference data</text>
+
+  <!-- ═══════ ITERATIVE / ONLINE banner (L17) ═══════ -->
+  <rect x="170" y="664" width="475" height="36" rx="6" fill="#1a1f26" stroke="#b8a9c9" stroke-width="1.2" stroke-dasharray="4,3"/>
+  <text x="408" y="680" font-size="11" fill="#b8a9c9" text-anchor="middle" font-weight="600" letter-spacing="1">ITERATE IT ON-POLICY  →  ONLINE &amp; ITERATIVE PREFERENCE OPT</text>
+  <text x="408" y="694" font-family="'SF Mono', monospace" font-size="9" fill="#8b949e" text-anchor="middle">Lecture 17 — bridges offline DPO ⇄ online PPO/GRPO</text>
+
+  <!-- dotted lines from RLHF column → iterate banner → RLVR column (showing the bridge) -->
+  <path d="M 277 644 L 277 656 L 290 664" stroke="#b8a9c9" stroke-width="1" stroke-dasharray="4,3" fill="none" opacity="0.55"/>
+  <path d="M 627 644 L 627 656 L 540 664" stroke="#b8a9c9" stroke-width="1" stroke-dasharray="4,3" fill="none" opacity="0.55"/>
+  <!-- offline → RLHF cousin link (dotted, slate) -->
+  <path d="M 905 644 Q 750 670 645 682" stroke="#7c8a99" stroke-width="1" stroke-dasharray="3,4" fill="none" opacity="0.5"/>
+  <text x="780" y="678" font-size="9" fill="#7c8a99" font-style="italic" opacity="0.8">offline cousin</text>
+
+  <!-- footer caption -->
+  <text x="540" y="713" font-size="10" fill="#484f58" text-anchor="middle" font-style="italic">six reward sources, one MDP. CURRICULUM.md is the order to study them in.</text>
+</svg>
