@@ -28,57 +28,7 @@ Everything in the lecture series is the same underlying object: an MDP, where an
 
 The map below shows where each family fits. The lectures fill in the details; [`CURRICULUM.md`](./CURRICULUM.md) is the suggested order.
 
-```mermaid
----
-config:
-  look: handDrawn
-  theme: base
-  themeVariables:
-    fontFamily: "ui-sans-serif, system-ui, sans-serif"
-    fontSize: "15px"
-    primaryColor: "#fdf6e3"
-    primaryTextColor: "#1f2933"
-    primaryBorderColor: "#586e75"
-    lineColor: "#52606d"
-    edgeLabelBackground: "#fffaf0"
----
-flowchart LR
-    MDP((("MDP<br/>S · A · P · R · γ")))
-
-    MDP ==> Q{"where does the<br/>reward signal<br/>come from?"}
-
-    Q -- the environment --> ENV[/"<b>Classical RL</b><br/>L02 – L08<br/><br/>value-based · Q-learning, DQN<br/>policy gradients · REINFORCE → PPO<br/>actor-critic · A2C, SAC, TD3<br/>model-based"/]
-
-    Q -- human preference labels --> RLHF(["<b>RLHF</b><br/>L09 – L13<br/><br/>reward model + PPO<br/>DPO · GRPO · IPO · KTO · ORPO"])
-
-    Q -- an LLM judge or<br/>a written constitution --> RLAIF(["<b>RLAIF</b><br/>L14, L18<br/><br/>Constitutional AI<br/>self-rewarding LMs<br/>distillation of reasoning"])
-
-    Q -- a checker<br/>math · code · proofs --> RLVR(["<b>RLVR</b><br/>L15<br/><br/>GRPO + rule-based reward<br/>DeepSeek-R1 recipe<br/>process vs outcome RM"])
-
-    Q -- outcome of a<br/>multi-step task --> AGT(["<b>Agentic RL</b><br/>L16<br/><br/>tool use · ReAct<br/>multi-turn rollouts<br/>SWE-bench-style"])
-
-    Q -- logged data only,<br/>no fresh interaction --> OFF[\"<b>Offline RL</b><br/>L19<br/><br/>BCQ · BEAR · CQL · IQL<br/>Decision Transformer"\]
-
-    RLHF -. iterating it
-            on-policy .-> ITER(["<b>Online &amp; iterative</b><br/>preference optimization<br/>L17"])
-
-    OFF -. DPO is its
-           offline cousin .-> RLHF
-
-    classDef root fill:#2c3e50,stroke:#1a252f,stroke-width:3px,color:#fdf6e3
-    classDef question fill:#fff3cd,stroke:#7d6608,stroke-width:2.5px,color:#5d4e00
-    classDef llmfam fill:#fde4cf,stroke:#a0522d,stroke-width:2px,color:#3e1f0f
-    classDef classical fill:#d4e8f7,stroke:#2c5f8d,stroke-width:2px,color:#0f2a47
-    classDef offline fill:#d6ead8,stroke:#3a7d44,stroke-width:2px,color:#143a1f
-    classDef link fill:#f5e1d8,stroke:#a0522d,stroke-width:1.5px,stroke-dasharray:5 3,color:#3e1f0f
-
-    class MDP root
-    class Q question
-    class ENV classical
-    class RLHF,RLAIF,RLVR,AGT llmfam
-    class OFF offline
-    class ITER link
-```
+![The landscape — six reward sources, one MDP. Where each RL family fits: classical RL, RLHF, RLAIF, RLVR, agentic RL, and offline RL.](./notes/diagrams/svg/landscape.svg)
 
 ---
 
