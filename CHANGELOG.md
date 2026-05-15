@@ -2,6 +2,19 @@
 
 Notable changes to the repo. Not a release log — there are no releases — just a record of what moved and why.
 
+## 2026-05-15 — promote the hand-written notes out of Archive/
+
+The trusted, hand-written 2017 notes had been sitting in a folder called `Archive/` — which connotes "old/dead" — while the unreviewed AI-drafted lecture series occupied `notes/`. Backwards. Fixed:
+
+- `Archive/2017-Course-Notes/CS294-DeepRL-Berkeley/` → `notes/cs294-2017/` (with `imgs/` intact and image links unchanged).
+- `Archive/2017-Course-Notes/Elements-Of-RL/` → `notes/sutton-barto-digest/`.
+- Both moved files got a `<!-- status: hand-written -->` header.
+- `Archive/` directory deleted (`Archive/README.md` was a wrapper; no content lost).
+- Root `readme.md` "What's here" section restructured to lead with the trusted, hand-written content (the CS294 notes, the Sutton & Barto digest, the curated talks/books/courses, the tested exercises) and clearly demote the AI-drafted lecture series as scaffold-with-skepticism. "Start here" reordered to lead with safer paths (talks/books → exercises → drafts).
+- `notes/README.md` rewritten in the same spirit — hand-written content first, lecture series second with a clear caveat about what `unreviewed` means.
+- `AGENTS.md` and `CLAUDE.md` updated: the layout table now points at `notes/cs294-2017/` and `notes/sutton-barto-digest/` as the trusted, frozen, never-reword material instead of `Archive/`.
+- GitHub topics refreshed: dropped `guideline` and `study` (generic), added `rlhf`, `llm-alignment`, `dpo`, `grpo`, `ppo`, `rlvr`, `agentic-rl`, `lecture-notes`, `study-notes`, `deepseek-r1`, `constitutional-ai`, `policy-gradient`, `q-learning`, `sutton-barto`. Description sharpened.
+
 ## 2026-05-12 — restructure: separate the layers, set up rules
 
 Context: the repo had grown two layers — the original 2017 notes, and a much larger newer layer added in 2025 (a 13-lecture series, scraped paper lists, a content tool). The newer layer was unmarked, wrote in a first person it hadn't earned, and shipped broken links, phantom lectures, and made-up citations. This pass separates the two so nobody has to guess what's trustworthy, and sets up conventions so they can coexist.

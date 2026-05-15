@@ -1,3 +1,5 @@
+<!-- status: hand-written | provenance: notes by Yad Konrad while taking the courses (2017); kept as written -->
+
 #### Elements Of Reinforcement Learning: (Derived from Barto and Sutton '17 and Li '17)
 
 * A policy defines the learning agent’s way of behaving at a given time. Roughly speaking, a policy is a mapping from perceived states of the environment to actions to be taken when in those states.
