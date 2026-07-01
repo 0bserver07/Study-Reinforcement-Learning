@@ -1,19 +1,32 @@
 <!-- status: unreviewed | last-reviewed: never -->
 
-# Lecture series: deep RL to LLM alignment
+# notes — study material
 
-A self-study sequence that goes from MDPs and policy gradients up through RLHF, DPO, and the 2024–2025 alignment methods. The lecture bodies **haven't been reviewed yet** — useful as a structured path, but check the math, the code, and the citations against primary sources. `../CURRICULUM.md` is the same path with prerequisites and time estimates; [`../AGENTS.md`](../AGENTS.md) explains the `status:` labels.
+Two layers live in this directory, mixed.
 
-Each lecture tries to do four things: give the intuition before the math, show code that runs, point at where the method breaks in practice, and name the papers that introduced it. When a lecture has a matching exercise, it links to [`../exercises/`](../exercises/).
+**Trusted, hand-written:**
 
-## Lectures and review status
+- **[`cs294-2017/`](./cs294-2017/)** — personal student notes from CS 294 Deep RL (Berkeley, Spring 2017 — Levine, Schulman, Finn). 246 lines of working notes from the field being built. Idiosyncratic, kept as written. `status: hand-written`.
+- **[`sutton-barto-digest/`](./sutton-barto-digest/)** — short distillation of the four elements of an RL system (policy, reward, value function, model) from Sutton & Barto. `status: hand-written`.
+
+These are old (2017) and informal — but they're a real person's understanding, not AI text. Trusted as starting points.
+
+**AI-drafted, useful as scaffold (`unreviewed` — treat with skepticism):**
+
+- **[`lectures/`](./lectures/)** — a 34-lecture series taking RL from MDPs through RLHF / DPO / GRPO / RLVR / agentic / offline and on into reasoning, systems, and applications. Lectures 01–19 have had an editorial pass — broken links fixed, code bugs caught (`import gym` → `gymnasium`, missing imports, old-API `env.step` calls), citations checked or removed when they didn't resolve, fake-first-person framing stripped. Lectures 20–34 are newer drafts without that pass. **In no case has a person read a lecture end to end and signed off.** Cross-check the math against the cited papers; treat the code as a starting point that needs verification. Index and per-lecture review status below.
+- **[`cheat-sheets/`](./cheat-sheets/)** — `RL-Math-Formulas.md` and `RL-Quick-Reference.md`. Audited (caught a wrong KL direction; fixed). Same caveat.
+- **[`diagrams/`](./diagrams/)** — `RL-Algorithm-Diagrams.md`. Audited (caught and fixed a wrong DPO loss diagram and a wrong GRPO advantage diagram). Same caveat.
+
+[`../CURRICULUM.md`](../CURRICULUM.md) is the suggested order through everything. [`../AGENTS.md`](../AGENTS.md) explains the `<!-- status: ... -->` convention every doc carries.
+
+## Lecture series — drafts, in order
 
 | # | Lecture | Status |
 |---|---|---|
 | 01 | [MDPs and Bellman equations](./lectures/01-mdps-bellman.md) — exercise: [`01-mdps`](../exercises/01-mdps/) | unreviewed (de-slopped; a fabricated value-function output was removed) |
 | 02 | [Policy gradients from scratch](./lectures/02-policy-gradients.md) — exercise: [`02-policy-gradients`](../exercises/02-policy-gradients/) | unreviewed (de-slopped; a broken link and a code bug were fixed) |
 | 03 | [Value functions & Q-learning](./lectures/03-value-functions-q-learning.md) — exercise: [`03-q-learning`](../exercises/03-q-learning/) | unreviewed (de-slopped; a dead `Modern-RL-Research/` path and a missing import fixed) |
-| 04 | [Actor-critic methods](./lectures/04-actor-critic.md) | unreviewed (de-slopped; a code bug fixed) |
+| 04 | [Actor-critic methods](./lectures/04-actor-critic.md) — exercise: [`04-actor-critic`](../exercises/04-actor-critic/) | unreviewed (de-slopped; a code bug fixed) |
 | 05 | [Trust regions and TRPO](./lectures/05-trpo.md) | unreviewed (de-slopped; fabricated training times removed) |
 | 06 | [PPO](./lectures/06-ppo.md) | unreviewed (de-slopped; `import gym` → `gymnasium` fixed) |
 | 07 | [Off-policy learning: SAC and TD3](./lectures/07-off-policy-rl.md) | unreviewed (de-slopped; an old-API `env.step` call fixed) |
@@ -22,9 +35,9 @@ Each lecture tries to do four things: give the intuition before the math, show c
 | 10 | [PPO for language models](./lectures/10-ppo-for-llms.md) | unreviewed (de-slopped; a broken next-lecture link + unverified compute claims fixed) |
 | 11 | [Direct preference optimization](./lectures/11-dpo.md) | unreviewed (de-slopped; a fabricated paper removed) |
 | 12 | [Beyond DPO: GRPO, RRHF, IPO](./lectures/12-beyond-dpo.md) | unreviewed (de-slopped; a fabricated benchmark table + a fabricated paper removed) |
-| 13 | [RLHF for code generation](./lectures/13-rlhf-code-generation.md) | unreviewed (de-slopped; CodeRL mis-attributed to Meta → fixed to Salesforce; fabricated benchmark numbers removed) |
+| 13 | [RLHF for code generation](./lectures/13-rlhf-code-generation.md) — exercise: [`15-grpo-rlvr`](../exercises/15-grpo-rlvr/) (related) | unreviewed (de-slopped; CodeRL mis-attributed to Meta → fixed to Salesforce; fabricated benchmark numbers removed) |
 | 14 | [Constitutional AI, RLAIF, self-improvement](./lectures/14-constitutional-ai-rlaif.md) | unreviewed (new draft) |
-| 15 | [RL with verifiable rewards & reasoning models](./lectures/15-rl-verifiable-rewards.md) | unreviewed (new draft) |
+| 15 | [RL with verifiable rewards & reasoning models](./lectures/15-rl-verifiable-rewards.md) — exercise: [`15-grpo-rlvr`](../exercises/15-grpo-rlvr/) | unreviewed (new draft) |
 | 16 | [Agentic RL: tool use, multi-turn](./lectures/16-agentic-rl.md) | unreviewed (new draft) |
 | 17 | [Online & iterative preference optimization](./lectures/17-online-iterative-preference.md) | unreviewed (new draft) |
 | 18 | [Distillation of reasoning models](./lectures/18-distillation-reasoning.md) | unreviewed (new draft) |
@@ -45,37 +58,22 @@ Each lecture tries to do four things: give the intuition before the math, show c
 | 33 | [Robotics RL](./lectures/33-robotics-rl.md) | unreviewed (new draft) |
 | 34 | [Self-distillation and self-improvement loops](./lectures/34-self-distillation.md) | unreviewed (new draft) |
 
-Planned: a curated paper layer in [`../reference/papers/`](../reference/papers/), built from `../tools/lit-builder/` once the LLM scoring step has been run (it needs a credential). Two new hand-curated topic READMEs have landed: [`GRPO-RLVR/`](../reference/papers/GRPO-RLVR/) and [`Agentic-RL/`](../reference/papers/Agentic-RL/); the auto-generated `PAPERS.md` files in those directories still need a collector run.
+What "unreviewed" means here: nobody has read the lecture end-to-end and signed off on it. The editorial pass (de-slop, fix broken links, catch code bugs, verify citations) has happened for lectures 01–19 — that's the parenthetical note next to those rows. Lectures 20–34 are newer drafts that haven't had even that pass yet, so treat them with more caution. The next step for any of them is a person reads it and either flips it to `reviewed` (with today's date in `last-reviewed:`) or notes what's still wrong.
 
-Cheat sheets and diagrams are in [`cheat-sheets/`](./cheat-sheets/) and [`diagrams/`](./diagrams/) — also unreviewed. Recent additions: `RLHF-vs-DPO-vs-GRPO.md` (side-by-side comparison of the alignment methods), `RL-LLM-loops-2026.md` (ASCII data-flow diagrams of every training loop), `KL-control.md` (KL penalties across TRPO/PPO/RLHF/DPO/GRPO), `RL-loss-functions.md` (one block per algorithm with loss, gradient, code, and tradeoff).
+Planned: a curated paper layer in [`../reference/papers/`](../reference/papers/), built from `../tools/lit-builder/` once the LLM scoring step has been run (it needs a credential — see issue #2). Two hand-curated topic READMEs have landed — [`GRPO-RLVR/`](../reference/papers/GRPO-RLVR/) and [`Agentic-RL/`](../reference/papers/Agentic-RL/) — but their auto-generated `PAPERS.md` files still need a collector run.
+
+Cheat sheets and diagrams are in [`cheat-sheets/`](./cheat-sheets/) and [`diagrams/`](./diagrams/) — also unreviewed. Beyond `RL-Math-Formulas.md` and `RL-Quick-Reference.md`: `RLHF-vs-DPO-vs-GRPO.md` (side-by-side comparison of the alignment methods), `RL-LLM-loops-2026.md` (ASCII data-flow diagrams of every training loop), `KL-control.md` (KL penalties across TRPO/PPO/RLHF/DPO/GRPO), `RL-loss-functions.md` (one block per algorithm with loss, gradient, code, and tradeoff).
 
 ## How to use this
 
-Starting from scratch: do 01–05 in order, type out the code yourself, and don't move on from a lecture until you can explain its method without notes. Then 06–08, then 09 onward.
+Starting from scratch: read the talks/books/courses linked in [`../readme.md`](../readme.md) — they're the trusted external material. The hand-written CS294 notes at [`cs294-2017/`](./cs294-2017/) give you one student's path through the same material.
 
-Already know RL, here for the LLM part: skim 01–05 for notation, then go 09 → 10 → 11 → 12. Lecture 13 if you care about code generation specifically.
+Already know RL, here for the LLM part: lectures 09 → 11 → 12 → 14 → 15 → 17 covers the RLHF → DPO → GRPO → constitutional AI → RLVR → iterative preference optimization arc.
 
-Here for code generation: 02 (policy-gradient intuition), 10 (PPO for LLMs), 11–13.
+Here for code generation specifically: lecture 02 (policy-gradient intuition), 10 (PPO for LLMs), 13 (RLHF for code), 15 (RLVR — the basis of modern reasoning-RL on code).
 
 ## Prerequisites
 
-- Calculus (derivatives, chain rule, gradients), probability (expectations, distributions, KL divergence), basic linear algebra. The math is explained as it comes up.
-- Python at an intermediate level; PyTorch basics (the code uses PyTorch); NumPy.
-- Budget a few hours per lecture including coding and debugging.
-
-## Study notes that hold up
-
-- Type the code out. Don't paste it.
-- Break it on purpose — change a hyperparameter until it fails, then work out why.
-- If you can't explain a method simply, you don't have it yet.
-- After coding a method, read the original paper. It reads very differently once you've implemented it.
-- Print shapes when something's wrong. Most RL bugs are shape or sign errors.
-
-## Supplementary resources
-
-- Sutton & Barto, *Reinforcement Learning: An Introduction* (2nd ed.)
-- Spinning Up in Deep RL (OpenAI) — explanations plus reference implementations
-- David Silver's UCL lectures
-- Recent papers, by topic, in [`../reference/papers/`](../reference/papers/)
-
-The lectures are meant to stand on their own, but they'll make more sense alongside these.
+- Calculus (derivatives, chain rule, gradients), probability (expectations, distributions, KL divergence), basic linear algebra.
+- Python at an intermediate level; PyTorch basics; NumPy.
+- A few hours per lecture including coding and debugging.

@@ -2,6 +2,19 @@
 
 Notable changes to the repo. Not a release log — there are no releases — just a record of what moved and why.
 
+## 2026-05-15 — promote the hand-written notes out of Archive/
+
+The trusted, hand-written 2017 notes had been sitting in a folder called `Archive/` — which connotes "old/dead" — while the unreviewed AI-drafted lecture series occupied `notes/`. Backwards. Fixed:
+
+- `Archive/2017-Course-Notes/CS294-DeepRL-Berkeley/` → `notes/cs294-2017/` (with `imgs/` intact and image links unchanged).
+- `Archive/2017-Course-Notes/Elements-Of-RL/` → `notes/sutton-barto-digest/`.
+- Both moved files got a `<!-- status: hand-written -->` header.
+- `Archive/` directory deleted (`Archive/README.md` was a wrapper; no content lost).
+- Root `readme.md` "What's here" section restructured to lead with the trusted, hand-written content (the CS294 notes, the Sutton & Barto digest, the curated talks/books/courses, the tested exercises) and clearly demote the AI-drafted lecture series as scaffold-with-skepticism. "Start here" reordered to lead with safer paths (talks/books → exercises → drafts).
+- `notes/README.md` rewritten in the same spirit — hand-written content first, lecture series second with a clear caveat about what `unreviewed` means.
+- `AGENTS.md` and `CLAUDE.md` updated: the layout table now points at `notes/cs294-2017/` and `notes/sutton-barto-digest/` as the trusted, frozen, never-reword material instead of `Archive/`.
+- GitHub topics refreshed: dropped `guideline` and `study` (generic), added `rlhf`, `llm-alignment`, `dpo`, `grpo`, `ppo`, `rlvr`, `agentic-rl`, `lecture-notes`, `study-notes`, `deepseek-r1`, `constitutional-ai`, `policy-gradient`, `q-learning`, `sutton-barto`. Description sharpened.
+
 ## 2026-05-16 — bulk add: 15 new lectures, 4 new exercises, 4 new cheat sheets, 2 new reading lists
 
 Context: the lecture series stopped at 19 (offline RL) and was missing most of the 2024–2025 material — exploration, multi-agent, world models, the agentic / reasoning / RLAIF / reward-hacking deep-dives, the systems and hardware layer, and the meta-RL / robotics adjacencies. Twenty-five parallel agents wrote one chunk each, each to a unique path, each `unreviewed`. The orchestrator wired them into the index files; no existing material was reworded.

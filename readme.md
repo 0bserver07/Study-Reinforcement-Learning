@@ -6,21 +6,28 @@ This is a personal study repo, not a library. It mixes notes a person wrote (som
 
 ## What's here
 
-- **`notes/`** — the lecture series (`notes/lectures/`), plus cheat sheets and diagrams. Currently unreviewed; see [`notes/README.md`](./notes/README.md) for the index and review status.
-- **`exercises/`** — small coding exercises with tests and reference solutions. Built to be worked through step by step, with a coding agent or on your own.
-- **`CURRICULUM.md`** — the ordered path through the lectures and exercises.
-- **`Archive/`** — the original 2017 course notes (CS294 Deep RL, Berkeley) and a short Sutton & Barto digest. Kept as written.
-- **`reference/papers/`** — reading lists of recent papers, collected from arXiv by the script in `tools/`.
-- **`tools/`** — `arxiv-collector/` (fetches arXiv papers), `lit-builder/` (conference-paper triage — a retuned copy of `iclr-lit-builder`: fetches ICLR/NeurIPS/ICML paper lists, keyword-filters, LLM-scores 0–3 with a reason), and `content-pipeline/` (drafts blog posts / threads from papers; auxiliary).
+**Trusted, hand-written:**
+
+- **[`notes/cs294-2017/`](./notes/cs294-2017/)** — personal student notes from CS 294 Deep RL (Berkeley, Spring 2017 — Levine, Schulman, Finn). 246 lines of real-time notes from the field being built. Idiosyncratic, opinionated, with the cannon-trajectory aside. Kept as written.
+- **[`notes/sutton-barto-digest/`](./notes/sutton-barto-digest/)** — short distillation of the four elements of an RL system, from Sutton & Barto.
+- **Talks, books, courses** — the curated external links below. The Pineau intro, Abbeel's deep RL talk, David Silver's UCL course, Sutton & Barto's book, CS285, Spinning Up. Here since 2015. Still the best place to start if you're new.
+- **[`exercises/`](./exercises/)** — five small coding exercises with `pytest` tests and reference solutions, verified to pass. Implement REINFORCE on CartPole, Q-learning on FrozenLake, value iteration on a gridworld, actor-critic, a tiny GRPO loop on a verifiable arithmetic task.
+
+**AI-drafted, useful as scaffold (`unreviewed` — treat with skepticism):**
+
+- **[`notes/lectures/`](./notes/lectures/)** — a 19-lecture series, MDPs through RLHF / DPO / GRPO / RLVR / agentic / offline. Editorial pass done (broken links, code bugs, made-up citations all caught and fixed) — but no person has read each one end-to-end. Cross-check the math against the cited papers before relying on it. Index and per-lecture status in [`notes/README.md`](./notes/README.md); ordered study path in [`CURRICULUM.md`](./CURRICULUM.md).
+- **`notes/cheat-sheets/`, `notes/diagrams/`** — quick reference. Same caveat. (The diagrams file caught and fixed two wrong loss diagrams during the audit, FWIW.)
+- **[`reference/papers/`](./reference/papers/)** — auto-collected paper lists from arXiv (~430 abstracts). Use as a search index, not a curated reading list.
+- **[`tools/`](./tools/)** — `arxiv-collector/` (fetches arXiv papers), `lit-builder/` (ICLR/NeurIPS/ICML triage with keyword filter + LLM scoring), `content-pipeline/` (drafts blog posts from papers; auxiliary).
+
+[`AGENTS.md`](./AGENTS.md) explains the `<!-- status: hand-written | reviewed | unreviewed -->` convention every doc carries.
 
 ## Start here
 
-- New to RL: read [`CURRICULUM.md`](./CURRICULUM.md), then start `notes/lectures/01-mdps-bellman.md`. Do the exercises as you go.
-- Know RL, here for the LLM part: skim lectures 1–5, then 9 onward (reward modeling → PPO for LLMs → DPO → GRPO).
-- Want the original 2017 notes: `Archive/2017-Course-Notes/`.
-- Working in this repo with Claude Code or Codex? Read [`AGENTS.md`](./AGENTS.md) first.
-
-For the foundational external material the repo has always pointed at — talks, books, courses — see below. It's still the best starting point if you want lectures from the people who built the field.
+- **New to RL?** Start with the talks/books/courses below — Pineau's intro, then Sutton & Barto for foundations, then David Silver's UCL course or CS285 (Berkeley's current version of CS294). The 2017 CS294 notes ([`notes/cs294-2017/`](./notes/cs294-2017/)) give you one student's working notes through the same material if you like that genre.
+- **Want hands-on?** Do the [`exercises/`](./exercises/). They're tested and they actually run. Five of them, a couple of hours each.
+- **Curious about modern LLM RL?** The 19-lecture series in [`notes/lectures/`](./notes/lectures/) covers RLHF, DPO, GRPO, RLVR, agentic, offline. Drafts; cross-check the claims against the cited papers.
+- **Working in this repo with Claude Code or Codex?** Read [`AGENTS.md`](./AGENTS.md) first.
 
 ## The landscape
 
@@ -151,7 +158,7 @@ The map below shows where each family fits. The lectures fill in the details; [`
 	* Lecture 9: Exploration and Exploitation
 	* Lecture 10: Case Study: RL in Classic Games
 
-* [CS 294: Deep Reinforcement Learning, Spring 2017](https://rll.berkeley.edu/deeprlcourse-fa17/) by Sergey Levine, John Schulman, Chelsea Finn. My notes are archived at [`Archive/2017-Course-Notes/CS294-DeepRL-Berkeley/`](./Archive/2017-Course-Notes/CS294-DeepRL-Berkeley/).
+* [CS 294: Deep Reinforcement Learning, Spring 2017](https://rll.berkeley.edu/deeprlcourse-fa17/) by Sergey Levine, John Schulman, Chelsea Finn. My notes from taking it are at [`notes/cs294-2017/`](./notes/cs294-2017/).
 
 * [CS 285: Deep Reinforcement Learning (Berkeley)](https://rail.eecs.berkeley.edu/deeprlcourse/) — the current version of CS294, updated each year.
 
