@@ -13,7 +13,7 @@ These are old (2017) and informal — but they're a real person's understanding,
 
 **AI-drafted, useful as scaffold (`unreviewed` — treat with skepticism):**
 
-- **[`lectures/`](./lectures/)** — a 19-lecture series taking RL from MDPs through to RLHF / DPO / GRPO / RLVR / agentic / offline. Editorial pass has been done — broken links fixed, code bugs caught (`import gym` → `gymnasium`, missing imports, old-API `env.step` calls), citations checked or removed when they didn't resolve, fake-first-person framing stripped. **But no person has read each lecture end to end and signed off.** Cross-check the math against the cited papers; treat the code as a starting point that needs verification. Index and per-lecture review status below.
+- **[`lectures/`](./lectures/)** — a 34-lecture series taking RL from MDPs through RLHF / DPO / GRPO / RLVR / agentic / offline and on into reasoning, systems, and applications. Lectures 01–19 have had an editorial pass — broken links fixed, code bugs caught (`import gym` → `gymnasium`, missing imports, old-API `env.step` calls), citations checked or removed when they didn't resolve, fake-first-person framing stripped. Lectures 20–34 are newer drafts without that pass. **In no case has a person read a lecture end to end and signed off.** Cross-check the math against the cited papers; treat the code as a starting point that needs verification. Index and per-lecture review status below.
 - **[`cheat-sheets/`](./cheat-sheets/)** — `RL-Math-Formulas.md` and `RL-Quick-Reference.md`. Audited (caught a wrong KL direction; fixed). Same caveat.
 - **[`diagrams/`](./diagrams/)** — `RL-Algorithm-Diagrams.md`. Audited (caught and fixed a wrong DPO loss diagram and a wrong GRPO advantage diagram). Same caveat.
 
@@ -42,10 +42,27 @@ These are old (2017) and informal — but they're a real person's understanding,
 | 17 | [Online & iterative preference optimization](./lectures/17-online-iterative-preference.md) | unreviewed (new draft) |
 | 18 | [Distillation of reasoning models](./lectures/18-distillation-reasoning.md) | unreviewed (new draft) |
 | 19 | [Offline RL](./lectures/19-offline-rl.md) | unreviewed (new draft) |
+| 20 | [Exploration: from ε-greedy to intrinsic motivation](./lectures/20-exploration.md) — exercise: [`20-exploration`](../exercises/20-exploration/) | unreviewed (new draft) |
+| 21 | [Multi-agent RL and self-play](./lectures/21-multi-agent-rl.md) | unreviewed (new draft) |
+| 22 | [World models](./lectures/22-world-models.md) | unreviewed (new draft) |
+| 23 | [Process reward models vs outcome reward models](./lectures/23-process-reward-models.md) | unreviewed (new draft) |
+| 24 | [Computer use and browser agents](./lectures/24-computer-use-agents.md) | unreviewed (new draft) |
+| 25 | [Long-horizon credit assignment](./lectures/25-long-horizon-credit.md) | unreviewed (new draft) |
+| 26 | [RL for mathematical reasoning](./lectures/26-rl-math-reasoning.md) | unreviewed (new draft) |
+| 27 | [RLAIF and synthetic preferences at scale](./lectures/27-rlaif.md) | unreviewed (new draft) |
+| 28 | [Reward hacking and verifier design](./lectures/28-reward-hacking.md) | unreviewed (new draft) |
+| 29 | [Distributed RL systems](./lectures/29-distributed-rl-systems.md) | unreviewed (new draft) |
+| 30 | [RL inference infrastructure for LLMs](./lectures/30-rl-inference-infra.md) | unreviewed (new draft) |
+| 31 | [Hardware for RL](./lectures/31-hardware-for-rl.md) | unreviewed (new draft) |
+| 32 | [Meta-RL and in-context RL](./lectures/32-meta-rl-in-context.md) | unreviewed (new draft) |
+| 33 | [Robotics RL](./lectures/33-robotics-rl.md) | unreviewed (new draft) |
+| 34 | [Self-distillation and self-improvement loops](./lectures/34-self-distillation.md) | unreviewed (new draft) |
 
-What "unreviewed" means here: nobody has read the lecture end-to-end and signed off on it. The editorial pass (de-slop, fix broken links, catch code bugs, verify citations) has happened — that's the parenthetical note next to each row. The next step is a person reads it and either flips it to `reviewed` (with today's date in `last-reviewed:`) or notes what's still wrong.
+What "unreviewed" means here: nobody has read the lecture end-to-end and signed off on it. The editorial pass (de-slop, fix broken links, catch code bugs, verify citations) has happened for lectures 01–19 — that's the parenthetical note next to those rows. Lectures 20–34 are newer drafts that haven't had even that pass yet, so treat them with more caution. The next step for any of them is a person reads it and either flips it to `reviewed` (with today's date in `last-reviewed:`) or notes what's still wrong.
 
-Planned: a curated paper layer in [`../reference/papers/`](../reference/papers/), built from `../tools/lit-builder/` once the LLM scoring step has been run (it needs a credential — see issue #2). Optionally: an exploration lecture (intrinsic motivation, count-based methods, RND).
+Planned: a curated paper layer in [`../reference/papers/`](../reference/papers/), built from `../tools/lit-builder/` once the LLM scoring step has been run (it needs a credential — see issue #2). Two hand-curated topic READMEs have landed — [`GRPO-RLVR/`](../reference/papers/GRPO-RLVR/) and [`Agentic-RL/`](../reference/papers/Agentic-RL/) — but their auto-generated `PAPERS.md` files still need a collector run.
+
+Cheat sheets and diagrams are in [`cheat-sheets/`](./cheat-sheets/) and [`diagrams/`](./diagrams/) — also unreviewed. Beyond `RL-Math-Formulas.md` and `RL-Quick-Reference.md`: `RLHF-vs-DPO-vs-GRPO.md` (side-by-side comparison of the alignment methods), `RL-LLM-loops-2026.md` (ASCII data-flow diagrams of every training loop), `KL-control.md` (KL penalties across TRPO/PPO/RLHF/DPO/GRPO), `RL-loss-functions.md` (one block per algorithm with loss, gradient, code, and tradeoff).
 
 ## How to use this
 
