@@ -32,6 +32,10 @@ If you're using Claude Code or Codex: it should have you edit `starter.py`, run 
 | [`02-policy-gradients/`](./02-policy-gradients/) — REINFORCE, solve CartPole | Lecture 02 | ready |
 | [`03-q-learning/`](./03-q-learning/) — tabular Q-learning on FrozenLake | Lecture 03 | ready |
 | [`04-actor-critic/`](./04-actor-critic/) — actor-critic with a learned baseline, on CartPole | Lecture 04 | ready |
+| [`05-ppo/`](./05-ppo/) — PPO with GAE, solve CartPole | Lecture 06 | ready |
+| [`09-reward-model/`](./09-reward-model/) — Bradley-Terry reward model on synthetic preferences | Lecture 09 | ready |
+| [`11-dpo/`](./11-dpo/) — DPO on a toy preference dataset | Lecture 11 | ready |
 | [`15-grpo-rlvr/`](./15-grpo-rlvr/) — GRPO on a verifiable arithmetic toy task | Lecture 15 | ready |
+| [`20-exploration/`](./20-exploration/) — RND on a sparse-reward chain MDP | Lecture 20 | ready |
 
-A PPO exercise on a continuous-control env is the next obvious one. Agentic RL doesn't make a fast tested exercise — that's a "go build it" project.
+A PPO exercise on a continuous-control env (`Pendulum-v1`, `LunarLanderContinuous-v2`) is still the next obvious extension — `05-ppo/` covers the discrete-action case. Agentic RL doesn't make a fast tested exercise — that's a "go build it" project.

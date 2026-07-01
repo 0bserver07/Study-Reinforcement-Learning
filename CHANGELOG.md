@@ -2,6 +2,73 @@
 
 Notable changes to the repo. Not a release log — there are no releases — just a record of what moved and why.
 
+## 2026-05-15 — promote the hand-written notes out of Archive/
+
+The trusted, hand-written 2017 notes had been sitting in a folder called `Archive/` — which connotes "old/dead" — while the unreviewed AI-drafted lecture series occupied `notes/`. Backwards. Fixed:
+
+- `Archive/2017-Course-Notes/CS294-DeepRL-Berkeley/` → `notes/cs294-2017/` (with `imgs/` intact and image links unchanged).
+- `Archive/2017-Course-Notes/Elements-Of-RL/` → `notes/sutton-barto-digest/`.
+- Both moved files got a `<!-- status: hand-written -->` header.
+- `Archive/` directory deleted (`Archive/README.md` was a wrapper; no content lost).
+- Root `readme.md` "What's here" section restructured to lead with the trusted, hand-written content (the CS294 notes, the Sutton & Barto digest, the curated talks/books/courses, the tested exercises) and clearly demote the AI-drafted lecture series as scaffold-with-skepticism. "Start here" reordered to lead with safer paths (talks/books → exercises → drafts).
+- `notes/README.md` rewritten in the same spirit — hand-written content first, lecture series second with a clear caveat about what `unreviewed` means.
+- `AGENTS.md` and `CLAUDE.md` updated: the layout table now points at `notes/cs294-2017/` and `notes/sutton-barto-digest/` as the trusted, frozen, never-reword material instead of `Archive/`.
+- GitHub topics refreshed: dropped `guideline` and `study` (generic), added `rlhf`, `llm-alignment`, `dpo`, `grpo`, `ppo`, `rlvr`, `agentic-rl`, `lecture-notes`, `study-notes`, `deepseek-r1`, `constitutional-ai`, `policy-gradient`, `q-learning`, `sutton-barto`. Description sharpened.
+
+## 2026-05-16 — bulk add: 15 new lectures, 4 new exercises, 4 new cheat sheets, 2 new reading lists
+
+Context: the lecture series stopped at 19 (offline RL) and was missing most of the 2024–2025 material — exploration, multi-agent, world models, the agentic / reasoning / RLAIF / reward-hacking deep-dives, the systems and hardware layer, and the meta-RL / robotics adjacencies. Twenty-five parallel agents wrote one chunk each, each to a unique path, each `unreviewed`. The orchestrator wired them into the index files; no existing material was reworded.
+
+Lectures added (notes/lectures/, all `unreviewed`, ~10,200 lines total):
+
+- 20 — Exploration: ε-greedy → UCB → RND → ICM → NGU → Go-Explore, plus how exploration shows up differently in LLM-RL (temperature / best-of-N rather than dedicated bonuses).
+- 21 — Multi-agent RL and self-play: stochastic games, CTDE (MADDPG, QMIX, MAPPO), self-play (AlphaZero, AlphaStar, OpenAI Five), PSRO and exploitability.
+- 22 — World models: the Dreamer family (PlaNet → V3), MuZero / EfficientZero / Sampled MuZero, transformer world models (IRIS, GAIA-1, Genie), the LLM-as-world-model thread.
+- 23 — Process reward models vs outcome reward models: PRM800K, Math-Shepherd, why DeepSeek skipped PRMs, best-of-N re-ranking, the autoPRM line.
+- 24 — Computer use and browser agents: WebGPT → Mind2Web → WebArena → VisualWebArena → OSWorld; Set-of-Marks; Anthropic Computer Use and OpenAI Operator; prompt-injection failure modes.
+- 25 — Long-horizon credit assignment: GAE/PPO at long horizons, hindsight relabeling, Reflexion, ToT, MCTS-then-train, the open question of value functions at 1000+ steps.
+- 26 — RL for mathematical reasoning: GSM8K/MATH/AIME/OlympiadBench/MiniF2F; STaR; PRM800K; DeepSeekMath/GRPO; DeepSeek-R1; the rollout/verifier loop; tool-augmented math RL (PAL, Lean/Coq).
+- 27 — RLAIF and synthetic preferences: Lee et al RLAIF, OAIF, UltraFeedback; LLM-judge biases (position, length, self-preference, sycophancy) and mitigations; weak-to-strong generalization.
+- 28 — Reward hacking and verifier design: Goodhart, CoastRunners; Stiennon overoptimization, Gao scaling laws (KL as the controller); RLVR-specific verifier hacks (test-overfitting, format exploits, judge-injection); mitigations.
+- 29 — Distributed RL systems: A3C → IMPALA → Ape-X → SEED RL → R2D2; Ray RLlib, ACME; the LLM-RL stack (TRL, OpenRLHF, verl/HybridFlow, DeepSpeed-Chat) with vLLM rollouts and FSDP/ZeRO training.
+- 30 — RL inference infrastructure: why ~70–90% of LLM-RL wall-clock is decode; PagedAttention, continuous batching, RadixAttention; speculative decoding caveats for RL; weight-sync patterns.
+- 31 — Hardware for RL: classical (CPU-env-bottlenecked) vs LLM-RL (HBM-bandwidth-bound); accelerators (H100/H200/B200, MI300X, TPU v5p/Trillium); FlashAttention 1/2/3; Triton; FP8/INT4 quantization for rollouts; interconnect geometry.
+- 32 — Meta-RL and in-context RL: MAML and Reptile (gradient-based); RL² and "Learning to RL" (recurrence-based); Decision Transformer, Trajectory Transformer, Algorithm Distillation, DPT; the bridge to LLM in-context learning.
+- 33 — Robotics RL: PILCO, domain randomization, OpenAI dexterous hand; the data-driven shift (RT-1, RT-2, Octo, OpenVLA, π₀, Open X-Embodiment); residual policies; Isaac Gym, MuJoCo, Brax, Drake.
+- 34 — Self-distillation and self-improvement loops: STaR, ReST^EM, Self-Instruct, CAI's RL phase, self-rewarding LMs; failure modes (mode collapse, hallucination amplification, self-preference); the connection to RLVR.
+
+Cheat sheets added (notes/cheat-sheets/, all `unreviewed`):
+
+- `RLHF-vs-DPO-vs-GRPO.md` — side-by-side of PPO-RLHF / DPO / IPO / KTO / ORPO / SimPO / GRPO / RLVR, with comparison table, per-method blocks, decision tree.
+- `RL-LLM-loops-2026.md` — ASCII data-flow diagrams of every major LLM-RL training loop (SFT, RLHF, DPO, iterative DPO, RLVR/GRPO, CAI, R1-Zero, R1-distill, agentic).
+- `KL-control.md` — KL penalties across TRPO/PPO/RLHF/DPO/GRPO with formulas, K1/K2/K3 estimators, β tuning rules of thumb.
+- `RL-loss-functions.md` — one block per algorithm (23 total) with loss in symbols, gradient, ~5-10 line PyTorch snippet, stability tradeoff, "watch in training" diagnostic.
+
+Exercises added (`exercises/`, each tested against its reference solution and passing):
+
+- `05-ppo/` — PPO with GAE on CartPole-v1. Five filled-in pieces (ActorCriticNet, compute_gae, ppo_clip_loss, collect_rollouts, train). 13 tests, ~13s wall-clock, integration test threshold mean_last10 > 150.
+- `09-reward-model/` — Bradley-Terry reward model on synthetic preferences (4-dim features, known true reward, BT-labeled pairs). 5 tests including `test_bradley_terry_loss_tied` (asserting loss == log(2)) and a Spearman-correlation integration test > 0.85. ~3s.
+- `11-dpo/` — DPO on a toy per-prompt categorical policy. 6 tests including `test_dpo_loss_starts_at_log2` (when policy == ref) and an integration test that the greedy policy mean true reward goes from ~0.09 (uniform baseline) to ~1.7 after 2000 steps. ~2.5s.
+- `20-exploration/` — RND on a sparse-reward 20-state chain MDP. 11 tests: `test_q_learning_alone_fails` (mean reward < 0.1 after 200 episodes, never sees the goal), `test_train_with_intrinsic_succeeds` (mean reward > 0.5 after 200 episodes with intrinsic_coef=0.1). ~4.5s.
+
+Reading lists added (hand-curated `reference/papers/<topic>/README.md` files; the auto-generated `PAPERS.md` companions still need a collector run):
+
+- `GRPO-RLVR/README.md` — 20 verified arXiv IDs across foundational PPO/InstructGPT/STaR, the GRPO / RLVR / reasoning lineage (DeepSeekMath, R1, Kimi k1.5, Qwen2.5-Math, Open-Reasoner-Zero), PRMs (Uesato, Lightman, Math-Shepherd, OmegaPRM), code-RL with verifiable rewards (CodeRL, CodeT, SWE-bench, SWE-RL), and verifier design / reward hacking (Stiennon, Gao, Pan in-context reward hacking).
+- `Agentic-RL/README.md` — 21 verified arXiv IDs across tool use (ReAct, Toolformer, Reflexion, ToT, Voyager), browser agents (WebGPT, Mind2Web, WebArena, VisualWebArena), computer-use (OSWorld, Set-of-Marks) + Anthropic Computer Use / OpenAI Operator by URL, coding agents (SWE-agent, OpenHands, AutoCodeRover), and benchmarks (GAIA, BFCL, Cybench).
+
+Index updates:
+
+- `notes/README.md` — table extended from 19 rows to 34; new cheat sheets listed; the "Planned: an exploration lecture" line removed (lecture 20 covers it).
+- `CURRICULUM.md` — added Block 6 (modern RL deep-dives: 20, 21, 22, 32, 33), Block 7 (reasoning, agents, LLM modern stack continued: 23–28, 34), Block 8 (systems and infrastructure: 29, 30, 31), each with prereqs / time / checkpoints. Removed the "Optionally: an exploration lecture" from Planned.
+- `exercises/README.md` — table extended from 5 rows to 9; the "PPO exercise on a continuous-control env is the next obvious one" line softened (`05-ppo/` now covers the discrete-action case; continuous control still open).
+
+Caveats:
+
+- All 15 lectures, 4 cheat sheets, and 2 reading lists are `unreviewed`. Per AGENTS.md, that means citations / math / claims should be treated as unverified until a person reads them end to end. Each subagent reported its own verification status in its summary; the high-confidence citations are the ones a subagent fetched against `arxiv.org/abs/<id>` and confirmed title+authors+date.
+- Specifically flagged by subagents as wanting a careful second look: lecture 27 (RLAIF) — three citations (Tunstall 2310.16944, Meng 2405.14734, Lambert 2403.13787) were added without live arxiv fetches; lecture 34 (self-distillation) — the ReST^EM ID was changed to 2312.06585 because 2308.08998 actually points to Gulcehre's ReST, not Singh's ReST^EM; cheat sheet `RLHF-vs-DPO-vs-GRPO.md` — IPO and KTO loss formulas are simplifications, flagged inline with "verify against §4 of the paper"; cheat sheet `KL-control.md` — the InstructGPT β ≈ 0.02 and the "6 nats" adaptive-KL target were quoted from memory rather than re-verified.
+- All 4 new exercises pass their tests on a laptop CPU. The PPO integration test has only ~20 points of margin above its threshold at seed=0 (mean_last10 ≈ 169.6 vs threshold 150); seeds 1, 2, 7, 42 all clear with bigger margin. The exploration test is single-seed only.
+- The new GRPO-RLVR and Agentic-RL reading lists have only the hand-curated README so far; `tools/arxiv-collector/arxiv_paper_collector.py` should be re-run to generate their `PAPERS.md` companions.
+
 ## 2026-05-12 — restructure: separate the layers, set up rules
 
 Context: the repo had grown two layers — the original 2017 notes, and a much larger newer layer added in 2025 (a 13-lecture series, scraped paper lists, a content tool). The newer layer was unmarked, wrote in a first person it hadn't earned, and shipped broken links, phantom lectures, and made-up citations. This pass separates the two so nobody has to guess what's trustworthy, and sets up conventions so they can coexist.
@@ -42,6 +109,7 @@ Content:
 Still TODO:
 
 - Run `lit score` on the lit-builder data (needs a credential), `deepen` the top ~20–30 per area, and write the curated digests into `reference/papers/<topic>/README.md`. Once a credential is set, this is a one-shot run plus the curation pass.
-- A person reviews the lectures end to end and promotes the ones that hold up to `reviewed` (an agent can't do that). The 14–19 drafts especially — new and fast-moving material.
+- A person reviews the lectures end to end and promotes the ones that hold up to `reviewed` (an agent can't do that). The 14–19 drafts and especially the 20–34 drafts (added 2026-05-16) — newer, faster-moving, machine-written.
 - Decide whether `tools/arxiv-collector/papers_database.json` (large, regenerable) should stay tracked.
-- Optional: an exploration lecture (intrinsic motivation, count-based methods, RND) — the only foundational topic still uncovered. A PPO exercise on a continuous-control env.
+- A PPO exercise on a continuous-control env (`Pendulum-v1` or `LunarLanderContinuous-v2`) — `05-ppo/` covers the discrete-action case.
+- Run `tools/arxiv-collector/arxiv_paper_collector.py` against the two new topics (`GRPO-RLVR/`, `Agentic-RL/`) to populate their `PAPERS.md` companions.

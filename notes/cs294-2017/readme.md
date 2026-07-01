@@ -1,3 +1,5 @@
+<!-- status: hand-written | provenance: notes by Yad Konrad while taking the courses (2017); kept as written -->
+
 
 ## Notes taken from CS 294: Deep Reinforcement Learning, Spring 2017 (Berkeley)
 

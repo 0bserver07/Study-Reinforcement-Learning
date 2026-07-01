@@ -54,10 +54,45 @@ Recent material, and the field moves fast — treat these as a map of the territ
 
 You can read 19 anywhere after Block 1; it's placed here because the bridge it draws to DPO (lecture 11) — DPO is offline preference learning — is easier to see once you've done the LLM material.
 
+## Block 6 — modern RL deep-dives (lectures 20–22, 32–33)
+
+Standalone deep-dives that don't sit in the main path but cover material a serious RL practitioner should know. Read in any order after Block 2.
+
+| Step | Prereq | Time | Checkpoint |
+|---|---|---|---|
+| 20 — Exploration: ε-greedy to intrinsic motivation | 01, 03 | ~3 h + exercise | Explain why uniform random exploration fails on Montezuma's Revenge and what RND's prediction-error bonus computes. Then do the exercise: [`exercises/20-exploration/`](./exercises/20-exploration/) — RND on a sparse-reward chain MDP, tests green. |
+| 21 — Multi-agent RL and self-play | 02, 04, 06 | ~3 h | Explain why naive independent Q-learning fails when other agents learn too, and what fictitious self-play buys you in non-transitive games. |
+| 22 — World models | 08 | ~3 h | Explain the latent-dynamics premise (Dreamer family) and how MuZero learns a model that's only as accurate as needed for planning. |
+| 32 — Meta-RL and in-context RL | 02, 04, 19 | 2–3 h | Explain how MAML differs from RL² in *where* the adaptation happens, and what Algorithm Distillation learns from the histories of an RL algorithm. |
+| 33 — Robotics RL | 04, 07, 08 | 2–3 h | Explain why off-policy methods dominate real-robot work and what a VLA model contributes vs. a from-scratch RL policy. |
+
+## Block 7 — reasoning, agents, and the LLM modern stack continued (lectures 23–28, 34)
+
+Continuation of Block 4, expanded across the 2024–2025 deep-dives. The same caveat applies: fast-moving, drafts are `unreviewed`.
+
+| Step | Prereq | Time | Checkpoint |
+|---|---|---|---|
+| 23 — Process reward models vs outcome reward models | 09, 15 | 2–3 h | Explain why PRMs reduce noisy credit assignment but add a gameable surface, and why DeepSeek chose to skip them. |
+| 24 — Computer use and browser agents | 16 | 2–3 h | Explain why pixel-coordinate action spaces are hard to ground from screenshots, and one failure mode specific to prompt injection from web content. |
+| 25 — Long-horizon credit assignment | 02, 04, 16 | ~3 h | Explain why GAE breaks at 1000+ steps and what hindsight relabeling / tree-search-then-train each buy you. |
+| 26 — RL for mathematical reasoning | 12, 15 | ~3 h | Walk through the DeepSeek-R1 training recipe: dataset, reward design, GRPO loop; explain the "aha moment" finding. |
+| 27 — RLAIF and synthetic preferences | 09, 14 | 2–3 h | Name three biases of an LLM-as-judge and a mitigation for each; explain why a weak judge caps the policy's ceiling. |
+| 28 — Reward hacking and verifier design | 09, 15 | 2–3 h | Describe one concrete reward-hack in code-RL and one in math-RL; explain why holding out a verifier set is analogous to holding out test data. |
+| 34 — Self-distillation and self-improvement loops | 11, 14, 18 | 2–3 h | Explain when a self-improvement loop converges vs. collapses; describe the role of the filter / verifier in keeping the loop honest. |
+
+## Block 8 — systems and infrastructure (lectures 29–31)
+
+How LLM-RL training actually runs in practice. Read these when you're about to operationalize, or just want to know what the engineering looks like at scale.
+
+| Step | Prereq | Time | Checkpoint |
+|---|---|---|---|
+| 29 — Distributed RL systems | 06, 10 | 2–3 h | Explain the IMPALA actor-learner split and what V-trace corrects for; describe a typical 2025 LLM-RL stack (vLLM rollouts + FSDP learner). |
+| 30 — RL inference infrastructure for LLMs | 10 | ~2 h | Explain why decode dominates wall-clock in RL training and what PagedAttention / continuous batching contribute. |
+| 31 — Hardware for RL | 06 (any prior GPU exposure helps) | ~2 h | Explain why decode is HBM-bandwidth-bound and prefill is compute-bound; name one kernel-level optimization (FlashAttention) and why it matters. |
+
 ## Planned
 
-- A curated paper layer in [`reference/papers/`](./reference/papers/), built from `tools/lit-builder/` once the LLM scoring step has been run (it needs a credential).
-- Optionally: an exploration lecture (intrinsic motivation, count-based methods, RND).
+- A curated paper layer in [`reference/papers/`](./reference/papers/), built from `tools/lit-builder/` once the LLM scoring step has been run (it needs a credential). Two hand-curated topic READMEs have landed alongside the existing three: [`GRPO-RLVR/`](./reference/papers/GRPO-RLVR/) and [`Agentic-RL/`](./reference/papers/Agentic-RL/); the auto-generated `PAPERS.md` files in those directories still need a collector run.
 
 ## If you already know RL
 
