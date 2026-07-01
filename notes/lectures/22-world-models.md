@@ -2,7 +2,7 @@
 
 # Lecture 22: World models
 
-_Unreviewed — no one has checked this end to end. Treat the math, code, and citations as unverified._
+_Unreviewed: no one has checked this end to end. Treat the math, code, and citations as unverified._
 
 **Time**: ~3 h · **Prerequisites**: Lecture 08
 
@@ -26,9 +26,9 @@ A world model is a learned function that predicts what happens next in some envi
 p(s_{t+1}, r_t | s_t, a_t)
 ```
 
-The model takes the current state and the action the agent will take, and returns a distribution over the next state and the reward. With this in hand, an agent can roll forward in imagination: sample an action, sample a next state, sample the reward, sample another action, and so on. The trajectory is fake — no environment was touched — but you can compute returns along it and use them to train a policy.
+The model takes the current state and the action the agent will take, and returns a distribution over the next state and the reward. With this in hand, an agent can roll forward in imagination: sample an action, sample a next state, sample the reward, sample another action, and so on. The trajectory is fake (no environment was touched), but you can compute returns along it and use them to train a policy.
 
-This is the same shape as the dynamics model from [Lecture 08](./08-model-based-rl.md). The label "world model" is used most often when the model also encodes high-dimensional observations (pixels, video) into a compact latent state, so that prediction happens in latent space rather than pixel space. That naming is fuzzy in practice — MuZero's dynamics network is a "world model" in this sense; PETS's probabilistic ensemble is usually called a "dynamics model." They are the same thing functionally; the term tracks the architecture, not the role.
+This is the same shape as the dynamics model from [Lecture 08](./08-model-based-rl.md). The label "world model" is used most often when the model also encodes high-dimensional observations (pixels, video) into a compact latent state, so that prediction happens in latent space rather than pixel space. That naming is fuzzy in practice: MuZero's dynamics network is a "world model" in this sense; PETS's probabilistic ensemble is usually called a "dynamics model." They are the same thing functionally; the term tracks the architecture, not the role.
 
 There are two design axes worth pulling out before going further.
 
@@ -47,9 +47,9 @@ r_t     ≈ reward_head(z_t, a_t)
 
 The latent space is typically a few hundred dimensions, regardless of input modality. Three things change once you move to latent dynamics:
 
-- Rollouts are cheap. You don't pay decoder cost during imagination — only when you need to reconstruct an observation for the training loss.
+- Rollouts are cheap. You don't pay decoder cost during imagination, only when you need to reconstruct an observation for the training loss.
 - The transition model has a simpler job. Predicting the next 256-dim latent is easier than predicting the next 21,168-dim pixel frame.
-- The representation can be shaped by auxiliary objectives — reward prediction, contrastive losses, KL constraints — so the latent captures task-relevant structure rather than every pixel.
+- The representation can be shaped by auxiliary objectives (reward prediction, contrastive losses, KL constraints) so the latent captures task-relevant structure rather than every pixel.
 
 The cost is that the latent dynamics are only as good as the encoder. If the encoder discards information the agent needs, no amount of clever dynamics training will recover it. This shows up in Dreamer's reliance on a reconstruction loss: without forcing the latent to be sufficient for pixel reconstruction, it's tempting for the encoder to throw away useful structure.
 
@@ -57,7 +57,7 @@ The cost is that the latent dynamics are only as good as the encoder. If the enc
 
 A second axis is how you use the model once you have it.
 
-- **Planning** uses the model at decision time. Given the current state, search over action sequences, evaluate each one by rolling forward through the model, and pick the action whose rollout looks best. Model-predictive control, cross-entropy method, MuZero's MCTS — all decision-time planning.
+- **Planning** uses the model at decision time. Given the current state, search over action sequences, evaluate each one by rolling forward through the model, and pick the action whose rollout looks best. Model-predictive control, cross-entropy method, MuZero's MCTS, all decision-time planning.
 - **Imagination training** uses the model at training time. Generate synthetic trajectories from the model, treat them as if they were real experience, and train a value function or policy on them. Dreamer's actor-critic trains on imagined rollouts in latent space.
 
 The two are not exclusive. MuZero does both: MCTS at decision time, replay on real trajectories at training time. Dreamer is mostly the imagination-training pattern. PETS is mostly the planning pattern. Whether to plan or to train policies in imagination shows up again later when you decide what the model is actually for.
@@ -66,10 +66,10 @@ The two are not exclusive. MuZero does both: MCTS at decision time, replay on re
 
 ## The premise: when is a model worth learning?
 
-The honest version of the model-based pitch goes like this. If you have a perfect simulator (Atari, MuJoCo, any video game), model-free RL is fine — interactions are cheap, so sample efficiency stops being a hard constraint. The reason to learn a model is one of:
+The honest version of the model-based pitch goes like this. If you have a perfect simulator (Atari, MuJoCo, any video game), model-free RL is fine: interactions are cheap, so sample efficiency stops being a hard constraint. The reason to learn a model is one of:
 
 1. **Real-world data is expensive.** Robotics, drug discovery, real driving, recommendation systems with serving cost. Every interaction has a price, and you want as much learning per interaction as possible.
-2. **Planning helps decision quality.** Some problems need lookahead at decision time — board games, scheduling, chess-like tactics — and even a perfect simulator is something you'd want to do tree search over.
+2. **Planning helps decision quality.** Some problems need lookahead at decision time (board games, scheduling, chess-like tactics), and even a perfect simulator is something you'd want to do tree search over.
 3. **You need to inspect or transfer.** A learned model is something you can probe, perturb, condition on counterfactuals. A pure policy is opaque by comparison.
 
 What does not motivate model-based RL by itself: "the model gives us a more general representation." It might, but representation learning is its own field and you can do contrastive or self-supervised pretraining without committing to a transition model.
@@ -88,21 +88,21 @@ The architecture has three components:
 - **M (memory)**: a mixture-density recurrent network that predicts the distribution over `z_{t+1}` given `z_t` and `a_t`. The "memory" carries information across time so the model can be partially observable.
 - **C (controller)**: a small linear controller (a few thousand parameters) that maps the concatenation of `z_t` and the MDN-RNN's hidden state `h_t` to an action.
 
-V and M are trained on rollouts from a random policy. C is trained with CMA-ES — evolution strategies, not gradient-based RL — entirely inside the M-rollout. The agent never sees the real environment during C's training. Then C is evaluated in the real environment.
+V and M are trained on rollouts from a random policy. C is trained with CMA-ES (evolution strategies, not gradient-based RL) entirely inside the M-rollout. The agent never sees the real environment during C's training. Then C is evaluated in the real environment.
 
 A few things made this paper influential beyond the specific architecture:
 
 - The components are independently trainable. You can stare at V's reconstructions, sample from M to see if rollouts look like the game, then train C. This is debuggable in a way that end-to-end models are not.
-- The controller is intentionally tiny. The world model carries the representation; the policy on top is small and fast. Later work (Dreamer, IRIS) drops this asymmetry — the policy gets bigger — but the layering idea persists.
+- The controller is intentionally tiny. The world model carries the representation; the policy on top is small and fast. Later work (Dreamer, IRIS) drops this asymmetry (the policy gets bigger), but the layering idea persists.
 - It works on visually rich tasks. The Car Racing and Doom (ViZDoom) experiments showed that imagination-only training could transfer to the real environment, at least on these specific games.
 
-The limitations: the random-policy data collection bounds what the world model ever sees, so V and M never learn to model the parts of state space that an interesting policy would visit. Subsequent Dreamer work fixes this with a loop — refit the world model as the policy improves and collects new data.
+The limitations: the random-policy data collection bounds what the world model ever sees, so V and M never learn to model the parts of state space that an interesting policy would visit. Subsequent Dreamer work fixes this with a loop: refit the world model as the policy improves and collects new data.
 
 ---
 
 ## The Dreamer family
 
-The Dreamer line — PlaNet, Dreamer (v1), DreamerV2, DreamerV3 — is the most worked-out latent world model program. All four are by Danijar Hafner with various coauthors. They share an architecture pattern (the **recurrent state-space model**, RSSM) and a training pattern (encode → predict → reconstruct → train policy in imagination), and the differences across the four are largely about which losses and target scales to use.
+The Dreamer line (PlaNet, Dreamer (v1), DreamerV2, DreamerV3) is the most worked-out latent world model program. All four are by Danijar Hafner with various coauthors. They share an architecture pattern (the **recurrent state-space model**, RSSM) and a training pattern (encode → predict → reconstruct → train policy in imagination), and the differences across the four are largely about which losses and target scales to use.
 
 ### The recurrent state-space model
 
@@ -114,7 +114,7 @@ z_t : stochastic latent                     (Gaussian or categorical)
 s_t = (h_t, z_t)                            : full latent state
 ```
 
-The deterministic part `h_t` carries history. The stochastic part `z_t` captures the randomness in transitions — without it, the model would collapse to a deterministic recurrent encoder.
+The deterministic part `h_t` carries history. The stochastic part `z_t` captures the randomness in transitions: without it, the model would collapse to a deterministic recurrent encoder.
 
 Two distributions over `z_t` are learned:
 
@@ -136,7 +136,7 @@ This is the RSSM. It first appears in PlaNet and is reused (with variations) in 
 
 ### PlaNet (Hafner et al., 2018)
 
-PlaNet — "Learning Latent Dynamics for Planning from Pixels" (arXiv:1811.04551) — introduced the RSSM and used it for **planning**, not imagination training. At decision time, PlaNet runs the cross-entropy method (CEM) over action sequences in latent space:
+PlaNet ("Learning Latent Dynamics for Planning from Pixels," arXiv:1811.04551) introduced the RSSM and used it for **planning**, not imagination training. At decision time, PlaNet runs the cross-entropy method (CEM) over action sequences in latent space:
 
 1. Sample a population of action sequences.
 2. Roll each one forward through the RSSM, summing predicted rewards.
@@ -144,44 +144,44 @@ PlaNet — "Learning Latent Dynamics for Planning from Pixels" (arXiv:1811.04551
 4. Sample again. Repeat for a few iterations.
 5. Execute the first action of the best sequence. Replan at the next step.
 
-This is model-predictive control with a learned latent model. The agent has no policy network at all — every decision goes through CEM. PlaNet showed that this works on DeepMind Control Suite tasks from pixels, with much less environment data than model-free baselines of the time.
+This is model-predictive control with a learned latent model. The agent has no policy network at all: every decision goes through CEM. PlaNet showed that this works on DeepMind Control Suite tasks from pixels, with much less environment data than model-free baselines of the time.
 
 ### Dreamer (v1) (Hafner et al., 2019)
 
-Dreamer — "Dream to Control: Learning Behaviors by Latent Imagination" (arXiv:1912.01603) — swapped the planner for a policy. Instead of CEM at decision time, train an actor and a critic in latent imagination:
+Dreamer ("Dream to Control: Learning Behaviors by Latent Imagination," arXiv:1912.01603) swapped the planner for a policy. Instead of CEM at decision time, train an actor and a critic in latent imagination:
 
 1. Sample a batch of real states from the replay buffer; encode them to `s_0`.
 2. Roll the policy forward through the RSSM for `H` steps (typically H=15), producing imagined `s_1, s_2, ..., s_H` and rewards.
 3. Compute λ-returns from the imagined rewards and the critic's value estimates.
-4. Update the actor with the policy gradient through the differentiable rollout — the dynamics model is differentiable, so the policy gradient flows through the entire rollout rather than just sampling.
+4. Update the actor with the policy gradient through the differentiable rollout: the dynamics model is differentiable, so the policy gradient flows through the entire rollout rather than just sampling.
 5. Update the critic on the same λ-returns.
 
-The actor and critic are small MLPs on top of `s_t`. Imagination horizons of 15 work because the model is trained on the same buffer and never strays far from on-policy. Crucially, gradients can flow through the model — the policy gradient is "analytic" through the differentiable transition function, not just sampled.
+The actor and critic are small MLPs on top of `s_t`. Imagination horizons of 15 work because the model is trained on the same buffer and never strays far from on-policy. Crucially, gradients can flow through the model: the policy gradient is "analytic" through the differentiable transition function, not just sampled.
 
 The replay buffer is filled by the policy acting in the real environment, with exploration noise on actions. The world model is retrained on the growing buffer periodically. So the system is a loop: act → store → fit model → train policy in imagination → act.
 
 ### DreamerV2 (Hafner et al., 2020)
 
-DreamerV2 — "Mastering Atari with Discrete World Models" (arXiv:2010.02193) — replaced the continuous Gaussian `z_t` with **categorical** latents. The stochastic part is now a vector of one-hot categoricals, with the straight-through estimator carrying gradients through the sample.
+DreamerV2 ("Mastering Atari with Discrete World Models," arXiv:2010.02193) replaced the continuous Gaussian `z_t` with **categorical** latents. The stochastic part is now a vector of one-hot categoricals, with the straight-through estimator carrying gradients through the sample.
 
 The motivation in the paper: discrete latents are better at capturing multimodal predictions. A car can turn left or right at an intersection; a Gaussian latent tends to average. Categorical latents can represent that bimodality directly.
 
-DreamerV2 was the first model-based method to outperform a strong model-free baseline (Rainbow DQN) on the full Atari benchmark while using comparable data. That result mattered because Atari had been dominated by model-free methods since DQN — model-based was generally seen as a robotics technique, not a video-games-from-pixels one.
+DreamerV2 was the first model-based method to outperform a strong model-free baseline (Rainbow DQN) on the full Atari benchmark while using comparable data. That result mattered because Atari had been dominated by model-free methods since DQN: model-based was generally seen as a robotics technique, not a video-games-from-pixels one.
 
 ### DreamerV3 (Hafner et al., 2023)
 
-DreamerV3 — "Mastering Diverse Domains through World Models" (arXiv:2301.04104) — is the version most people will use today. The headline result is that a **single fixed hyperparameter setting** works across more than 150 tasks spanning continuous control, Atari, DMLab, Crafter, and Minecraft. Earlier Dreamer versions needed retuning for each environment family; DreamerV3 doesn't.
+DreamerV3 ("Mastering Diverse Domains through World Models," arXiv:2301.04104) is the version most people will use today. The headline result is that a **single fixed hyperparameter setting** works across more than 150 tasks spanning continuous control, Atari, DMLab, Crafter, and Minecraft. Earlier Dreamer versions needed retuning for each environment family; DreamerV3 doesn't.
 
 The technical changes are largely about scale-invariant losses:
 
 - **Symlog prediction.** The reward and value heads predict `symlog(x) = sign(x) * log(|x| + 1)` instead of `x`. The inverse `symexp(y) = sign(y) * (exp(|y|) - 1)` is applied at evaluation to recover the original scale. This compresses large rewards (a reward of 1000 maps to about 6.9) and expands small ones, so the loss surface looks similar whether the environment rewards are in the range of [-1, 1] or [-10000, 10000]. The same trick is applied to value targets.
 - **Two-hot encoding for the value head.** Instead of regressing a scalar, the value function predicts a softmax distribution over a fixed grid of bins (e.g., 255 bins spanning a symlog-transformed range). The target is a two-hot vector: probability mass at the two bins straddling the true value, weighted by distance. This converts value regression into classification, which behaves better when targets vary by orders of magnitude.
-- **KL balancing with free bits.** The KL between prior `p(z_t|h_t)` and posterior `q(z_t|h_t,o_t)` is split into two terms — `KL[stop_grad(q) || p]` (which trains the prior) and `KL[q || stop_grad(p)]` (which trains the encoder) — and weighted separately (1.0 and 0.1 in DreamerV3). Each term is also clipped from below by a "free bits" floor (1 nat per dimension), so the loss is zero when the KL is already small. This stops the encoder from collapsing the posterior into the prior in the early training, which would make the latent uninformative.
+- **KL balancing with free bits.** The KL between prior `p(z_t|h_t)` and posterior `q(z_t|h_t,o_t)` is split into two terms: `KL[stop_grad(q) || p]` (which trains the prior) and `KL[q || stop_grad(p)]` (which trains the encoder), and weighted separately (1.0 and 0.1 in DreamerV3). Each term is also clipped from below by a "free bits" floor (1 nat per dimension), so the loss is zero when the KL is already small. This stops the encoder from collapsing the posterior into the prior in the early training, which would make the latent uninformative.
 - **Replay ratios and training step scheduling** that don't require per-task tuning. DreamerV3 uses a fixed ratio of gradient steps per environment step across all environments, with a small warmup. Earlier Dreamer versions had per-task knobs.
 
-DreamerV3 also collected diamonds in Minecraft from scratch (no demonstrations, no curriculum, no human data) — a long-standing milestone in sparse-reward sample-efficient RL.
+DreamerV3 also collected diamonds in Minecraft from scratch (no demonstrations, no curriculum, no human data), a long-standing milestone in sparse-reward sample-efficient RL.
 
-On Atari100k (a benchmark where the agent gets only 100,000 environment frames, roughly two hours of real-time play), DreamerV3 reaches a median human-normalized score above 1.0, beating EfficientZero and IRIS on aggregate. The exact comparisons shift across paper versions and table conventions — don't quote a specific number without checking the table in the version of the paper you read.
+On Atari100k (a benchmark where the agent gets only 100,000 environment frames, roughly two hours of real-time play), DreamerV3 reaches a median human-normalized score above 1.0, beating EfficientZero and IRIS on aggregate. The exact comparisons shift across paper versions and table conventions: don't quote a specific number without checking the table in the version of the paper you read.
 
 ### What you get from Dreamer
 
@@ -192,17 +192,17 @@ If you build a Dreamer-style system today, this is roughly what you sign up for:
 - A training loop that interleaves real rollouts, world model updates, and imagination-based actor-critic updates.
 - Sample efficiency comparable to or better than the best model-free methods on most benchmarks, achieved without per-task hyperparameter tuning.
 
-The engineering cost is real. The world model is the dominant cost — it's a non-trivial RNN-plus-CNN with several loss terms, and getting the loss weights and KL schedule right took years of iteration to settle. The DreamerV3 paper's contribution is, in a sense, "we found the recipe that doesn't need to be retuned." Treat that recipe as load-bearing.
+The engineering cost is real. The world model is the dominant cost: it's a non-trivial RNN-plus-CNN with several loss terms, and getting the loss weights and KL schedule right took years of iteration to settle. The DreamerV3 paper's contribution is, in a sense, "we found the recipe that doesn't need to be retuned." Treat that recipe as load-bearing.
 
 ---
 
 ## The MuZero family
 
-MuZero takes a different bet. Instead of training a policy in imagination, MuZero runs Monte Carlo tree search at decision time, using a learned model to expand the tree. The model doesn't have to reconstruct observations — it only has to predict rewards, values, and policy logits, all in latent space.
+MuZero takes a different bet. Instead of training a policy in imagination, MuZero runs Monte Carlo tree search at decision time, using a learned model to expand the tree. The model doesn't have to reconstruct observations: it only has to predict rewards, values, and policy logits, all in latent space.
 
 ### MuZero (Schrittwieser et al., 2019)
 
-MuZero — "Mastering Atari, Go, Chess and Shogi by Planning with a Learned Model" (arXiv:1911.08265) — generalizes AlphaZero to environments where the rules are unknown. AlphaZero needed a perfect simulator (the rules of chess); MuZero learns one.
+MuZero ("Mastering Atari, Go, Chess and Shogi by Planning with a Learned Model," arXiv:1911.08265) generalizes AlphaZero to environments where the rules are unknown. AlphaZero needed a perfect simulator (the rules of chess); MuZero learns one.
 
 The model has three networks:
 
@@ -238,21 +238,21 @@ MuZero matched or exceeded AlphaZero on Go, chess, and shogi *without access to 
 
 ### EfficientZero (Ye et al., 2021)
 
-EfficientZero — "Mastering Atari Games with Limited Data" (arXiv:2111.00210) — adapted MuZero for the Atari100k regime (only 100k environment frames, roughly two hours of real-time gameplay). Three changes:
+EfficientZero ("Mastering Atari Games with Limited Data," arXiv:2111.00210) adapted MuZero for the Atari100k regime (only 100k environment frames, roughly two hours of real-time gameplay). Three changes:
 
-- **Self-supervised consistency loss.** The latent predicted by the dynamics network is pushed to match the latent of the actual next observation (encoded with the representation network) using a SimSiam-style objective. This gives a denser training signal for the dynamics function — without it, the only supervision is reward and value, which is sparse.
+- **Self-supervised consistency loss.** The latent predicted by the dynamics network is pushed to match the latent of the actual next observation (encoded with the representation network) using a SimSiam-style objective. This gives a denser training signal for the dynamics function: without it, the only supervision is reward and value, which is sparse.
 - **End-to-end prediction of value prefix.** Instead of predicting individual rewards along the unroll and summing them later, EfficientZero predicts the discounted sum of rewards directly. This avoids compounding small per-step prediction errors.
 - **Model-based off-policy correction.** When sampling from the replay buffer, the value targets can be re-bootstrapped using the current model rather than the value at collection time.
 
-EfficientZero was the first system to exceed median human performance on Atari100k. That benchmark has continued to move — DreamerV3, IRIS, and later transformer-based world models have all pushed numbers further — but EfficientZero remains the canonical reference for the MuZero-on-limited-data setting.
+EfficientZero was the first system to exceed median human performance on Atari100k. That benchmark has continued to move (DreamerV3, IRIS, and later transformer-based world models have all pushed numbers further), but EfficientZero remains the canonical reference for the MuZero-on-limited-data setting.
 
 ### Sampled MuZero (Hubert et al., 2021)
 
 MuZero's MCTS enumerates actions at each node. For discrete action spaces with up to ~20 actions this is fine; for continuous or very large discrete spaces, full enumeration is impossible.
 
-Sampled MuZero — "Learning and Planning in Complex Action Spaces" (arXiv:2104.06303) — replaces enumeration with sampling. At each node, draw `K` actions from the policy prior, and expand the tree only on those. The PUCT objective is reweighted to remain unbiased given the sampling distribution.
+Sampled MuZero ("Learning and Planning in Complex Action Spaces," arXiv:2104.06303) replaces enumeration with sampling. At each node, draw `K` actions from the policy prior, and expand the tree only on those. The PUCT objective is reweighted to remain unbiased given the sampling distribution.
 
-This makes MuZero applicable to continuous control (where the action space is uncountable) and to extremely large discrete spaces (such as combinatorial optimization). The cost is increased variance — with finite samples, the tree might miss important actions — but in practice the sampling is well-behaved as long as the policy prior is reasonably exploratory.
+This makes MuZero applicable to continuous control (where the action space is uncountable) and to extremely large discrete spaces (such as combinatorial optimization). The cost is increased variance (with finite samples, the tree might miss important actions), but in practice the sampling is well-behaved as long as the policy prior is reasonably exploratory.
 
 ### What MuZero buys you (and what it costs)
 
@@ -264,7 +264,7 @@ The costs:
 
 - The architecture is more involved than Dreamer's. Implementing PUCT, the search tree, the unroll loss, and the training loop correctly is significant work.
 - MCTS at decision time costs compute. For 50-simulation search, every decision is ~50 forward passes through the dynamics and prediction networks.
-- The latent is not interpretable. Without a decoder, you can't visualize what the model "thinks" is happening — only verify it through downstream value and policy quality.
+- The latent is not interpretable. Without a decoder, you can't visualize what the model "thinks" is happening, only verify it through downstream value and policy quality.
 
 A reasonable rule: reach for MuZero when planning at decision time is the value proposition (board games, tree-search-friendly tasks, problems with clear discrete action structure). Reach for Dreamer when you want imagination-based training of a fast reactive policy.
 
@@ -292,14 +292,14 @@ The third line replaces the RNN/CNN architecture with transformers operating on 
 
 ### IRIS (Micheli et al., 2022)
 
-IRIS — "Transformers are Sample-Efficient World Models" (arXiv:2209.00588) — has two components:
+IRIS ("Transformers are Sample-Efficient World Models," arXiv:2209.00588) has two components:
 
 - A **discrete autoencoder** (VQ-VAE) that tokenizes each frame into a small grid of discrete tokens (e.g., 16 tokens per frame).
 - An **autoregressive transformer** that predicts the next token given all previous tokens and actions. Tokens for one frame are predicted sequentially, then the next action is consumed, then the next frame's tokens, and so on.
 
 The interleaved structure (action, frame tokens, action, frame tokens, ...) is essentially a flat sequence model. Imagination rollouts work by sampling tokens autoregressively until you have a full frame, then conditioning on an action, then sampling the next frame.
 
-A policy is trained on imagined rollouts, similar to Dreamer's actor-critic. On Atari100k, IRIS reaches mean and median human-normalized scores above 1.0 — competitive with EfficientZero at the time of publication.
+A policy is trained on imagined rollouts, similar to Dreamer's actor-critic. On Atari100k, IRIS reaches mean and median human-normalized scores above 1.0, competitive with EfficientZero at the time of publication.
 
 IRIS demonstrated three things:
 
@@ -311,13 +311,13 @@ The cost is sampling speed. Sampling frame-by-frame token-by-token is slow compa
 
 ### TWM (Robine et al., 2023)
 
-TWM — "Transformer-based World Models Are Happy with 100K Interactions" (Robine et al., arXiv:2303.07109) — followed IRIS with a slightly different recipe: a transformer over discrete-VAE tokens, trained jointly with a Dyna-style policy update. Also reached strong results on Atari100k. The principal contribution was showing that transformer world models could be trained data-efficiently with a careful tokenizer and replay schedule.
+TWM ("Transformer-based World Models Are Happy with 100K Interactions," Robine et al., arXiv:2303.07109) followed IRIS with a slightly different recipe: a transformer over discrete-VAE tokens, trained jointly with a Dyna-style policy update. Also reached strong results on Atari100k. The principal contribution was showing that transformer world models could be trained data-efficiently with a careful tokenizer and replay schedule.
 
 The 2025 follow-up "Improving Transformer World Models for Data-Efficient RL" (arXiv:2502.01591) introduced three further refinements (nearest-neighbor tokenizer, Dyna warmup, block teacher forcing) and reported state-of-the-art on a 1M-step Atari benchmark. The relevant takeaway: the transformer-world-model line is active and the numbers keep moving.
 
 ### GAIA-1: world models for driving
 
-GAIA-1 — "GAIA-1: A Generative World Model for Autonomous Driving" (Hu et al., arXiv:2309.17080) from Wayve — pushed transformer world models toward a different goal: video generation for autonomous driving. The architecture has two parts:
+GAIA-1 ("GAIA-1: A Generative World Model for Autonomous Driving," Hu et al., arXiv:2309.17080, from Wayve) pushed transformer world models toward a different goal: video generation for autonomous driving. The architecture has two parts:
 
 - An autoregressive transformer over discrete tokens, conditioning on video tokens, text, and actions.
 - A video diffusion model that decodes the latent token stream back into high-resolution video.
@@ -326,14 +326,14 @@ GAIA-1 is trained on logged driving data. Given a prompt (a few seconds of video
 
 Two things make GAIA-1 interesting as a world model rather than as a video generator:
 
-- The action conditioning is non-cosmetic. Different actions produce trajectories that respect approximate vehicle dynamics — turning left really does move the world to the right in the next frame.
+- The action conditioning is non-cosmetic. Different actions produce trajectories that respect approximate vehicle dynamics: turning left really does move the world to the right in the next frame.
 - The scale (9B parameters by the time of the scaled report) is the largest publicly described world model in 2023.
 
-GAIA-1 is *not* used directly for policy training in the paper. It's pitched as a simulator: a way to generate adversarial driving scenarios for training and validation of downstream models. That positioning matters — it's a world model used the way the model-based community always wanted to use them (as a counterfactual generator), but the actual policy still trains in real or scripted environments.
+GAIA-1 is *not* used directly for policy training in the paper. It's pitched as a simulator: a way to generate adversarial driving scenarios for training and validation of downstream models. That positioning matters: it's a world model used the way the model-based community always wanted to use them (as a counterfactual generator), but the actual policy still trains in real or scripted environments.
 
 ### Genie (Bruce et al., 2024)
 
-Genie — "Genie: Generative Interactive Environments" (Bruce et al., ICML 2024, arXiv:2402.15391) — pushed in a different direction. Genie is trained on a large corpus of unlabeled internet video. It has no access to actions during training. The architecture:
+Genie ("Genie: Generative Interactive Environments," Bruce et al., ICML 2024, arXiv:2402.15391) pushed in a different direction. Genie is trained on a large corpus of unlabeled internet video. It has no access to actions during training. The architecture:
 
 - A **video tokenizer** that maps frames to discrete tokens.
 - A **latent action model** that, given two consecutive frames, infers a discrete latent action that explains the transition. This is a small set of "actions" (typically 8) inferred without supervision.
@@ -341,7 +341,7 @@ Genie — "Genie: Generative Interactive Environments" (Bruce et al., ICML 2024,
 
 At inference, a user provides an initial frame and a sequence of latent action codes; Genie generates the corresponding video. The latent action vocabulary is small enough that you can map it to controller inputs by hand (left/right/jump in a platformer).
 
-Genie shows that you can extract action-controllable world models from passive video — no labels, no logged action streams, no reward. That's a different premise than the Dreamer/MuZero line, which assumed you had agent-environment interaction data to train on. It also opens the door to scaling laws: throw more internet video at the same architecture and see what happens.
+Genie shows that you can extract action-controllable world models from passive video: no labels, no logged action streams, no reward. That's a different premise than the Dreamer/MuZero line, which assumed you had agent-environment interaction data to train on. It also opens the door to scaling laws: throw more internet video at the same architecture and see what happens.
 
 This is one of the points where world models converge with general-purpose generative models. Genie isn't trained for any specific environment; it's trained on whatever video it sees, and the "world" it learns is whatever the videos depict.
 
@@ -353,13 +353,13 @@ The Sora release in February 2024 (OpenAI's text-to-video model) triggered a deb
 
 OpenAI's framing in their technical writeup was: video models like Sora are "world simulators" in that they can generate physically plausible scenes with consistent object permanence over short timescales. The implicit argument is that the model has had to learn an internal model of physics, object identity, and scene structure to generate coherent video, even though it was trained with a pure generative objective (reconstruct video, then condition on text).
 
-The pushback, most clearly assembled in the survey "Is Sora a World Simulator? A Comprehensive Survey on General World Models and Beyond" (Zhu et al., arXiv:2405.03520, May 2024), is that "world model" has a technical meaning in RL — `p(s_{t+1}, r_t | s_t, a_t)`, conditionable on actions, usable for planning or training — and most video generative models don't satisfy it. Specifically:
+The pushback, most clearly assembled in the survey "Is Sora a World Simulator? A Comprehensive Survey on General World Models and Beyond" (Zhu et al., arXiv:2405.03520, May 2024), is that "world model" has a technical meaning in RL (`p(s_{t+1}, r_t | s_t, a_t)`, conditionable on actions, usable for planning or training), and most video generative models don't satisfy it. Specifically:
 
 - Most video models are not action-conditioned. They generate plausible video continuations but you can't tell them what action to take and have the rollout reflect that.
 - Most video models are not used for planning or policy training. Their outputs are evaluated for visual quality, not for downstream control utility.
-- The "physics understanding" claim is hard to defend rigorously. There are visible failures — a glass on a table morphing as it falls, an object failing to remain itself across cuts — that suggest the model is doing texture-and-motion synthesis with weak causal structure underneath.
+- The "physics understanding" claim is hard to defend rigorously. There are visible failures (a glass on a table morphing as it falls, an object failing to remain itself across cuts) that suggest the model is doing texture-and-motion synthesis with weak causal structure underneath.
 
-The honest summary is that there's a continuum. GAIA-1 and Genie are action-conditioned video models used as world models in the RL sense — they're on the world-model end. A pure text-to-video model with no action conditioning is on the video-generation end. Whether something in between counts depends on what you're trying to do with it.
+The honest summary is that there's a continuum. GAIA-1 and Genie are action-conditioned video models used as world models in the RL sense: they're on the world-model end. A pure text-to-video model with no action conditioning is on the video-generation end. Whether something in between counts depends on what you're trying to do with it.
 
 For an RL practitioner, the relevant question is: does adding action conditioning to a video generation model produce something useful for control? Genie suggests yes, at least when "action" is a small discrete vocabulary the model can recover from unlabeled video. Whether this scales to dexterous manipulation, real driving, or general-purpose embodied agents is an open empirical question as of early 2026.
 
@@ -373,17 +373,17 @@ The cleanest example is "Reasoning with Language Model is Planning with World Mo
 
 With these pieces in place, MCTS can search over reasoning trees. RAP showed measurable gains on Blocksworld planning, GSM8K math, and PrOntoQA logical reasoning, by using the LLM in both the world-model and the policy role simultaneously.
 
-The connection back to this lecture: in RAP, the LLM is doing exactly what Dreamer's latent transition model does — predicting the next state given the current state and action. It just happens that "state" is "a partial reasoning trace" and "action" is "a candidate next reasoning step." The MCTS over imagined rollouts is the same template as MuZero, with a frozen LLM in place of the learned dynamics network.
+The connection back to this lecture: in RAP, the LLM is doing exactly what Dreamer's latent transition model does: predicting the next state given the current state and action. It just happens that "state" is "a partial reasoning trace" and "action" is "a candidate next reasoning step." The MCTS over imagined rollouts is the same template as MuZero, with a frozen LLM in place of the learned dynamics network.
 
-The limitations are the obvious ones. The LLM as a world model inherits all of the LLM's hallucination tendencies — it will confidently predict a next state that's inconsistent with the action it was given. There's no learning loop closing the gap. And the planning time is dominated by LLM forward passes, which are expensive enough that the search budget has to be tight.
+The limitations are the obvious ones. The LLM as a world model inherits all of the LLM's hallucination tendencies: it will confidently predict a next state that's inconsistent with the action it was given. There's no learning loop closing the gap. And the planning time is dominated by LLM forward passes, which are expensive enough that the search budget has to be tight.
 
-Newer work in this thread has tried to fix the hallucination problem by adding verifiers (when the action is "run a code block," the world model can be replaced with actually running the code), and has pushed the planning structure further (depth-first search, beam search with critic models, learned process reward models). The basic shape — LLM doubling as policy and world model, with search on top — is the part that's worth knowing for this lecture.
+Newer work in this thread has tried to fix the hallucination problem by adding verifiers (when the action is "run a code block," the world model can be replaced with actually running the code), and has pushed the planning structure further (depth-first search, beam search with critic models, learned process reward models). The basic shape (LLM doubling as policy and world model, with search on top) is the part that's worth knowing for this lecture.
 
 ---
 
 ## A worked sketch: imagination rollout against a learned latent model
 
-The following code shows the imagination loop for a Dreamer-style latent world model. It's a faithful skeleton — the loss terms, training schedule, and replay buffer plumbing are omitted, but the rollout logic is what matters for the lecture.
+The following code shows the imagination loop for a Dreamer-style latent world model. It's a faithful skeleton: the loss terms, training schedule, and replay buffer plumbing are omitted, but the rollout logic is what matters for the lecture.
 
 ```python
 import torch
@@ -569,19 +569,19 @@ Three failure modes recur across every model-based system.
 
 ### Model exploitation
 
-Once the policy is trained against the model, it will find and exploit anywhere the model is wrong. If the model predicts that taking a certain action sequence leads to high reward — but only because the model has never seen that region of state space and is hallucinating — the policy will happily go there.
+Once the policy is trained against the model, it will find and exploit anywhere the model is wrong. If the model predicts that taking a certain action sequence leads to high reward (but only because the model has never seen that region of state space and is hallucinating), the policy will happily go there.
 
 This is the model-based analog of reward hacking. It's especially visible in the early days of training, when the world model is undertrained and the policy can easily find "cracks" in it. The mitigations are familiar from [Lecture 08](./08-model-based-rl.md):
 
 - **Short rollouts.** Limit the imagination horizon so errors don't compound far enough to dominate the return.
 - **Model ensembles with uncertainty.** Treat states where ensemble members disagree as out-of-distribution; penalize the imagined return there. PETS did this; some Dreamer variants don't, which makes them more brittle on hard exploration tasks.
-- **Replay refresh.** Re-collect real data with the current policy and retrain the model frequently. As long as the model tracks the policy's distribution, exploitation is limited to that distribution — and the policy can't reach beyond it without the model adapting.
+- **Replay refresh.** Re-collect real data with the current policy and retrain the model frequently. As long as the model tracks the policy's distribution, exploitation is limited to that distribution, and the policy can't reach beyond it without the model adapting.
 
-Dreamer keeps this in check by retraining the world model often and using a short imagination horizon (15 steps). MuZero relies on the value function — MCTS uses real-trajectory-bootstrapped value targets, so an over-optimistic dynamics expansion gets corrected by the value estimate at depth.
+Dreamer keeps this in check by retraining the world model often and using a short imagination horizon (15 steps). MuZero relies on the value function: MCTS uses real-trajectory-bootstrapped value targets, so an over-optimistic dynamics expansion gets corrected by the value estimate at depth.
 
 ### Compounding error horizon
 
-Even a well-trained model is wrong at every step. Small per-step errors accumulate. The 10-step prediction error is roughly the 1-step error compounded — exponentially in the worst case, polynomially in the typical case if errors are uncorrelated.
+Even a well-trained model is wrong at every step. Small per-step errors accumulate. The 10-step prediction error is roughly the 1-step error compounded: exponentially in the worst case, polynomially in the typical case if errors are uncorrelated.
 
 The practical consequence: imagination horizons are short. Dreamer uses H=15. MBPO uses H=1–5 and grows it slowly as the model improves. MuZero's MCTS only unrolls 5 steps in the dynamics-loss training (and during search itself, the bootstrap value handles longer horizons).
 
@@ -591,7 +591,7 @@ The compounding-error wall is the structural reason model-based RL hasn't replac
 
 A specific failure mode of reconstruction-free models (MuZero, EfficientZero without the consistency loss) is **representation collapse**. The latent has no constraint to be informative beyond what reward and value prediction require. If the rewards are sparse and the value function is poorly learned early in training, the encoder gets almost no useful gradient signal, and the latent can collapse to a near-constant vector. Once that happens, the dynamics function has nothing to work with, the value function has nothing to predict from, and training stalls.
 
-EfficientZero's self-supervised consistency loss is partly motivated by this. By forcing `g(h(o_t), a_t)` to match `h(o_{t+1})` (the next observation encoded through the same representation network), the encoder gets a dense supervisory signal that doesn't depend on the reward being informative. Dreamer side-steps the collapse problem with the reconstruction loss — the encoder has to preserve enough information to decode pixels, so it can't collapse.
+EfficientZero's self-supervised consistency loss is partly motivated by this. By forcing `g(h(o_t), a_t)` to match `h(o_{t+1})` (the next observation encoded through the same representation network), the encoder gets a dense supervisory signal that doesn't depend on the reward being informative. Dreamer side-steps the collapse problem with the reconstruction loss: the encoder has to preserve enough information to decode pixels, so it can't collapse.
 
 The general pattern: latent dynamics models need at least one dense, action-or-observation-grounded loss to avoid degenerate latents. Reconstruction is one choice; self-supervised consistency is another; contrastive predictive coding is a third. A model trained only on reward and value (with sparse rewards and uninitialized value targets) is fragile.
 
@@ -647,10 +647,10 @@ A practitioner's heuristic, after eight years of post-Dreamer literature.
 - You have a verifier that can correct the LLM's hallucinations at planning time (code execution, a theorem prover, a search engine).
 
 **Don't reach for a world model at all** if:
-- The environment has dynamics that defeat current models — long-horizon stochasticity, complex multi-agent settings without good interaction data, adversarial agents.
+- The environment has dynamics that defeat current models: long-horizon stochasticity, complex multi-agent settings without good interaction data, adversarial agents.
 - The model would need to be more complex than the policy you're trying to train. There are problems where the policy is simpler than the dynamics; in those cases, model-free wins by default.
 
-The honest summary as of early 2026: model-based RL has earned its place in the sample-efficient regime (DreamerV3 on Crafter/Minecraft, EfficientZero on Atari100k), in the planning-heavy regime (AlphaZero/MuZero on board games), and in the simulator-building regime (GAIA-1, Genie). It has not displaced model-free in the unlimited-data regime, and it probably won't. The convergence with generative video remains an open question — the architectures are increasingly similar, but the evaluation criteria are not yet aligned across the two communities.
+The honest summary as of early 2026: model-based RL has earned its place in the sample-efficient regime (DreamerV3 on Crafter/Minecraft, EfficientZero on Atari100k), in the planning-heavy regime (AlphaZero/MuZero on board games), and in the simulator-building regime (GAIA-1, Genie). It has not displaced model-free in the unlimited-data regime, and it probably won't. The convergence with generative video remains an open question: the architectures are increasingly similar, but the evaluation criteria are not yet aligned across the two communities.
 
 ---
 
@@ -658,7 +658,7 @@ The honest summary as of early 2026: model-based RL has earned its place in the 
 
 A world model is a learned `p(s', r | s, a)`. It can be explicit (predict in the original state space) or latent (predict in a learned compact representation). It can be used for planning at decision time or for training a policy in imagination, or both.
 
-Ha & Schmidhuber's 2018 paper crystallized the three-piece pattern (encoder, transition model, controller) and trained a controller entirely inside the model. The Dreamer line — PlaNet, Dreamer v1/v2/v3 — built the recurrent state-space model and made imagination-based actor-critic training work end-to-end with a single recipe by DreamerV3. The MuZero line dropped the decoder, trained the latent only against reward, value, and policy targets, and added MCTS at decision time. The transformer line (IRIS, TWM, GAIA-1, Genie) replaced the RNN with autoregressive token models and started to converge with general-purpose video generation.
+Ha & Schmidhuber's 2018 paper crystallized the three-piece pattern (encoder, transition model, controller) and trained a controller entirely inside the model. The Dreamer line (PlaNet, Dreamer v1/v2/v3) built the recurrent state-space model and made imagination-based actor-critic training work end-to-end with a single recipe by DreamerV3. The MuZero line dropped the decoder, trained the latent only against reward, value, and policy targets, and added MCTS at decision time. The transformer line (IRIS, TWM, GAIA-1, Genie) replaced the RNN with autoregressive token models and started to converge with general-purpose video generation.
 
 Where world models break is the familiar trio: model exploitation, compounding error, and the gap between simulating and controlling. The mitigations are short rollouts, ensembles, frequent retraining, and (in MuZero's case) skipping reconstruction entirely.
 
@@ -668,20 +668,20 @@ In 2026, the practical question is rarely "model-based or not?" in the abstract.
 
 ## References
 
-1. **Ha & Schmidhuber (2018)** — "World Models." arXiv:1803.10122.
-2. **Hafner et al. (2018)** — "Learning Latent Dynamics for Planning from Pixels" (PlaNet). arXiv:1811.04551.
-3. **Hafner et al. (2019)** — "Dream to Control: Learning Behaviors by Latent Imagination" (Dreamer). arXiv:1912.01603.
-4. **Hafner et al. (2020)** — "Mastering Atari with Discrete World Models" (DreamerV2). arXiv:2010.02193. ICLR 2021.
-5. **Hafner et al. (2023)** — "Mastering Diverse Domains through World Models" (DreamerV3). arXiv:2301.04104.
-6. **Schrittwieser et al. (2019)** — "Mastering Atari, Go, Chess and Shogi by Planning with a Learned Model" (MuZero). arXiv:1911.08265. Published as Nature 588, 604–609 (2020).
-7. **Ye et al. (2021)** — "Mastering Atari Games with Limited Data" (EfficientZero). arXiv:2111.00210.
-8. **Hubert et al. (2021)** — "Learning and Planning in Complex Action Spaces" (Sampled MuZero). arXiv:2104.06303.
-9. **Micheli, Alonso & Fleuret (2022)** — "Transformers are Sample-Efficient World Models" (IRIS). arXiv:2209.00588.
-10. **Robine et al. (2023)** — "Transformer-based World Models Are Happy with 100K Interactions" (TWM). arXiv:2303.07109.
-11. **Hu et al. (2023)** — "GAIA-1: A Generative World Model for Autonomous Driving." arXiv:2309.17080.
-12. **Bruce et al. (2024)** — "Genie: Generative Interactive Environments." arXiv:2402.15391. ICML 2024.
-13. **Zhu et al. (2024)** — "Is Sora a World Simulator? A Comprehensive Survey on General World Models and Beyond." arXiv:2405.03520.
-14. **Hao et al. (2023)** — "Reasoning with Language Model is Planning with World Model" (RAP). arXiv:2305.14992. EMNLP 2023.
+1. **Ha & Schmidhuber (2018)**: "World Models." arXiv:1803.10122.
+2. **Hafner et al. (2018)**: "Learning Latent Dynamics for Planning from Pixels" (PlaNet). arXiv:1811.04551.
+3. **Hafner et al. (2019)**: "Dream to Control: Learning Behaviors by Latent Imagination" (Dreamer). arXiv:1912.01603.
+4. **Hafner et al. (2020)**: "Mastering Atari with Discrete World Models" (DreamerV2). arXiv:2010.02193. ICLR 2021.
+5. **Hafner et al. (2023)**: "Mastering Diverse Domains through World Models" (DreamerV3). arXiv:2301.04104.
+6. **Schrittwieser et al. (2019)**: "Mastering Atari, Go, Chess and Shogi by Planning with a Learned Model" (MuZero). arXiv:1911.08265. Published as Nature 588, 604–609 (2020).
+7. **Ye et al. (2021)**: "Mastering Atari Games with Limited Data" (EfficientZero). arXiv:2111.00210.
+8. **Hubert et al. (2021)**: "Learning and Planning in Complex Action Spaces" (Sampled MuZero). arXiv:2104.06303.
+9. **Micheli, Alonso & Fleuret (2022)**: "Transformers are Sample-Efficient World Models" (IRIS). arXiv:2209.00588.
+10. **Robine et al. (2023)**: "Transformer-based World Models Are Happy with 100K Interactions" (TWM). arXiv:2303.07109.
+11. **Hu et al. (2023)**: "GAIA-1: A Generative World Model for Autonomous Driving." arXiv:2309.17080.
+12. **Bruce et al. (2024)**: "Genie: Generative Interactive Environments." arXiv:2402.15391. ICML 2024.
+13. **Zhu et al. (2024)**: "Is Sora a World Simulator? A Comprehensive Survey on General World Models and Beyond." arXiv:2405.03520.
+14. **Hao et al. (2023)**: "Reasoning with Language Model is Planning with World Model" (RAP). arXiv:2305.14992. EMNLP 2023.
 
 The OpenAI Sora technical report ("Video generation models as world simulators," February 2024) is a web post, not a peer-reviewed paper. Cite the URL if you reference it directly; don't claim it's an arXiv paper.
 
@@ -698,4 +698,4 @@ The OpenAI Sora technical report ("Video generation models as world simulators,"
 
 ## What's next
 
-Lecture 22 closes out the explicit model-based block. The lectures above this number (in the planned curriculum) move into open exploration, intrinsic motivation, and large-scale RL infrastructure. World models reappear as a building block whenever sample efficiency is the binding constraint — keep this lecture nearby when you hit one.
+Lecture 22 closes out the explicit model-based block. The lectures above this number (in the planned curriculum) move into open exploration, intrinsic motivation, and large-scale RL infrastructure. World models reappear as a building block whenever sample efficiency is the binding constraint: keep this lecture nearby when you hit one.

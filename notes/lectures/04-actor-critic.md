@@ -2,7 +2,7 @@
 
 # Lecture 04: Actor-Critic Methods
 
-_Unreviewed — no one has checked this end to end. Treat the math, code, and citations as unverified._
+_Unreviewed: no one has checked this end to end. Treat the math, code, and citations as unverified._
 
 **Duration:** ~90 minutes
 **Prerequisites:** Lecture 02 (Policy Gradients), Lecture 03 (Q-Learning)
@@ -747,7 +747,7 @@ torch.nn.utils.clip_grad_norm_(model.parameters(), 0.5)
 
 ---
 
-## Part 8: A2C vs A3C vs PPO — quick comparison
+## Part 8: A2C vs A3C vs PPO: quick comparison
 
 | Method | Update Frequency | Parallelization | Sample Efficiency | Stability |
 |--------|------------------|-----------------|-------------------|-----------|

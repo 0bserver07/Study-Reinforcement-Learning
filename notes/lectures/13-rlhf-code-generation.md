@@ -2,7 +2,7 @@
 
 # Lecture 13: RLHF for Code Generation
 
-_Unreviewed — no one has checked this end to end. Treat the math, code, and citations as unverified._
+_Unreviewed: no one has checked this end to end. Treat the math, code, and citations as unverified._
 
 **Duration:** ~90 minutes
 **Prerequisites:** Lecture 10 (PPO for LLMs), Lecture 06 (PPO), basic Python/PyTorch
@@ -763,4 +763,4 @@ Implement a minimal version: take CodeGen-350M, create 10 simple problems with t
 
 ## Next lecture
 
-[Lecture 14: Constitutional AI, RLAIF, and Self-Improvement](./14-constitutional-ai-rlaif.md) — replacing human preference labels with AI feedback, and the self-improvement loops that follow.
+[Lecture 14: Constitutional AI, RLAIF, and Self-Improvement](./14-constitutional-ai-rlaif.md): replacing human preference labels with AI feedback, and the self-improvement loops that follow.

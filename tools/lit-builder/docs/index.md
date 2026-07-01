@@ -2,7 +2,7 @@
 
 **ICLR / NeurIPS literature builder with keyword + LLM relevance scoring.**
 
-Pulls ML conference paper lists, filters them through a research lens, and produces an annotated, browsable literature base. Built for the [Sutro Group](https://github.com/cybertronai/SutroYaro) energy-efficient training agenda — generalizes to any lens via `configs/keywords.yaml`.
+Pulls ML conference paper lists, filters them through a research lens, and produces an annotated, browsable literature base. Built for the [Sutro Group](https://github.com/cybertronai/SutroYaro) energy-efficient training agenda, generalizes to any lens via `configs/keywords.yaml`.
 
 ## What's published
 

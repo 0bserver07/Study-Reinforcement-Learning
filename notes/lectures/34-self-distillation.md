@@ -2,7 +2,7 @@
 
 # Lecture 34: Self-distillation and self-improvement loops
 
-_Unreviewed — no one has checked this end to end. Treat the math, code, and citations as unverified._
+_Unreviewed: no one has checked this end to end. Treat the math, code, and citations as unverified._
 
 **Time**: ~2-3 h · **Prerequisites**: Lectures 11, 14, 18
 
@@ -12,17 +12,17 @@ _Unreviewed — no one has checked this end to end. Treat the math, code, and ci
 
 [Lecture 18: Distillation of Reasoning Models](./18-distillation-reasoning.md) covered a specific recipe: take a large reasoning model, sample reasoning chains, filter by a verifiable checker, train a smaller model on the kept chains. The teacher and student are different models.
 
-This lecture covers the more general pattern, including the case where teacher and student are the same model. A model M generates outputs. Those outputs are filtered or scored by some signal — a verifier, a judge, a heuristic. The filtered set becomes training data for a new version M'. M' replaces M and the loop repeats.
+This lecture covers the more general pattern, including the case where teacher and student are the same model. A model M generates outputs. Those outputs are filtered or scored by some signal: a verifier, a judge, a heuristic. The filtered set becomes training data for a new version M'. M' replaces M and the loop repeats.
 
 That's the whole shape. The variants differ in three places: what signal does the filtering, whether the loop iterates or runs once, and whether the student is the same checkpoint as the teacher or a different model. Lecture 18's R1-distill recipe is the case where the signal is a verifiable checker, the loop runs once, and teacher and student are different models. Most of the other points in the space have been explored.
 
-The reason the pattern matters: when the filter is reliable, you bootstrap capability without external supervision. The same model that produced the outputs gets trained on its better outputs and improves. There's no human labeling step. Compute is the only cost. If you have a domain where the filter is trustworthy — and "trustworthy" is the load-bearing word — you can scale capability cheaply.
+The reason the pattern matters: when the filter is reliable, you bootstrap capability without external supervision. The same model that produced the outputs gets trained on its better outputs and improves. There's no human labeling step. Compute is the only cost. If you have a domain where the filter is trustworthy, and "trustworthy" is the load-bearing word, you can scale capability cheaply.
 
 The same lever cuts the other way when the filter is unreliable. A model trained on its own confident errors gets more confident about those errors. A judge that systematically favors one style produces a student that produces only that style. The loop amplifies whatever signal the filter provides, including its biases.
 
 This lecture is about both sides: when the loop works, when it doesn't, and the methods that sit along the spectrum from "trustworthy filter, big gains" to "untrustworthy filter, mode collapse."
 
-Cross-references throughout. The R1-distill specific recipe is [Lecture 18](./18-distillation-reasoning.md) — referenced here, not re-explained. Constitutional AI's RL phase is [Lecture 14](./14-constitutional-ai-rlaif.md) — same. Iterative DPO and online preference optimization are [Lecture 17](./17-online-iterative-preference.md). The verifiable-rewards setting is [Lecture 15](./15-rl-verifiable-rewards.md).
+Cross-references throughout. The R1-distill specific recipe is [Lecture 18](./18-distillation-reasoning.md), referenced here, not re-explained. Constitutional AI's RL phase is [Lecture 14](./14-constitutional-ai-rlaif.md), same. Iterative DPO and online preference optimization are [Lecture 17](./17-online-iterative-preference.md). The verifiable-rewards setting is [Lecture 15](./15-rl-verifiable-rewards.md).
 
 ---
 
@@ -32,10 +32,10 @@ The pattern, written out once:
 
 ```
 Given:
-  M_0       — initial model
-  prompts   — a set of inputs to train against
-  filter    — a function that scores or selects outputs
-  train     — a training procedure (SFT, DPO, RL)
+  M_0       : initial model
+  prompts   : a set of inputs to train against
+  filter    : a function that scores or selects outputs
+  train     : a training procedure (SFT, DPO, RL)
 
 for t in 0, 1, 2, ...:
     samples_t = [M_t.generate(p) for p in prompts]
@@ -57,7 +57,7 @@ Most named methods are a specific choice on each axis. The methods worth knowing
 
 ## Classical context: self-training before LLMs
 
-The basic idea — train a model, use it to label unlabeled data, retrain on the labels — is decades old. Two reference points:
+The basic idea (train a model, use it to label unlabeled data, retrain on the labels) is decades old. Two reference points:
 
 **Yarowsky 1995** (ACL 1995, "Unsupervised word sense disambiguation rivaling supervised methods") is the canonical NLP application. Train a classifier on a small seed of labeled examples, label unlabeled data with the classifier, keep only the high-confidence labels, retrain. Yarowsky showed this could nearly match supervised performance on word sense disambiguation using almost no manual labels. The mechanism that made it work: the high-confidence threshold filtered out the cases where the classifier was unsure, so only reliable labels entered training.
 
@@ -89,7 +89,7 @@ The model improves because each round adds correct chains for problems it can so
 
 The mechanism is consistent with the verifier-driven distillation in [Lecture 18](./18-distillation-reasoning.md). The chain itself is a latent variable: the dataset gives you only (question, answer), and the chain is the missing intermediate explanation. STaR generates candidate chains, uses the answer check as a filter to identify chains that are plausibly correct, and trains on those.
 
-STaR adds one further mechanism: **rationalization**. For problems the model gets wrong on every sampled chain, STaR generates a chain conditioned on the known correct answer (prompt: "the answer is X; explain how to get there"). These rationalized chains are added to the training set. Without rationalization, the loop's training set is biased toward problems the model already gets right — easy problems with short chains — and the model never learns the harder structure.
+STaR adds one further mechanism: **rationalization**. For problems the model gets wrong on every sampled chain, STaR generates a chain conditioned on the known correct answer (prompt: "the answer is X; explain how to get there"). These rationalized chains are added to the training set. Without rationalization, the loop's training set is biased toward problems the model already gets right, easy problems with short chains, and the model never learns the harder structure.
 
 The empirical finding from the paper: STaR's iterative loop improves arithmetic and commonsense reasoning accuracy over baseline SFT on the same data. The model gets better at producing chains that are both correct and well-structured, even on the harder problems where rationalization was needed.
 
@@ -138,7 +138,7 @@ def star(initial_model, qa_dataset, num_rounds=5):
     return model
 ```
 
-The relationship to expectation-maximization is explicit in the STaR paper and worth being precise about. The latent variable is the chain. The E step samples candidate chains from the current model and keeps the ones consistent with the observed answer (the filter). The M step does SFT on the kept chains, which is approximately maximizing the log-likelihood of the data under the model with the chain treated as observed. This isn't EM in the strict statistical sense — the filter is a hard threshold rather than a posterior weighting, and the M step is one or two epochs of SGD rather than a full likelihood maximization — but the structure is the same.
+The relationship to expectation-maximization is explicit in the STaR paper and worth being precise about. The latent variable is the chain. The E step samples candidate chains from the current model and keeps the ones consistent with the observed answer (the filter). The M step does SFT on the kept chains, which is approximately maximizing the log-likelihood of the data under the model with the chain treated as observed. This isn't EM in the strict statistical sense (the filter is a hard threshold rather than a posterior weighting, and the M step is one or two epochs of SGD rather than a full likelihood maximization), but the structure is the same.
 
 The rationalization step doesn't fit the EM framing cleanly. It's an importance-sampling-style fix for the case where the current model assigns near-zero probability to any chain that reaches the correct answer. Without rationalization, those questions contribute nothing to the loss and the model stays stuck. With rationalization, the loop bootstraps onto problems the model couldn't initially solve.
 
@@ -148,7 +148,7 @@ The rationalization step doesn't fit the EM framing cleanly. It's an importance-
 
 ReST (Reinforced Self-Training, Gulcehre, Le Paine, Srinivasan et al. 2023, arXiv:2308.08998) restructures STaR-style self-training for compute efficiency.
 
-The structural difference: STaR interleaves generation and training within each round — for each batch of questions, sample, filter, train, move on. ReST separates them. The "Grow" step generates a large batch of completions from the current model all at once, in parallel, on whatever inference hardware is available. The "Improve" step then runs several rounds of training on the resulting filtered dataset, with the filtering threshold raised between training rounds.
+The structural difference: STaR interleaves generation and training within each round. For each batch of questions, sample, filter, train, move on. ReST separates them. The "Grow" step generates a large batch of completions from the current model all at once, in parallel, on whatever inference hardware is available. The "Improve" step then runs several rounds of training on the resulting filtered dataset, with the filtering threshold raised between training rounds.
 
 ```
 Grow step:
@@ -179,7 +179,7 @@ The trade-off is data freshness. By the time the third Improve iteration runs, t
 
 The paper's empirical finding: on math and code, ReST^EM outperforms standard SFT on the same dataset by a significant margin, and the gap grows with iteration count. The interpretation is consistent with the general loop intuition: each iteration adds correct completions for harder problems, expanding the training distribution.
 
-ReST^EM also explicitly compares to training on human-written solutions for the same problems. The model-generated correct chains, filtered by the verifier, sometimes outperform human-written chains as training data. This is striking — it suggests that for math reasoning specifically, a strong model's own correct chains are at least as informative as human-written ones, because they're tailored to the model's existing reasoning style.
+ReST^EM also explicitly compares to training on human-written solutions for the same problems. The model-generated correct chains, filtered by the verifier, sometimes outperform human-written chains as training data. This is striking; it suggests that for math reasoning specifically, a strong model's own correct chains are at least as informative as human-written ones, because they're tailored to the model's existing reasoning style.
 
 The connection back to [Lecture 18](./18-distillation-reasoning.md): R1-distill is essentially one round of cross-model ReST^EM where the Grow model (R1) is much stronger than the Improve target (Qwen-7B). The single-round version works well when the gap between Grow model and Improve target is large; the iterative version is necessary when the two are the same model and have to improve together.
 
@@ -217,11 +217,11 @@ finetuned = sft(model, dataset)
 
 The paper started from GPT-3 and generated around 52k instructions from the 175-example seed. Fine-tuning GPT-3 on these instructions produced an instruction-following model that performed close to InstructGPT on a held-out set, despite using zero human-written instructions beyond the seed.
 
-The filter here is much weaker than in the math/code self-training methods. There's no correctness verifier — an instruction-and-output pair is "correct" if it follows the task format and makes sense, which is judged heuristically (ROUGE-L similarity for deduplication, simple format checks). The quality of the loop depends on the base model being capable enough to generate sensible instructions; a weaker model would generate nonsense and the loop wouldn't bootstrap.
+The filter here is much weaker than in the math/code self-training methods. There's no correctness verifier: an instruction-and-output pair is "correct" if it follows the task format and makes sense, which is judged heuristically (ROUGE-L similarity for deduplication, simple format checks). The quality of the loop depends on the base model being capable enough to generate sensible instructions; a weaker model would generate nonsense and the loop wouldn't bootstrap.
 
-This is the version of the loop most prone to mode collapse. With no verifier, the model generates instructions in the styles it finds easiest to generate, which then become the training data, which then shapes the model toward those styles even more. The paper notes that Self-Instruct's generated instructions have noticeable distributional artifacts compared to human-written ones — they cluster around certain topics and phrasings — and the resulting model inherits those clusters.
+This is the version of the loop most prone to mode collapse. With no verifier, the model generates instructions in the styles it finds easiest to generate, which then become the training data, which then shapes the model toward those styles even more. The paper notes that Self-Instruct's generated instructions have noticeable distributional artifacts compared to human-written ones (they cluster around certain topics and phrasings) and the resulting model inherits those clusters.
 
-The broader pattern: Self-Instruct is what self-improvement looks like without a strong filter. It works because the base model (GPT-3) is capable enough that even unfiltered generations are useful, and the diversity filters do enough to keep the dataset from degenerating. But it doesn't bootstrap capability the way STaR or ReST does; it bootstraps coverage of the instruction-following task. The model isn't getting smarter — it's getting more directable.
+The broader pattern: Self-Instruct is what self-improvement looks like without a strong filter. It works because the base model (GPT-3) is capable enough that even unfiltered generations are useful, and the diversity filters do enough to keep the dataset from degenerating. But it doesn't bootstrap capability the way STaR or ReST does; it bootstraps coverage of the instruction-following task. The model isn't getting smarter; it's getting more directable.
 
 ---
 
@@ -233,7 +233,7 @@ The relevant point for this lecture: CAI's RL phase is a self-distillation loop 
 
 The constitution is the filter specification. The principles are plain-English sentences ("choose the response that is least likely to cause real-world harm"). The judge interprets these sentences when scoring response pairs. The interpretation is itself a model behavior, which is what makes CAI a self-improvement loop rather than a fixed external supervision signal.
 
-What CAI illustrates that the math/code methods don't: a self-improvement loop with an articulated, value-laden filter rather than a binary correctness check. The constitution makes the filter inspectable — you can read the principles and see what the model is being optimized against. The R1-distill checker is also inspectable, but its specification is short ("the extracted answer matches the reference"). The constitution is longer and more open to interpretation, which means more of the filter's behavior comes from the judge model's prior, not from the explicit specification.
+What CAI illustrates that the math/code methods don't: a self-improvement loop with an articulated, value-laden filter rather than a binary correctness check. The constitution makes the filter inspectable: you can read the principles and see what the model is being optimized against. The R1-distill checker is also inspectable, but its specification is short ("the extracted answer matches the reference"). The constitution is longer and more open to interpretation, which means more of the filter's behavior comes from the judge model's prior, not from the explicit specification.
 
 This is both CAI's strength and its risk. The constitution can capture nuanced criteria that no binary verifier could (helpfulness, honesty, respect for autonomy). It also depends on the judge model interpreting those criteria consistently, which is harder than running a regex on a math answer.
 
@@ -243,13 +243,13 @@ In the categorization at the top of this lecture: CAI's RL phase is iterative (m
 
 ## Self-rewarding language models: judge inside the loop
 
-Self-Rewarding Language Models (Yuan, Pang, Cho, Sukhbaatar, Xu, Weston 2024, arXiv:2401.10020) — covered in [Lecture 14](./14-constitutional-ai-rlaif.md) — is the pure version of the self-judge loop. The same model generates candidate responses, scores them itself with an LLM-as-judge prompt, forms preference pairs from the scores, and trains with DPO. Iterate.
+Self-Rewarding Language Models (Yuan, Pang, Cho, Sukhbaatar, Xu, Weston 2024, arXiv:2401.10020), covered in [Lecture 14](./14-constitutional-ai-rlaif.md), is the pure version of the self-judge loop. The same model generates candidate responses, scores them itself with an LLM-as-judge prompt, forms preference pairs from the scores, and trains with DPO. Iterate.
 
 The structural property worth highlighting here that wasn't the focus in lecture 14: the judge improves alongside the policy. In iteration t, the model M_t generates responses and judges them. In iteration t+1, M_{t+1} is a better generator (because it was trained on M_t's judgments), and it's also a better judge (because both capabilities use the same underlying model and DPO training improves both). The ceiling rises each round.
 
 This is different from CAI's RL phase, where the preference model is trained once on AI-generated preferences and then frozen during the PPO phase. CAI has one round of preference data generation; self-rewarding LMs have many.
 
-The cost of this structure: the model's judging biases compound with each round. If the model in iteration 0 has a slight preference for long responses (a documented LLM-judge bias — see Zheng et al. 2023, arXiv:2306.05685, covered in lecture 14), iteration 1 trains on preferences biased toward long responses, iteration 2 trains on preferences from a model whose preferences are even more biased toward long responses, and so on. The bias is amplified, not corrected.
+The cost of this structure: the model's judging biases compound with each round. If the model in iteration 0 has a slight preference for long responses (a documented LLM-judge bias: see Zheng et al. 2023, arXiv:2306.05685, covered in lecture 14), iteration 1 trains on preferences biased toward long responses, iteration 2 trains on preferences from a model whose preferences are even more biased toward long responses, and so on. The bias is amplified, not corrected.
 
 Empirically the paper reports gains across three iterations on AlpacaEval 2.0. The caveat lecture 14 mentions also applies: AlpacaEval is itself LLM-judged, so a model trained to produce outputs that look good to an LLM judge will score well there regardless of whether those outputs are better by human standards.
 
@@ -277,7 +277,7 @@ The Pang et al. 2024 iterative reasoning DPO paper (arXiv:2404.19733, covered in
 
 The cross-reference: R1-distill is the cross-model, one-pass, verifier-filtered version of the loop. The teacher (R1) is much stronger than the student. The signal is the verifiable checker used during R1's RL training, applied to R1's outputs. The loop runs once. Student training is plain SFT.
 
-The reason it works without iteration: R1 already discovered correct reasoning chains via its own RL training. The distillation step transfers those chains to the student. There's no need to iterate because the teacher's capability ceiling is what's being transferred, not bootstrapped further. If you ran a second round (sample from the distilled student, filter, retrain), the student would slowly approach the teacher's capability rather than exceeding it — and one round of cross-model distillation gets most of the way there already.
+The reason it works without iteration: R1 already discovered correct reasoning chains via its own RL training. The distillation step transfers those chains to the student. There's no need to iterate because the teacher's capability ceiling is what's being transferred, not bootstrapped further. If you ran a second round (sample from the distilled student, filter, retrain), the student would slowly approach the teacher's capability rather than exceeding it, and one round of cross-model distillation gets most of the way there already.
 
 The general structural lesson: cross-model distillation (strong teacher → weaker student) collapses the iterative loop into one pass because the teacher is already at the destination. Self-distillation (same-model teacher and student) requires iteration because each round is a small improvement that bootstraps the next round.
 
@@ -287,7 +287,7 @@ The general structural lesson: cross-model distillation (strong teacher → weak
 
 [Lecture 15: RL with Verifiable Rewards](./15-rl-verifiable-rewards.md) covered GRPO with verifiable rewards. Worth re-framing here in the self-distillation language.
 
-GRPO with a verifiable reward is, in a real sense, a tight self-distillation loop. The model samples K completions per prompt. The verifier scores them. The advantage is computed as the group-relative reward. The policy is updated to make high-advantage completions more likely and low-advantage completions less likely. Sample, score, train, repeat — every step.
+GRPO with a verifiable reward is, in a real sense, a tight self-distillation loop. The model samples K completions per prompt. The verifier scores them. The advantage is computed as the group-relative reward. The policy is updated to make high-advantage completions more likely and low-advantage completions less likely. Sample, score, train, repeat: every step.
 
 The differences from the SFT-based self-distillation loops:
 
@@ -295,7 +295,7 @@ The differences from the SFT-based self-distillation loops:
 - The "filter" is the reward signal, not a hard threshold. Completions with low rewards still contribute gradient (a negative one), they're not just dropped.
 - The loop runs at every update, not at every epoch.
 
-If you take GRPO with a binary reward (correct/incorrect) and look at the gradient, completions with reward 1 get pushed up, completions with reward 0 get pushed down. SFT on filtered correct completions has the same effect on the correct-set, but no signal on the incorrect-set — they're just dropped. GRPO uses both halves of the data; SFT-after-filtering uses only the correct half but treats it as ground truth.
+If you take GRPO with a binary reward (correct/incorrect) and look at the gradient, completions with reward 1 get pushed up, completions with reward 0 get pushed down. SFT on filtered correct completions has the same effect on the correct-set, but no signal on the incorrect-set: they're just dropped. GRPO uses both halves of the data; SFT-after-filtering uses only the correct half but treats it as ground truth.
 
 The trade-off: SFT-after-filtering is simpler and works fine when the policy already produces correct completions often enough. GRPO is more sample-efficient because it uses the negative examples, but it's more expensive per step and has more failure modes (instability, reward hacking, KL blowup).
 
@@ -323,7 +323,7 @@ The signs of mode collapse:
 
 Mitigations:
 
-- **Higher temperature during sampling.** The R1 paper uses temperature 0.7 for distillation generation; STaR samples with some temperature too. Greedy decoding for self-improvement data is almost always wrong — it kills diversity at the source.
+- **Higher temperature during sampling.** The R1 paper uses temperature 0.7 for distillation generation; STaR samples with some temperature too. Greedy decoding for self-improvement data is almost always wrong; it kills diversity at the source.
 - **Reject duplicate or near-duplicate samples.** Self-Instruct does this via ROUGE-L similarity thresholds. For chain-of-thought, you can check if multiple sampled chains are structurally similar and downsample.
 - **KL penalty to a reference model.** If the training procedure is RL (Lectures 10, 14, 15), the KL term penalizes the policy for moving too far from the reference. This bounds how much mode collapse can happen per update. SFT-based loops don't have this built in.
 - **Periodic re-initialization or interpolation with the original model.** Some papers (especially in iterative DPO) reset to the SFT model every few rounds, or mix the SFT model's distribution into the sampling. Trades off improvement rate for diversity preservation.
@@ -334,7 +334,7 @@ If the filter is imperfect, the model gets trained on its own confident errors. 
 
 The classical example, from outcome-supervised math training: the model produces a chain with an arithmetic error mid-chain that happens to cancel out and reach the correct final answer. The checker accepts the chain because the answer is right. The student trains on the chain and learns the false intermediate step as a valid reasoning move. The Uesato et al. 2022 paper (arXiv:2211.14275, covered in [Lecture 15](./15-rl-verifiable-rewards.md) and [Lecture 18](./18-distillation-reasoning.md)) documents this in detail for math; process reward models are the mitigation.
 
-In settings without a verifier — Self-Instruct, self-rewarding with LLM judges — hallucination amplification is more direct. The judge accepts confidently-stated incorrect content because confident statements are stylistically similar to correct ones. The student is trained on confident incorrect content, becomes more confident about it, and the next round's judge is even more easily fooled by the same content.
+In settings without a verifier (Self-Instruct, self-rewarding with LLM judges), hallucination amplification is more direct. The judge accepts confidently-stated incorrect content because confident statements are stylistically similar to correct ones. The student is trained on confident incorrect content, becomes more confident about it, and the next round's judge is even more easily fooled by the same content.
 
 The most pernicious version: hallucination amplification on rare events. If a model is wrong about a rare class of inputs (say, a specific kind of edge case), but right on the bulk of inputs, the filter accepts most outputs and rejects only the obviously bad ones. The model's confident errors on the rare class slip through, and over rounds, the model's behavior on that rare class gets worse while its average performance looks flat or improves.
 
@@ -353,7 +353,7 @@ In a self-improvement loop, self-preference is the worst-case bias because it di
 1. The model has a slight preference for style S.
 2. The model judges its own outputs, preferring those that exhibit S more strongly.
 3. Training on those judgments shifts the model further toward S.
-4. The next round's judge — which is the updated model — has an even stronger preference for S.
+4. The next round's judge, which is the updated model, has an even stronger preference for S.
 5. Step 2 gets worse.
 
 After several rounds, the model produces outputs strongly conforming to S, regardless of whether S correlates with actual quality. The narrowing is exactly mode collapse, but driven by the judge's preferences rather than by exploration loss.
@@ -372,7 +372,7 @@ The loop only improves the model on the distribution of prompts in the training 
 
 This is true of all training, but it bites harder in self-improvement loops because the model's own outputs further narrow the effective training distribution. SFT on filtered model outputs trains on (prompt, model's-correct-output) pairs. The model's outputs concentrate on the styles and topics it's already good at; the training reinforces those. The model gets better at what it was already good at, and the gap on prompts it wasn't good at stays.
 
-For STaR-style loops, this manifests as the model improving rapidly on problems where its baseline success rate is moderate (say, 20-60%) and slowly or not at all on problems where the baseline success rate is near 0% or near 100%. The rationalization mechanism helps with the 0% case by injecting correct chains the model couldn't generate itself. The 100% case doesn't matter — the model already gets those right.
+For STaR-style loops, this manifests as the model improving rapidly on problems where its baseline success rate is moderate (say, 20-60%) and slowly or not at all on problems where the baseline success rate is near 0% or near 100%. The rationalization mechanism helps with the 0% case by injecting correct chains the model couldn't generate itself. The 100% case doesn't matter. The model already gets those right.
 
 For Self-Instruct, the coverage failure shows up as instruction-style narrowing: the bootstrapped instructions cover the topics and formats the model finds easiest to generate, not the topics and formats users will actually ask about. The paper's own evaluation notes this gap.
 
@@ -408,11 +408,11 @@ Mirror of the above:
 
 **The filter shares the model's blind spots.** An LLM judge that's the same model as the policy has correlated errors. Both the judge and the policy will be wrong about the same things, and the loop reinforces those shared errors. The Burns et al. weak-to-strong work (next section) is partly motivated by this: when the supervisor is weaker than or correlated with the trainee, the trainee can't be safely trained beyond the supervisor's reliable region.
 
-**The base model lacks the capability.** RL or self-distillation on a very small model trying to learn reasoning that the model has no latent capacity for tends to fail. The R1 paper explicitly notes this for direct RL on small models — the gradient signal is too sparse because the model rarely succeeds (lecture 18 covers this). Self-distillation has the same issue more severely: if the model can't produce any correct sample, the filter accepts none and there's nothing to train on.
+**The base model lacks the capability.** RL or self-distillation on a very small model trying to learn reasoning that the model has no latent capacity for tends to fail. The R1 paper explicitly notes this for direct RL on small models: the gradient signal is too sparse because the model rarely succeeds (lecture 18 covers this). Self-distillation has the same issue more severely: if the model can't produce any correct sample, the filter accepts none and there's nothing to train on.
 
 **The prompt distribution doesn't cover the failure region.** Self-improvement bootstraps on the prompts you give it. If the prompts don't include the region where the model fails (or where the deployed model will face hard inputs), the loop never sees those failures and can't fix them. This is a curation problem, not an algorithmic one.
 
-**The student-becomes-teacher recursion drifts after a few generations.** Most self-improvement loops show diminishing returns after 3-5 rounds. The first round usually adds the most; subsequent rounds add less; eventually accuracy plateaus or drops. The drop is the drift failure mode — the implicit reward has shifted to something the verifier doesn't measure. Stopping at the right round is part of the engineering.
+**The student-becomes-teacher recursion drifts after a few generations.** Most self-improvement loops show diminishing returns after 3-5 rounds. The first round usually adds the most; subsequent rounds add less; eventually accuracy plateaus or drops. The drop is the drift failure mode: the implicit reward has shifted to something the verifier doesn't measure. Stopping at the right round is part of the engineering.
 
 The 2024-2025 literature has converged on a rough heuristic: 1-3 rounds of self-improvement is usually safe; more requires careful monitoring of held-out performance; recursive distillation through many generations of student-becoming-teacher rarely works as well as a single round of cross-model distillation from a strong source.
 
@@ -422,19 +422,19 @@ The 2024-2025 literature has converged on a rough heuristic: 1-3 rounds of self-
 
 The structural question for all self-distillation: can a model teach itself capabilities it doesn't already have, or only refine capabilities it already has?
 
-For the cross-model case (R1-distill), the answer is usually no in the strict sense — the student can't exceed the teacher on the distilled corpus. But the student can be more efficient (faster inference) and sometimes more reliable (the SFT step regularizes), so the practical answer depends on what you're measuring.
+For the cross-model case (R1-distill), the answer is usually no in the strict sense: the student can't exceed the teacher on the distilled corpus. But the student can be more efficient (faster inference) and sometimes more reliable (the SFT step regularizes), so the practical answer depends on what you're measuring.
 
-For the self-distillation case, the question is whether the loop can bootstrap capability the model didn't have at round 0. STaR's empirical finding is that it can — accuracy improves across rounds — but the improvements are on problems where the model had some baseline ability (the rationalization mechanism shows the loop can't easily bootstrap from zero).
+For the self-distillation case, the question is whether the loop can bootstrap capability the model didn't have at round 0. STaR's empirical finding is that it can (accuracy improves across rounds) but the improvements are on problems where the model had some baseline ability (the rationalization mechanism shows the loop can't easily bootstrap from zero).
 
 The Burns et al. 2023 paper (OpenAI, "Weak-to-strong generalization: Eliciting strong capabilities with weak supervision," arXiv:2312.09390) studies a sharper version: can a weak supervisor train a strong student to outperform the supervisor? The setup: take a strong base model (e.g., GPT-4-base) and a weak supervisor (e.g., GPT-2-level), use the weak supervisor's outputs as the training signal, see how well the strong base does.
 
-The finding: the strong model trained on weak supervision recovers some of its underlying capability — the gap between weak-supervisor performance and strong-model-on-strong-supervision performance shrinks, but doesn't close. With naive training, the strong model is bottlenecked by the weak supervisor's errors. With auxiliary losses and training-time interventions, the gap closes more, but not entirely.
+The finding: the strong model trained on weak supervision recovers some of its underlying capability. The gap between weak-supervisor performance and strong-model-on-strong-supervision performance shrinks, but doesn't close. With naive training, the strong model is bottlenecked by the weak supervisor's errors. With auxiliary losses and training-time interventions, the gap closes more, but not entirely.
 
-This is the inverse of distillation in some sense. R1-distill transfers strong-teacher capability to a weak student. Burns et al. study transferring weak-teacher (incorrect) supervision to a strong student. The asymmetric finding — strong student trained on weak supervisor doesn't recover full strong capability — is the empirical basis for the worry that self-distillation can't bootstrap arbitrarily.
+This is the inverse of distillation in some sense. R1-distill transfers strong-teacher capability to a weak student. Burns et al. study transferring weak-teacher (incorrect) supervision to a strong student. The asymmetric finding (strong student trained on weak supervisor doesn't recover full strong capability) is the empirical basis for the worry that self-distillation can't bootstrap arbitrarily.
 
 The connection to self-distillation: when a model judges its own outputs and trains on the judgments, the judge is approximately at the same capability level as the student (they're the same model). This is the "weak supervisor for itself" case. The model can recover capability it has but isn't reliably accessing, but it likely can't recover capability beyond what it can already produce some of the time. The loop refines, it doesn't invent.
 
-This bounds the optimistic interpretation of self-improvement. STaR-style loops work because they're refining latent capability. They don't work indefinitely because they can't generate capability that wasn't latent. The empirical plateaus across rounds are consistent with this — capability extraction has a limit, and the loop hits it.
+This bounds the optimistic interpretation of self-improvement. STaR-style loops work because they're refining latent capability. They don't work indefinitely because they can't generate capability that wasn't latent. The empirical plateaus across rounds are consistent with this: capability extraction has a limit, and the loop hits it.
 
 The open question Burns et al. articulate: whether interventions exist that genuinely break this ceiling. Their auxiliary-loss results suggest it's at least partially possible. The broader research direction (weak-to-strong generalization, scalable oversight) is active and unsettled as of late 2025.
 
@@ -522,7 +522,7 @@ def deduplicate(kept: list[tuple[str, str]],
     seen = []
     unique = []
     for p, c in kept:
-        key = (p, c[:200])  # crude — use a real hash/embedding in practice
+        key = (p, c[:200])  # crude: use a real hash/embedding in practice
         if key not in seen:
             seen.append(key)
             unique.append((p, c))
@@ -578,7 +578,7 @@ def self_improvement_round(
     )
 
     # 5. Evaluate on the held-out set with the same filter.
-    # This is the only signal worth trusting for stopping criteria —
+    # This is the only signal worth trusting for stopping criteria:
     # accept_rate is gameable, training loss is uninformative.
     holdout_correct = sum(
         1 for p, gold in holdout
@@ -656,10 +656,10 @@ Things this sketch leaves out, deliberately:
 
 - Reference-model KL penalty in the training step. SFT doesn't have one built in; DPO and GRPO do. For SFT-based self-distillation, the practical mitigation for drift is the early-stopping criterion, not a KL term.
 - Rationalization for the case where the filter accepts zero samples on hard prompts. STaR's mechanism. Worth implementing if your base model has low baseline success rate.
-- Curriculum — starting with easier prompts and adding harder ones over rounds. ReST^EM does this implicitly via the threshold escalation in the Improve step.
+- Curriculum: starting with easier prompts and adding harder ones over rounds. ReST^EM does this implicitly via the threshold escalation in the Improve step.
 - Hyperparameter scheduling. In practice, sampling temperature often goes up over rounds (to fight collapse), and SFT learning rate often goes down.
 
-For the STaR variant: add a rationalization branch in `self_improvement_round` for prompts where the filter accepted zero samples, conditioning generation on the known answer. For the DPO variant: replace the `sft` call with a DPO update where the chosen examples are the filtered samples and the rejected examples are the discarded ones. For the GRPO variant: don't filter at all — compute the group-relative advantage from all K samples per prompt and run the GRPO update (see lecture 15).
+For the STaR variant: add a rationalization branch in `self_improvement_round` for prompts where the filter accepted zero samples, conditioning generation on the known answer. For the DPO variant: replace the `sft` call with a DPO update where the chosen examples are the filtered samples and the rejected examples are the discarded ones. For the GRPO variant: don't filter at all; compute the group-relative advantage from all K samples per prompt and run the GRPO update (see lecture 15).
 
 ---
 
@@ -678,7 +678,7 @@ For the STaR variant: add a rationalization branch in `self_improvement_round` f
 | Iterative DPO | Reward model / verifier / judge | Iterative | Often yes | Yes; lecture 17 covers tuning |
 | R1-distill (DeepSeek 2025) | Verifier (math/code) | One pass | No (R1 → smaller student) | Yes, well |
 | RLVR with GRPO | Verifier | Continuous (every step) | Yes (policy improves against external verifier) | Yes, when verifier is reliable |
-| Weak-to-strong (Burns 2023) | Weak supervisor's labels | Single training run | No (strong base, weak teacher) | Partial — strong base recovers some capability |
+| Weak-to-strong (Burns 2023) | Weak supervisor's labels | Single training run | No (strong base, weak teacher) | Partial: strong base recovers some capability |
 
 This is descriptive, not normative. The right method for a given setting depends on what filter is available, how strong the base model is, and how much compute is available.
 
@@ -688,7 +688,7 @@ This is descriptive, not normative. The right method for a given setting depends
 
 A few rules that hold across most of the methods covered here.
 
-**Use a verifier when one exists.** A binary correctness check is a much stronger filter than an LLM judge, and the difference compounds across iterations. If your task has a verifier — code tests, math answer check, Lean proof — use it. Don't substitute an LLM judge to save engineering effort.
+**Use a verifier when one exists.** A binary correctness check is a much stronger filter than an LLM judge, and the difference compounds across iterations. If your task has a verifier (code tests, math answer check, Lean proof), use it. Don't substitute an LLM judge to save engineering effort.
 
 **Don't trust the filter as your only signal.** Hold out a test set the loop never sees. Evaluate on it with a separate verifier or judge (or both). Stop the loop based on held-out performance, not on training metrics.
 
@@ -710,7 +710,7 @@ A few rules that hold across most of the methods covered here.
 
 These are things to try locally; no `exercises/` directory.
 
-**Implement STaR on a small math task.** Use a 1-3B parameter model and a small arithmetic dataset (GSM8K subset, or a synthetic generator). Implement one round of STaR — sample chains, filter to correct ones, SFT. Measure accuracy before and after. Run a second round on the updated model and measure again. Do the rounds give diminishing returns? At what round does held-out accuracy plateau?
+**Implement STaR on a small math task.** Use a 1-3B parameter model and a small arithmetic dataset (GSM8K subset, or a synthetic generator). Implement one round of STaR: sample chains, filter to correct ones, SFT. Measure accuracy before and after. Run a second round on the updated model and measure again. Do the rounds give diminishing returns? At what round does held-out accuracy plateau?
 
 **Rationalization ablation.** Run the same STaR loop with and without the rationalization fallback. On a dataset where the baseline model gets 5-20% accuracy, the rationalized version should improve more. On a dataset where the baseline is 60%+, the difference should be small.
 
@@ -766,4 +766,4 @@ These are things to try locally; no `exercises/` directory.
 
 ## Next lecture
 
-Next in sequence depends on what's been written. The lectures in this directory go through 29 as of writing. This lecture inserts at position 34 in the planned ordering — the curriculum will need to update to reflect where it sits relative to the other recent additions.
+Next in sequence depends on what's been written. The lectures in this directory go through 29 as of writing. This lecture inserts at position 34 in the planned ordering. The curriculum will need to update to reflect where it sits relative to the other recent additions.

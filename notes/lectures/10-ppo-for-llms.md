@@ -1,8 +1,8 @@
 <!-- status: unreviewed | last-reviewed: never -->
 
-# Lecture 10: PPO for language models — the full RLHF pipeline
+# Lecture 10: PPO for language models (the full RLHF pipeline)
 
-_Unreviewed — no one has checked this end to end. Treat the math, code, and citations as unverified._
+_Unreviewed: no one has checked this end to end. Treat the math, code, and citations as unverified._
 
 **Time**: 6–8 hours | **Prerequisites**: Lectures 06, 09
 
@@ -41,7 +41,7 @@ Each stage depends on the previous one.
 
 ---
 
-## Part 2: Stage 1 — supervised fine-tuning
+## Part 2: Stage 1, supervised fine-tuning
 
 ### Why SFT first?
 
@@ -149,11 +149,11 @@ if __name__ == "__main__":
     sft_model = sft_trainer.train(demo_data)
 ```
 
-SFT is not optional — skipping straight to RL produces incoherent output because the base model has no concept of the instruction-following format.
+SFT is not optional; skipping straight to RL produces incoherent output because the base model has no concept of the instruction-following format.
 
 ---
 
-## Part 3: Stage 2 — reward model (see Lecture 09)
+## Part 3: Stage 2, reward model (see Lecture 09)
 
 Quick recap:
 
@@ -170,7 +170,7 @@ reward = reward_model("How do I code?", "Here's a Python example...")
 
 ---
 
-## Part 4: Stage 3 — PPO for LLMs
+## Part 4: Stage 3, PPO for LLMs
 
 ### The RL Problem Formulation
 
@@ -793,13 +793,13 @@ plot(training_step, kl_divergence)
 
 ### Anthropic's approach
 
-Anthropic published two related papers. Bai et al. (2022, arXiv:2204.05862) describes iterated online RLHF using human preference data. A follow-up, also Bai et al. (2022, arXiv:2212.08073), introduces Constitutional AI, which replaces the human labeling step with AI-generated critiques — making the process cheaper to scale.
+Anthropic published two related papers. Bai et al. (2022, arXiv:2204.05862) describes iterated online RLHF using human preference data. A follow-up, also Bai et al. (2022, arXiv:2212.08073), introduces Constitutional AI, which replaces the human labeling step with AI-generated critiques, making the process cheaper to scale.
 
 ---
 
 ## Recap
 
-RLHF runs in three stages: SFT to get a usable instruction-following baseline, reward model training on preference pairs, then PPO to optimize against that reward. The KL penalty is what keeps PPO from gaming the reward model — without it the policy drifts into repetitive or nonsensical outputs that score well but aren't useful. Rewards are sparse (only at end-of-sequence), so GAE matters for credit assignment. Expect long wall-clock times: even at GPT-2 scale, the full pipeline takes many hours on a single GPU.
+RLHF runs in three stages: SFT to get a usable instruction-following baseline, reward model training on preference pairs, then PPO to optimize against that reward. The KL penalty is what keeps PPO from gaming the reward model; without it the policy drifts into repetitive or nonsensical outputs that score well but aren't useful. Rewards are sparse (only at end-of-sequence), so GAE matters for credit assignment. Expect long wall-clock times: even at GPT-2 scale, the full pipeline takes many hours on a single GPU.
 
 ---
 
@@ -807,7 +807,7 @@ RLHF runs in three stages: SFT to get a usable instruction-following baseline, r
 
 **[Lecture 11: Direct Preference Optimization (DPO)](./11-dpo.md)**
 
-DPO reformulates the same objective without a separate reward model — simpler to implement and more stable to train.
+DPO reformulates the same objective without a separate reward model, simpler to implement and more stable to train.
 
 Before moving on:
 - [ ] Understand all three RLHF stages
@@ -819,17 +819,17 @@ Before moving on:
 
 ## References
 
-**Ouyang et al. (2022)** — "Training language models to follow instructions with human feedback." arXiv:2203.02155. The InstructGPT paper; first large-scale RLHF deployment for LLMs.
+**Ouyang et al. (2022)**: "Training language models to follow instructions with human feedback." arXiv:2203.02155. The InstructGPT paper; first large-scale RLHF deployment for LLMs.
 
-**Bai et al. (2022)** — "Training a Helpful and Harmless Assistant with Reinforcement Learning from Human Feedback." arXiv:2204.05862. Anthropic's RLHF approach; introduced the iterated online training procedure.
+**Bai et al. (2022)**: "Training a Helpful and Harmless Assistant with Reinforcement Learning from Human Feedback." arXiv:2204.05862. Anthropic's RLHF approach; introduced the iterated online training procedure.
 
-**Bai et al. (2022)** — "Constitutional AI: Harmlessness from AI Feedback." arXiv:2212.08073. Extends RLHF with AI-generated feedback (RLAIF), reducing reliance on human labelers.
+**Bai et al. (2022)**: "Constitutional AI: Harmlessness from AI Feedback." arXiv:2212.08073. Extends RLHF with AI-generated feedback (RLAIF), reducing reliance on human labelers.
 
-**Stiennon et al. (2020)** — "Learning to summarize from human feedback." arXiv:2009.01325. Earlier demonstration that RLHF scales to longer-form tasks.
+**Stiennon et al. (2020)**: "Learning to summarize from human feedback." arXiv:2009.01325. Earlier demonstration that RLHF scales to longer-form tasks.
 
-**HuggingFace TRL** — https://github.com/huggingface/trl. Production RLHF library; includes PPO and DPO trainers for transformers.
+**HuggingFace TRL**: https://github.com/huggingface/trl. Production RLHF library; includes PPO and DPO trainers for transformers.
 
-**OpenAI Baselines** — https://github.com/openai/baselines. Reference PPO implementation; well-tested across many environments.
+**OpenAI Baselines**: https://github.com/openai/baselines. Reference PPO implementation; well-tested across many environments.
 
 ---
 

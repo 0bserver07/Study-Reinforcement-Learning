@@ -2,7 +2,7 @@
 
 # Lecture 15: RL with Verifiable Rewards and Reasoning Models
 
-_Unreviewed — no one has checked this end to end. Treat the math, code, and citations as unverified._
+_Unreviewed: no one has checked this end to end. Treat the math, code, and citations as unverified._
 
 **Time**: ~3-4 h · **Prerequisites**: Lectures 02, 06, 12
 
@@ -12,7 +12,7 @@ _Unreviewed — no one has checked this end to end. Treat the math, code, and ci
 
 Lectures 10–12 covered the standard RLHF pipeline: train a reward model on human preference comparisons, then run PPO against it. The reward model is a learned approximation of "what humans prefer," and its quality bottlenecks the whole system. Reward hacking, overoptimization, and distribution shift in the reward model are all real failure modes covered in those lectures.
 
-In some domains you can skip the learned reward model entirely. If the task has a verifiable correct answer — a math problem with a numeric result, a coding problem with a test suite, a formal proof checked by a theorem prover — you can evaluate each response directly and hand that binary or scalar signal to the RL algorithm. This is RL with verifiable rewards, or RLVR.
+In some domains you can skip the learned reward model entirely. If the task has a verifiable correct answer (a math problem with a numeric result, a coding problem with a test suite, a formal proof checked by a theorem prover) you can evaluate each response directly and hand that binary or scalar signal to the RL algorithm. This is RL with verifiable rewards, or RLVR.
 
 RLVR is not a fundamentally new algorithm. The RL machinery (policy gradient, KL penalties, clipping) is the same as in [Lecture 06: PPO](./06-ppo.md) and [Lecture 12: Beyond DPO](./12-beyond-dpo.md). What changes is the reward source: a checker replaces a learned model. That single substitution removes several failure modes and, in the 2024–2025 period, produced the most visible jump in reasoning capability of any alignment technique.
 
@@ -46,7 +46,7 @@ def rlvr_reward(response: str, expected_answer: str) -> float:
     return format_reward + correctness_reward
 ```
 
-The weights are illustrative — different implementations vary, and the exact schedule (whether to anneal the format component) is an engineering choice.
+The weights are illustrative; different implementations vary, and the exact schedule (whether to anneal the format component) is an engineering choice.
 
 ### Reward hacking
 
@@ -71,7 +71,7 @@ I'll guess 4.
 Answer: 4
 ```
 
-If 4 happens to be correct (and on short arithmetic problems it sometimes is, given small integer answers), this string gets full reward. The model is essentially doing shallow pattern-matching on the problem type, not reasoning. Distinguishing this from genuine reasoning at training time is hard — it requires evaluating whether the chain is causally connected to the answer, which is expensive to automate. One proxy: hold out a set of problems where the answer distribution doesn't match training (e.g., where typical problem types have unusual answers) and measure whether reward degrades. If it does, the model was surface-matching, not reasoning.
+If 4 happens to be correct (and on short arithmetic problems it sometimes is, given small integer answers), this string gets full reward. The model is essentially doing shallow pattern-matching on the problem type, not reasoning. Distinguishing this from genuine reasoning at training time is hard; it requires evaluating whether the chain is causally connected to the answer, which is expensive to automate. One proxy: hold out a set of problems where the answer distribution doesn't match training (e.g., where typical problem types have unusual answers) and measure whether reward degrades. If it does, the model was surface-matching, not reasoning.
 
 ---
 
@@ -79,11 +79,11 @@ If 4 happens to be correct (and on short arithmetic problems it sometimes is, gi
 
 ### Background and motivation
 
-Standard PPO ([Lecture 06](./06-ppo.md)) needs a value function (critic) that estimates expected return from each state. In LLM settings, the "state" is the full context so far, and the action space is the vocabulary. Training a separate critic network that matches the policy network in scale is expensive — roughly doubling memory and compute. You need to maintain the reference policy, the active policy, the reward model, and the critic simultaneously.
+Standard PPO ([Lecture 06](./06-ppo.md)) needs a value function (critic) that estimates expected return from each state. In LLM settings, the "state" is the full context so far, and the action space is the vocabulary. Training a separate critic network that matches the policy network in scale is expensive, roughly doubling memory and compute. You need to maintain the reference policy, the active policy, the reward model, and the critic simultaneously.
 
 GRPO (Group Relative Policy Optimization), introduced in the DeepSeekMath paper (Shao et al. 2024, arXiv:2402.03300), removes the critic. The insight is that for a given prompt, you can approximate the baseline needed for advantage estimation by sampling multiple completions and using their mean reward as the baseline. No separate network required.
 
-This is essentially a return to the REINFORCE-with-baseline structure from [Lecture 02: Policy Gradients](./02-policy-gradients.md). The difference is that the baseline is not a global average or a learned value function — it's the within-group mean for that specific prompt. Because you're computing advantages relative to other responses to the same question, you automatically control for prompt difficulty. A hard problem where everyone scores 0.1 and an easy problem where everyone scores 0.9 both produce similar advantage distributions; the policy is pushed toward what works better than the group average on each prompt.
+This is essentially a return to the REINFORCE-with-baseline structure from [Lecture 02: Policy Gradients](./02-policy-gradients.md). The difference is that the baseline is not a global average or a learned value function; it's the within-group mean for that specific prompt. Because you're computing advantages relative to other responses to the same question, you automatically control for prompt difficulty. A hard problem where everyone scores 0.1 and an easy problem where everyone scores 0.9 both produce similar advantage distributions; the policy is pushed toward what works better than the group average on each prompt.
 
 ### The algorithm
 
@@ -114,7 +114,7 @@ Let `pi_theta(y_i | x)` be the current policy's log-probability of completion `y
 r_i(theta) = exp(log pi_theta(y_i | x) - log pi_old(y_i | x))
 ```
 
-This ratio is a single scalar per completion — it compresses the whole sequence into one number. Note that for long completions, even small per-token differences in log-prob can compound into large ratios, which is one reason the clipping is necessary.
+This ratio is a single scalar per completion; it compresses the whole sequence into one number. Note that for long completions, even small per-token differences in log-prob can compound into large ratios, which is one reason the clipping is necessary.
 
 The GRPO objective per sample:
 
@@ -122,7 +122,7 @@ The GRPO objective per sample:
 L_CLIP_i = min(r_i * A_i,  clip(r_i, 1 - eps, 1 + eps) * A_i)
 ```
 
-The clipping works the same way as in standard PPO: if the advantage is positive (this completion was better than the group average), the objective is capped so the policy can't increase `r_i` beyond `1 + eps` to claim extra credit. If the advantage is negative, the policy can't decrease `r_i` below `1 - eps` to get extra penalty credit. In both cases the clip is conservative — it limits how much the update can move in a direction the advantage supports.
+The clipping works the same way as in standard PPO: if the advantage is positive (this completion was better than the group average), the objective is capped so the policy can't increase `r_i` beyond `1 + eps` to claim extra credit. If the advantage is negative, the policy can't decrease `r_i` below `1 - eps` to get extra penalty credit. In both cases the clip is conservative; it limits how much the update can move in a direction the advantage supports.
 
 The full policy loss averages over all K completions and all B prompts in the batch:
 
@@ -160,7 +160,7 @@ The original DeepSeekMath paper includes an additional term that averages the KL
 
 GRPO's advantage estimate has higher variance than a well-trained critic because the group mean from K samples is a noisy estimate of the true expected return. In practice K is set to 4–16 for language model training; larger K reduces variance but multiplies forward-pass cost. On math tasks the binary nature of the reward means most variance reduction comes from having diverse completions (some correct, some not), which happens naturally when the problem is in the right difficulty range for the model.
 
-A subtle point: the PPO critic in standard RLHF estimates `V(s_t)` at every token step, giving per-token advantages via GAE. GRPO instead assigns a single reward to the whole completion and treats all tokens in that completion as equally responsible for it. This is the outcome reward assumption built into the algorithm — the whole sequence is credited or debited as a unit. Per-token credit assignment is not attempted. That's both a simplification (no critic needed) and a limitation (tokens early in the completion get the same advantage as tokens late in the completion, even though early tokens might not be causally important for whether the answer is correct).
+A subtle point: the PPO critic in standard RLHF estimates `V(s_t)` at every token step, giving per-token advantages via GAE. GRPO instead assigns a single reward to the whole completion and treats all tokens in that completion as equally responsible for it. This is the outcome reward assumption built into the algorithm; the whole sequence is credited or debited as a unit. Per-token credit assignment is not attempted. That's both a simplification (no critic needed) and a limitation (tokens early in the completion get the same advantage as tokens late in the completion, even though early tokens might not be causally important for whether the answer is correct).
 
 ### The connection back to lecture 02
 
@@ -178,7 +178,7 @@ So the full GRPO loss is: REINFORCE baseline estimator (from Lecture 02) + PPO c
 
 ### A reference implementation
 
-The following code shows the core of a GRPO update — the advantage computation and the loss. It assumes you have a scoring function and can compute log-probabilities under the policy and reference policy. This is the reference for the `exercises/15-grpo-rlvr/` exercise set (planned).
+The following code shows the core of a GRPO update: the advantage computation and the loss. It assumes you have a scoring function and can compute log-probabilities under the policy and reference policy. This is the reference for the `exercises/15-grpo-rlvr/` exercise set (planned).
 
 ```python
 import torch
@@ -190,7 +190,7 @@ def compute_group_advantages(rewards: torch.Tensor, eps: float = 1e-8) -> torch.
     Compute group-relative advantages.
 
     Args:
-        rewards: shape [batch, K] — reward for each of K completions per prompt.
+        rewards: shape [batch, K], reward for each of K completions per prompt.
         eps: stability constant for std normalization.
 
     Returns:
@@ -203,10 +203,10 @@ def compute_group_advantages(rewards: torch.Tensor, eps: float = 1e-8) -> torch.
 
 
 def grpo_loss(
-    log_probs_current: torch.Tensor,   # [batch, K]  — current policy, with grad
-    log_probs_old: torch.Tensor,       # [batch, K]  — behavior policy, no grad
-    log_probs_ref: torch.Tensor,       # [batch, K]  — reference policy, no grad
-    advantages: torch.Tensor,          # [batch, K]  — from compute_group_advantages
+    log_probs_current: torch.Tensor,   # [batch, K], current policy, with grad
+    log_probs_old: torch.Tensor,       # [batch, K], behavior policy, no grad
+    log_probs_ref: torch.Tensor,       # [batch, K], reference policy, no grad
+    advantages: torch.Tensor,          # [batch, K], from compute_group_advantages
     clip_eps: float = 0.2,
     kl_beta: float = 0.04,
 ) -> tuple[torch.Tensor, dict]:
@@ -261,12 +261,12 @@ def demo_grpo_step():
         [1.0, 0.0, 1.0, 0.0],   # prompt 0: half correct
         [0.0, 0.0, 0.0, 1.0],   # prompt 1: one correct
         [1.0, 1.0, 1.0, 0.0],   # prompt 2: mostly correct
-        [0.0, 0.0, 0.0, 0.0],   # prompt 3: all wrong — zero gradient (see note)
+        [0.0, 0.0, 0.0, 0.0],   # prompt 3: all wrong, zero gradient (see note)
     ])
 
     advantages = compute_group_advantages(rewards)
     print("Advantages:\n", advantages)
-    # Prompt 3 advantages are all (0-0)/std ≈ 0 — correct, no learning signal.
+    # Prompt 3 advantages are all (0-0)/std ≈ 0: correct, no learning signal.
     # That's expected: if every completion is equally (wrong), we can't tell
     # which direction to move.
 
@@ -284,11 +284,11 @@ if __name__ == "__main__":
     demo_grpo_step()
 ```
 
-A few things to notice in the toy example. When all K completions score identically (prompt 3 above, all zeros), the group standard deviation is zero (or near-zero, caught by eps), and all advantages collapse to zero. There is no gradient. This is correct behavior: if the model can't produce any correct answers, reward-relative training can't tell it which direction to go. In practice this means you need problems where the model sometimes succeeds — typically 10–80% pass rate. Problems where the model never gets the right answer, or always does, provide no gradient.
+A few things to notice in the toy example. When all K completions score identically (prompt 3 above, all zeros), the group standard deviation is zero (or near-zero, caught by eps), and all advantages collapse to zero. There is no gradient. This is correct behavior: if the model can't produce any correct answers, reward-relative training can't tell it which direction to go. In practice this means you need problems where the model sometimes succeeds, typically 10–80% pass rate. Problems where the model never gets the right answer, or always does, provide no gradient.
 
-Also notice that `log_probs_current` is the only tensor with `requires_grad=True`. The advantages, `log_probs_old`, and `log_probs_ref` are all treated as fixed constants — they were computed without gradients (or detached). Gradients only flow through the current policy parameters. This is important: the baseline (the group mean) does not backpropagate, which is what makes GRPO cheap. In PPO, the critic also backpropagates, adding a second optimization problem on top of the policy update.
+Also notice that `log_probs_current` is the only tensor with `requires_grad=True`. The advantages, `log_probs_old`, and `log_probs_ref` are all treated as fixed constants; they were computed without gradients (or detached). Gradients only flow through the current policy parameters. This is important: the baseline (the group mean) does not backpropagate, which is what makes GRPO cheap. In PPO, the critic also backpropagates, adding a second optimization problem on top of the policy update.
 
-In a real LLM training loop, `log_probs_current` would be computed by a forward pass of the policy model over the concatenated prompt+completion, summing log-softmax values at the response token positions. The `log_probs_old` values would be computed once (before the update step) and cached, and the `log_probs_ref` values would come from a frozen copy of the initial model. The `rewards` tensor comes from running each completion through the verifiable checker — in math, calling a symbolic solver or a regex-based answer extractor; in code, running the completion through a sandboxed test harness.
+In a real LLM training loop, `log_probs_current` would be computed by a forward pass of the policy model over the concatenated prompt+completion, summing log-softmax values at the response token positions. The `log_probs_old` values would be computed once (before the update step) and cached, and the `log_probs_ref` values would come from a frozen copy of the initial model. The `rewards` tensor comes from running each completion through the verifiable checker: in math, calling a symbolic solver or a regex-based answer extractor; in code, running the completion through a sandboxed test harness.
 
 ---
 
@@ -296,15 +296,15 @@ In a real LLM training loop, `log_probs_current` would be computed by a forward 
 
 ### R1-Zero: pure RL from a base model
 
-DeepSeek-R1-Zero (DeepSeek-AI 2025, arXiv:2501.12948) applies GRPO directly to a base language model — not an SFT-tuned instruction-following model. The reward function is rule-based: correctness (exact match on normalized answer) plus the format reward for `<think>...</think>` structure.
+DeepSeek-R1-Zero (DeepSeek-AI 2025, arXiv:2501.12948) applies GRPO directly to a base language model, not an SFT-tuned instruction-following model. The reward function is rule-based: correctness (exact match on normalized answer) plus the format reward for `<think>...</think>` structure.
 
 No curated reasoning demonstrations. No chain-of-thought SFT warm-up. Just RL on a base model.
 
-What emerged: the model spontaneously learned to produce longer reasoning chains on harder problems, to backtrack and reconsider intermediate steps (the "aha moment" described in the paper, where the model writes something like "wait, let me reconsider"), and to self-check its answers before committing. These behaviors were not explicitly rewarded — they emerged because they turned out to be instrumentally useful for getting the correctness reward.
+What emerged: the model spontaneously learned to produce longer reasoning chains on harder problems, to backtrack and reconsider intermediate steps (the "aha moment" described in the paper, where the model writes something like "wait, let me reconsider"), and to self-check its answers before committing. These behaviors were not explicitly rewarded; they emerged because they turned out to be instrumentally useful for getting the correctness reward.
 
-R1-Zero also developed failure modes. Language mixing (switching between languages mid-reasoning), low readability, and occasionally circular or repetitive chains. These are downstream of training a base model without format SFT — the model has no strong prior on what a legible output looks like, so the format reward alone is insufficient to enforce coherent structure.
+R1-Zero also developed failure modes. Language mixing (switching between languages mid-reasoning), low readability, and occasionally circular or repetitive chains. These are downstream of training a base model without format SFT; the model has no strong prior on what a legible output looks like, so the format reward alone is insufficient to enforce coherent structure.
 
-A second observation from the paper: reasoning chain length increased over training. The model learned to allocate more tokens to harder problems and fewer to easier ones, without any explicit length reward. This happened because longer reasoning chains were, on average, more likely to reach correct answers on the hard problems in the training set. Token length became instrumentally correlated with correctness, so the policy naturally extended chains where extension helped. This emergent length-scaling is part of what people refer to as "test-time compute scaling" — the model itself learned to use inference compute adaptively.
+A second observation from the paper: reasoning chain length increased over training. The model learned to allocate more tokens to harder problems and fewer to easier ones, without any explicit length reward. This happened because longer reasoning chains were, on average, more likely to reach correct answers on the hard problems in the training set. Token length became instrumentally correlated with correctness, so the policy naturally extended chains where extension helped. This emergent length-scaling is part of what people refer to as "test-time compute scaling"; the model itself learned to use inference compute adaptively.
 
 ### R1: cold-start SFT + RL + final alignment
 
@@ -314,7 +314,7 @@ DeepSeek-R1 adds stages around the RL training to address R1-Zero's failure mode
 
 2. **RL with GRPO**: same reward function as R1-Zero, but starting from the SFT-initialized policy. The reasoning capability sharpens substantially more quickly than R1-Zero because the policy starts from a better initial point.
 
-3. **Rejection sampling + SFT + RLHF pass**: after the main RL stage, the policy is used to generate reasoning traces on a broader set of tasks — math, code, writing, instruction following. Correct or high-quality outputs are filtered and combined into a second SFT dataset. A second SFT pass trains the model on this combined data. A final RLHF stage (using a learned reward model over human preferences) then aligns output style for general helpfulness and safety.
+3. **Rejection sampling + SFT + RLHF pass**: after the main RL stage, the policy is used to generate reasoning traces on a broader set of tasks: math, code, writing, instruction following. Correct or high-quality outputs are filtered and combined into a second SFT dataset. A second SFT pass trains the model on this combined data. A final RLHF stage (using a learned reward model over human preferences) then aligns output style for general helpfulness and safety.
 
 The resulting model matches or exceeds OpenAI o1-class performance on math and coding benchmarks while being fully open-weight.
 
@@ -323,15 +323,15 @@ A useful way to read the pipeline schematically:
 ```
 Base model
     │
-    ▼ [cold-start SFT — format + reasoning traces, ~thousands of examples]
+    ▼ [cold-start SFT: format + reasoning traces, ~thousands of examples]
     │
-    ▼ [GRPO RL — correctness + format reward, many steps]
+    ▼ [GRPO RL: correctness + format reward, many steps]
     │
-    ▼ [rejection sampling — generate at scale, filter correct, collect diverse data]
+    ▼ [rejection sampling: generate at scale, filter correct, collect diverse data]
     │
-    ▼ [second SFT — math + code + general capabilities]
+    ▼ [second SFT: math + code + general capabilities]
     │
-    ▼ [RLHF — learned reward model, preference data, PPO or similar]
+    ▼ [RLHF: learned reward model, preference data, PPO or similar]
     │
   R1 (deployed)
 ```
@@ -340,7 +340,7 @@ The R1 paper also reports that reasoning-capable behavior can be distilled from 
 
 ### The "RL amplifies the base model" interpretation
 
-A common takeaway from R1-Zero: the reasoning behaviors that emerge from RL were already latent in the base model. RL did not teach the model to reason from nothing — it selected and amplified reasoning patterns that the base model could already produce, pushing them from occasional to systematic.
+A common takeaway from R1-Zero: the reasoning behaviors that emerge from RL were already latent in the base model. RL did not teach the model to reason from nothing; it selected and amplified reasoning patterns that the base model could already produce, pushing them from occasional to systematic.
 
 This matters for expectations. A base model trained on essentially no mathematical reasoning data will not suddenly reason well after GRPO training. The RL training adjusts the distribution of what the model produces; it cannot add capabilities that are entirely absent. The quality of the pre-training corpus and the scale of the base model set the ceiling.
 
@@ -348,7 +348,7 @@ This matters for expectations. A base model trained on essentially no mathematic
 
 ## o1 and inference-time scaling
 
-OpenAI's o1 (released September 2024) has no public technical paper. The official blog post ("Learning to reason with LLMs") describes RL on chain-of-thought and the observation that performance improves as the model is given more time to "think" — more tokens in the reasoning trace — before producing its final answer. The blog post explicitly connects o1 performance to training compute and to inference compute as two separable levers.
+OpenAI's o1 (released September 2024) has no public technical paper. The official blog post ("Learning to reason with LLMs") describes RL on chain-of-thought and the observation that performance improves as the model is given more time to "think" (more tokens in the reasoning trace) before producing its final answer. The blog post explicitly connects o1 performance to training compute and to inference compute as two separable levers.
 
 What's publicly observable:
 
@@ -358,14 +358,14 @@ What's publicly observable:
 
 What's not publicly documented: the exact training algorithm, the reward function structure, whether a learned process reward model is used at inference time, and how the inference compute is allocated (fixed budget, adaptive, search-based).
 
-The general principle underneath — **test-time compute as a lever** — is well-established in the literature independently of o1. For any task where you can verify candidate answers:
+The general principle underneath, **test-time compute as a lever**, is well-established in the literature independently of o1. For any task where you can verify candidate answers:
 
 - **Pass@K with voting**: generate K completions, take the majority answer. Performance increases with K. This is the cheapest version of inference-time compute.
 - **Best-of-N with a reward model**: generate N completions, score with a reward model, return the top-scoring one. Requires a reliable scorer.
 - **Beam search over reasoning steps**: maintain a beam of partial reasoning traces, score each step with a process reward model, prune low-score branches. Requires a PRM.
 - **MCTS over proof steps**: for formal domains (theorem proving), use Monte Carlo tree search with a learned policy and value function. Used in AlphaProof.
 
-The lesson that carries across all of these: a model that can sometimes reach the right answer, combined with a way to identify which attempt succeeded, can be made arbitrarily more reliable by sampling more. This is complementary to training-time RL — RL improves the per-sample quality; inference compute multiplies the chances of getting a good sample.
+The lesson that carries across all of these: a model that can sometimes reach the right answer, combined with a way to identify which attempt succeeded, can be made arbitrarily more reliable by sampling more. This is complementary to training-time RL. RL improves the per-sample quality; inference compute multiplies the chances of getting a good sample.
 
 The interaction with RLVR is direct: the verifier you train against is also usable at inference time to identify good completions. A model trained with RLVR already knows "correctness is verifiable here," and the verifier is a natural scoring function for inference-time search. Models that were not trained with RLVR (e.g., models trained only on preference data) don't have this as readily because there's no external checker to identify the best completion.
 
@@ -377,11 +377,11 @@ RLVR with a rule-based checker is a pure outcome signal: the model gets feedback
 
 Two papers give context for when outcome supervision falls short.
 
-Uesato et al. 2022 (arXiv:2211.14275) ran the first systematic comparison of process-based and outcome-based feedback on GSM8K math problems. Their finding: outcome supervision produces similar final-answer accuracy with less annotation cost. However, outcome-supervised models make more reasoning errors that happen to cancel out — wrong steps that lead to the right answer. Process supervision is necessary when you care about the correctness of intermediate steps, not just the final answer.
+Uesato et al. 2022 (arXiv:2211.14275) ran the first systematic comparison of process-based and outcome-based feedback on GSM8K math problems. Their finding: outcome supervision produces similar final-answer accuracy with less annotation cost. However, outcome-supervised models make more reasoning errors that happen to cancel out: wrong steps that lead to the right answer. Process supervision is necessary when you care about the correctness of intermediate steps, not just the final answer.
 
 Lightman et al. 2023 (arXiv:2305.20050) trained a process reward model (PRM) that scored each reasoning step rather than only the final answer, using human-annotated step-level labels on the MATH benchmark. Their process-supervised model substantially outperformed outcome-supervised models at the same scale. The PRM allows verification at each step, which is useful both for training (denser reward signal) and for inference-time search (prune branches with low step scores).
 
-A **process reward model** scores individual reasoning steps; an **outcome reward model** scores the final answer. RLVR with a rule-based checker is outcome supervision — the checker only knows if the last answer is correct. PRMs require human-labeled step data (expensive) or synthetic labels from a verifier that can evaluate partial solutions (limited to domains with that structure, like formal proofs).
+A **process reward model** scores individual reasoning steps; an **outcome reward model** scores the final answer. RLVR with a rule-based checker is outcome supervision; the checker only knows if the last answer is correct. PRMs require human-labeled step data (expensive) or synthetic labels from a verifier that can evaluate partial solutions (limited to domains with that structure, like formal proofs).
 
 The practical tradeoff: outcome supervision is cheap and works well when correct reasoning usually leads to correct answers. Process supervision is more expensive to collect but provides a richer training signal and can detect subtler reasoning failures.
 
@@ -425,13 +425,13 @@ The resulting model gets better at reasoning across iterations because the train
 
 ### ReST
 
-ReST (Reinforced Self-Training, Gulcehre et al. 2023, arXiv:2308.08998) generalizes STaR slightly. It generates a large offline dataset from the current policy, filters by reward threshold, and fine-tunes. The key distinction from online RL methods like PPO or GRPO is that the data is generated offline and reused — no live rollouts during training. This is more compute-efficient and, as Gulcehre et al. note, less susceptible to reward hacking because the reward is applied at filter time, not as a live training signal.
+ReST (Reinforced Self-Training, Gulcehre et al. 2023, arXiv:2308.08998) generalizes STaR slightly. It generates a large offline dataset from the current policy, filters by reward threshold, and fine-tunes. The key distinction from online RL methods like PPO or GRPO is that the data is generated offline and reused: no live rollouts during training. This is more compute-efficient and, as Gulcehre et al. note, less susceptible to reward hacking because the reward is applied at filter time, not as a live training signal.
 
 Both STaR and ReST are best-of-N distillation rather than policy gradient. They push the model toward correct solutions without computing gradients through the reward signal. This makes them simpler to implement but also less data-efficient for hard problems where the model rarely succeeds: if the model gets the right answer 0.1% of the time, you need enormous sample budgets to collect enough training signal.
 
 The comparison between STaR/ReST and GRPO comes down to where the credit assignment happens. In STaR/ReST, credit assignment is binary at filter time: a chain is either kept (correct) or discarded (incorrect). There's no gradient signal about which parts of the chain were useful. In GRPO, the policy gradient flows through log-probabilities of specific tokens, giving some per-token signal (coarsely: the whole completion gets the same group-relative advantage, but at least the update direction is informed by the actual token choices). GRPO should, in theory, be more sample-efficient for hard problems because it squeezes more information out of each rollout.
 
-A common workflow in practice: use STaR or ReST to bootstrap a reasoning policy to reasonable accuracy (say, 30–50% pass rate on the target problem set), then switch to GRPO for the final stage where the harder gradient-based optimization is worth the infrastructure cost. The cold-start SFT in R1 serves the same bootstrapping function as one round of STaR — it gets the policy to a starting point where some correctness signal is available before RL begins.
+A common workflow in practice: use STaR or ReST to bootstrap a reasoning policy to reasonable accuracy (say, 30–50% pass rate on the target problem set), then switch to GRPO for the final stage where the harder gradient-based optimization is worth the infrastructure cost. The cold-start SFT in R1 serves the same bootstrapping function as one round of STaR; it gets the policy to a starting point where some correctness signal is available before RL begins.
 
 ---
 
@@ -442,10 +442,10 @@ Code with test suites is as natural a home for RLVR as math. The reward function
 The differences from math that matter for RLVR:
 
 - **Partial credit is natural**: a code submission can pass 3 of 5 tests. Mapping this to a scalar reward (0.0–1.0) is straightforward, whereas math usually requires a binary threshold.
-- **Test suite coverage matters more**: a math verifier checks the answer against a known value — there's no "coverage" issue. A code test suite may fail to exercise important edge cases, making reward hacking much easier. Private, unseen test cases (held out from the training reward) are even more important than in math.
+- **Test suite coverage matters more**: a math verifier checks the answer against a known value; there's no "coverage" issue. A code test suite may fail to exercise important edge cases, making reward hacking much easier. Private, unseen test cases (held out from the training reward) are even more important than in math.
 - **Execution is expensive**: running code in a sandbox for each of K completions per prompt is slower than checking a numeric answer. This makes large K more costly for code than for math, and pushes practitioners toward smaller group sizes or asynchronous evaluation pipelines.
 
-The GRPO loss and advantage computation are identical between math and code. The only difference is what produces the `rewards` tensor — and how long that computation takes.
+The GRPO loss and advantage computation are identical between math and code. The only difference is what produces the `rewards` tensor, and how long that computation takes.
 
 ---
 
@@ -455,7 +455,7 @@ A few patterns show up repeatedly in GRPO runs on math and code, worth knowing b
 
 **Early training**: the format reward dominates. The policy quickly learns to produce structured output (the `<think>` tags, the answer box). Correctness reward stays near zero. This phase usually ends within a few hundred steps.
 
-**Mid training**: the correctness reward starts climbing. The policy finds some problems it can solve reliably and begins generalizing. This is also when entropy starts dropping — the model is converging toward specific reasoning strategies. Watch entropy here. If it drops sharply (say, from 3.5 to 2.0 nats per token within 500 steps), the policy may be collapsing to a narrow style.
+**Mid training**: the correctness reward starts climbing. The policy finds some problems it can solve reliably and begins generalizing. This is also when entropy starts dropping; the model is converging toward specific reasoning strategies. Watch entropy here. If it drops sharply (say, from 3.5 to 2.0 nats per token within 500 steps), the policy may be collapsing to a narrow style.
 
 **Late training**: correctness reward plateaus. You're in the regime where problems on the training distribution are being solved but generalization to harder problems is marginal. Adding harder problems (curriculum), increasing KL beta to slow convergence, or switching to a distillation step are all options.
 
@@ -501,7 +501,7 @@ RLVR is the right approach when:
 
 RLVR is probably not the right approach when:
 
-- The domain is subjective. Writing quality, tone, helpfulness — these don't have checkable correct answers. Use preference-based methods (RLHF with a learned reward model, DPO).
+- The domain is subjective. Writing quality, tone, helpfulness: these don't have checkable correct answers. Use preference-based methods (RLHF with a learned reward model, DPO).
 - You don't have a reliable verifier. A weak test suite is more dangerous than no test suite, because it trains reward hacking rather than reasoning.
 
 **Failure modes to watch for:**
@@ -533,7 +533,7 @@ Other things worth implementing:
 
 **Training reward not increasing after 500 steps**: check whether the model is producing the expected output format at all. If `format_reward` is also stuck at zero, the format check may be broken or the model isn't generating the expected tags. Print a sample completion every 50 steps.
 
-**Training reward increasing but held-out reward flat or declining**: reward hacking on the verifier. Compare training accuracy to a separate held-out set using the same checker. If there's a gap, the verifier has exploitable patterns — fix the verifier or hold out more test problems from the reward signal.
+**Training reward increasing but held-out reward flat or declining**: reward hacking on the verifier. Compare training accuracy to a separate held-out set using the same checker. If there's a gap, the verifier has exploitable patterns. Fix the verifier or hold out more test problems from the reward signal.
 
 **KL exploding**: `kl_beta` is too low, or the learning rate is too high. Reduce learning rate first (try 5e-7), then raise `kl_beta` (try 0.1). Check whether gradient norms are reasonable (clip at 1.0).
 
@@ -564,25 +564,25 @@ All IDs verified against arxiv.org.
 
 **GRPO / DeepSeekMath**
 
-- Shao, Wang, Zhu et al. 2024. "DeepSeekMath: Pushing the Limits of Mathematical Reasoning in Open Language Models." DeepSeek-AI. arXiv:2402.03300. — Introduces GRPO. The GRPO section (§3) is self-contained.
+- Shao, Wang, Zhu et al. 2024. "DeepSeekMath: Pushing the Limits of Mathematical Reasoning in Open Language Models." DeepSeek-AI. arXiv:2402.03300: introduces GRPO. The GRPO section (§3) is self-contained.
 
 **DeepSeek-R1**
 
-- DeepSeek-AI. 2025. "DeepSeek-R1: Incentivizing Reasoning Capability in LLMs via Reinforcement Learning." arXiv:2501.12948. — Describes R1-Zero (pure RL on base model) and R1 (cold-start SFT + RL + RLHF). Primary source for the recipe in this lecture.
+- DeepSeek-AI. 2025. "DeepSeek-R1: Incentivizing Reasoning Capability in LLMs via Reinforcement Learning." arXiv:2501.12948: describes R1-Zero (pure RL on base model) and R1 (cold-start SFT + RL + RLHF). Primary source for the recipe in this lecture.
 
 **Process vs outcome supervision**
 
-- Uesato, Kushman, Kumar et al. 2022. "Solving math word problems with process- and outcome-based feedback." DeepMind. arXiv:2211.14275. — First systematic GSM8K comparison; outcome supervision gets similar accuracy with less annotation.
-- Lightman, Kosaraju, Burda et al. 2023. "Let's Verify Step by Step." OpenAI. arXiv:2305.20050. — Human-annotated step-level labels on MATH; process supervision outperforms outcome supervision at matched scale.
+- Uesato, Kushman, Kumar et al. 2022. "Solving math word problems with process- and outcome-based feedback." DeepMind. arXiv:2211.14275: first systematic GSM8K comparison; outcome supervision gets similar accuracy with less annotation.
+- Lightman, Kosaraju, Burda et al. 2023. "Let's Verify Step by Step." OpenAI. arXiv:2305.20050: human-annotated step-level labels on MATH; process supervision outperforms outcome supervision at matched scale.
 
 **STaR and ReST**
 
-- Zelikman, Wu, Mu, Goodman. 2022. "STaR: Bootstrapping Reasoning With Reasoning." NeurIPS 2022. arXiv:2203.14465. — Iterative sample → filter → SFT loop for chain-of-thought.
-- Gulcehre, Le Paine, Srinivasan et al. 2023. "Reinforced Self-Training (ReST) for Language Modeling." Google DeepMind. arXiv:2308.08998. — Offline generate → filter → train loop; more compute-efficient than online RL.
+- Zelikman, Wu, Mu, Goodman. 2022. "STaR: Bootstrapping Reasoning With Reasoning." NeurIPS 2022. arXiv:2203.14465: iterative sample → filter → SFT loop for chain-of-thought.
+- Gulcehre, Le Paine, Srinivasan et al. 2023. "Reinforced Self-Training (ReST) for Language Modeling." Google DeepMind. arXiv:2308.08998: offline generate → filter → train loop; more compute-efficient than online RL.
 
 **PPO (prerequisite)**
 
-- Schulman, Wolski, Dhariwal et al. 2017. "Proximal Policy Optimization Algorithms." OpenAI. arXiv:1707.06347. — See [Lecture 06](./06-ppo.md) for the derivation and implementation. GRPO inherits the clipped surrogate objective directly from this paper.
+- Schulman, Wolski, Dhariwal et al. 2017. "Proximal Policy Optimization Algorithms." OpenAI. arXiv:1707.06347: see [Lecture 06](./06-ppo.md) for the derivation and implementation. GRPO inherits the clipped surrogate objective directly from this paper.
 
 **o1 (no paper)**
 
@@ -590,7 +590,7 @@ All IDs verified against arxiv.org.
 
 **Reading order suggestion**
 
-If you're reading the primary sources: start with §3 of DeepSeekMath (arXiv:2402.03300) for the GRPO algorithm, then read the R1 paper (arXiv:2501.12948) for the full training pipeline. The Lightman et al. PRM paper (arXiv:2305.20050) is the clearest treatment of why process supervision helps and how step-level labels are collected. STaR (arXiv:2203.14465) is short and worth reading in full — it's one of the cleaner experimental papers in this space.
+If you're reading the primary sources: start with §3 of DeepSeekMath (arXiv:2402.03300) for the GRPO algorithm, then read the R1 paper (arXiv:2501.12948) for the full training pipeline. The Lightman et al. PRM paper (arXiv:2305.20050) is the clearest treatment of why process supervision helps and how step-level labels are collected. STaR (arXiv:2203.14465) is short and worth reading in full; it's one of the cleaner experimental papers in this space.
 
 ---
 

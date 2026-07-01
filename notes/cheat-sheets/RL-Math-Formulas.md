@@ -2,7 +2,7 @@
 
 # Deep RL Mathematical Formulas - Quick Reference
 
-_Unreviewed — no one has checked this end to end. Treat the math, code, and citations as unverified._
+_Unreviewed: no one has checked this end to end. Treat the math, code, and citations as unverified._
 
 A mathematical reference for key formulas in deep reinforcement learning.
 

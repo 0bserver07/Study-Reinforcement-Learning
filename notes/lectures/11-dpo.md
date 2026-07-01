@@ -2,7 +2,7 @@
 
 # Lecture 11: Direct Preference Optimization (DPO)
 
-_Unreviewed — no one has checked this end to end. Treat the math, code, and citations as unverified._
+_Unreviewed: no one has checked this end to end. Treat the math, code, and citations as unverified._
 
 **Time**: 3–4 hours | **Prerequisites**: Lectures 09–10
 
@@ -10,7 +10,7 @@ _Unreviewed — no one has checked this end to end. Treat the math, code, and ci
 
 ## Why DPO matters
 
-PPO-based RLHF works but requires three models (SFT, reward model, policy), has many sensitive hyperparameters, and is expensive to run. DPO (Rafailov et al. 2023, arXiv:2305.18290) shows that you can derive a closed-form objective that directly optimizes the policy on preference pairs — no separate reward model needed.
+PPO-based RLHF works but requires three models (SFT, reward model, policy), has many sensitive hyperparameters, and is expensive to run. DPO (Rafailov et al. 2023, arXiv:2305.18290) shows that you can derive a closed-form objective that directly optimizes the policy on preference pairs, no separate reward model needed.
 
 The key insight is that the optimal policy under the KL-constrained RLHF objective can be written in terms of the reference policy and the reward, so reward differences can be expressed as log-probability ratios. This lets you train on preferences without ever explicitly fitting a reward model.
 
@@ -36,15 +36,15 @@ for step in range(training_steps):
     clipped_ratio = clip(ratio, 1-epsilon, 1+epsilon)
     loss = -min(ratio * advantages, clipped_ratio * advantages)
 
-    # Plus value function loss, entropy bonus, KL penalty —
+    # Plus value function loss, entropy bonus, KL penalty:
     # many hyperparameters, all interacting.
 ```
 
 Problems:
-1. Reward model errors compound — if r_φ is wrong, PPO amplifies it.
-2. Hyperparameter sensitivity — ε, KL coeff, learning rate all critical.
-3. Training instability — PPO can diverge or collapse.
-4. Computational cost — 3 models, many forward/backward passes.
+1. Reward model errors compound: if r_φ is wrong, PPO amplifies it.
+2. Hyperparameter sensitivity: ε, KL coeff, learning rate all critical.
+3. Training instability: PPO can diverge or collapse.
+4. Computational cost: 3 models, many forward/backward passes.
 
 ---
 
@@ -497,13 +497,13 @@ In practice: Llama 2 (Meta) used PPO. Zephyr (Tunstall et al. 2023, arXiv:2310.1
 
 ## Recap
 
-DPO removes the reward model from RLHF by reparameterizing the RLHF objective so that reward differences appear as log-probability ratios. The resulting loss trains directly on preference pairs with a single hyperparameter (β). The reference model acts as a KL regularizer — without it, or with β too small, the policy drifts arbitrarily. The main tradeoff is flexibility: DPO requires pairwise preferences, while PPO can consume any scalar reward signal.
+DPO removes the reward model from RLHF by reparameterizing the RLHF objective so that reward differences appear as log-probability ratios. The resulting loss trains directly on preference pairs with a single hyperparameter (β). The reference model acts as a KL regularizer; without it, or with β too small, the policy drifts arbitrarily. The main tradeoff is flexibility: DPO requires pairwise preferences, while PPO can consume any scalar reward signal.
 
 ---
 
 ## Next lecture
 
-**[Lecture 12: Beyond DPO — GRPO and relatives](./12-beyond-dpo.md)**
+**[Lecture 12: Beyond DPO (GRPO and relatives)](./12-beyond-dpo.md)**
 
 Before moving on:
 - [ ] Implement DPO on toy dataset
@@ -515,13 +515,13 @@ Before moving on:
 
 ## References
 
-**Rafailov et al. (2023)** — "Direct Preference Optimization: Your Language Model is Secretly a Reward Model." arXiv:2305.18290. The DPO paper; derives the closed-form loss from the KL-constrained RLHF objective.
+**Rafailov et al. (2023)**: "Direct Preference Optimization: Your Language Model is Secretly a Reward Model." arXiv:2305.18290. The DPO paper; derives the closed-form loss from the KL-constrained RLHF objective.
 
-**Azar et al. (2023)** — "A General Theoretical Paradigm to Understand Learning from Human Preferences." arXiv:2310.12036. Introduces IPO (Identity Preference Optimization), addressing cases where DPO overfits to the preference dataset.
+**Azar et al. (2023)**: "A General Theoretical Paradigm to Understand Learning from Human Preferences." arXiv:2310.12036. Introduces IPO (Identity Preference Optimization), addressing cases where DPO overfits to the preference dataset.
 
-**Hong et al. (2024)** — "ORPO: Monolithic Preference Optimization without Reference Model." arXiv:2403.07691. Published EMNLP 2024. Merges SFT and preference optimization into a single training stage by adding a log-odds-ratio term to the SFT loss.
+**Hong et al. (2024)**: "ORPO: Monolithic Preference Optimization without Reference Model." arXiv:2403.07691. Published EMNLP 2024. Merges SFT and preference optimization into a single training stage by adding a log-odds-ratio term to the SFT loss.
 
-**Tunstall et al. (2023)** — "Zephyr: Direct Distillation of LM Alignment." arXiv:2310.16944. Fine-tunes Mistral-7B with DPO on AI-feedback data; shows competitive performance against much larger models on chat benchmarks.
+**Tunstall et al. (2023)**: "Zephyr: Direct Distillation of LM Alignment." arXiv:2310.16944. Fine-tunes Mistral-7B with DPO on AI-feedback data; shows competitive performance against much larger models on chat benchmarks.
 
 ---
 

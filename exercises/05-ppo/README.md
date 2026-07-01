@@ -1,20 +1,20 @@
-# Exercise 05 — PPO on CartPole
+# Exercise 05: PPO on CartPole
 
-Goes with [Lecture 06: PPO — Proximal Policy Optimization](../../notes/lectures/06-ppo.md).
+Goes with [Lecture 06: PPO (Proximal Policy Optimization)](../../notes/lectures/06-ppo.md).
 
 You'll implement PPO-Clip from scratch and use it to solve `CartPole-v1`. After REINFORCE (exercise 02) and actor-critic (exercise 04), this is the algorithm that finally gives you stable, sample-efficient learning by (a) re-using each batch of rollouts for several gradient epochs and (b) clipping the probability ratio so a single noisy minibatch can't blow up the policy.
 
-The five pieces you fill in are the same pieces every "real" PPO implementation has — a shared-trunk actor-critic, GAE, the clipped surrogate loss, a rollout collector, and the outer loop. Everything is small enough that the training run finishes in ~15 seconds on a laptop CPU.
+The five pieces you fill in are the same pieces every "real" PPO implementation has: a shared-trunk actor-critic, GAE, the clipped surrogate loss, a rollout collector, and the outer loop. Everything is small enough that the training run finishes in ~15 seconds on a laptop CPU.
 
 ## The task
 
 Fill in the TODOs in [`starter.py`](./starter.py). Five pieces:
 
-1. `ActorCriticNet` — small MLP with a shared trunk (`state_dim → 64 → 64`, tanh), a policy head producing logits, and a value head producing a scalar V(s). One network, two heads.
-2. `compute_gae` — Generalized Advantage Estimation. Walk the rollout backwards, building up the GAE by mixing one-step TD residuals through `λ`. Return both the advantages and the returns (advantages + values, the critic target).
-3. `ppo_clip_loss` — the full PPO loss: clipped policy surrogate + value MSE − entropy bonus. The clipping is what makes this PPO and not just actor-critic with a ratio.
-4. `collect_rollouts` — run the env for `n_steps` with the current policy; return tensors of obs, actions, log_probs, rewards, values, dones. Collect everything under `torch.no_grad()` — the loss recomputes log_probs and values from the (post-update) net each minibatch.
-5. `train` — the outer loop: rollout → GAE → normalize advantages → `epochs` passes of minibatch SGD on `ppo_clip_loss` → clip grad norm → step. Return per-iteration mean episode reward.
+1. `ActorCriticNet`: small MLP with a shared trunk (`state_dim → 64 → 64`, tanh), a policy head producing logits, and a value head producing a scalar V(s). One network, two heads.
+2. `compute_gae`: Generalized Advantage Estimation. Walk the rollout backwards, building up the GAE by mixing one-step TD residuals through `λ`. Return both the advantages and the returns (advantages + values, the critic target).
+3. `ppo_clip_loss`: the full PPO loss: clipped policy surrogate + value MSE − entropy bonus. The clipping is what makes this PPO and not just actor-critic with a ratio.
+4. `collect_rollouts`: run the env for `n_steps` with the current policy; return tensors of obs, actions, log_probs, rewards, values, dones. Collect everything under `torch.no_grad()`; the loss recomputes log_probs and values from the (post-update) net each minibatch.
+5. `train`: the outer loop: rollout → GAE → normalize advantages → `epochs` passes of minibatch SGD on `ppo_clip_loss` → clip grad norm → step. Return per-iteration mean episode reward.
 
 ## Setup
 
@@ -41,7 +41,7 @@ You're done when the tests pass *and* you can explain:
 
 ## If you get stuck
 
-Read [`HINTS.md`](./HINTS.md) — one hint at a time. The reference implementation is in [`solution/ppo.py`](./solution/ppo.py); look at it after you've made a real attempt.
+Read [`HINTS.md`](./HINTS.md), one hint at a time. The reference implementation is in [`solution/ppo.py`](./solution/ppo.py); look at it after you've made a real attempt.
 
 ## Going further (optional)
 
@@ -49,4 +49,4 @@ Read [`HINTS.md`](./HINTS.md) — one hint at a time. The reference implementati
 - Track the **clip fraction** (the fraction of ratios that hit the clip boundary). If it's > 0.5 your clip is too tight or your `epochs` is too high; if it's < 0.05 your clip is doing nothing. Print it during training and tune.
 - Try `LunarLander-v3` (needs `pip install "gymnasium[box2d]"`). Same algorithm, just an 8-dim state space and continuous-ish dynamics; you'll need more `total_steps` (~200k) and possibly a smaller `lr`.
 - The full PPO paper uses a separate optimizer and a learning-rate schedule that anneals to zero. Add the schedule and see if it helps.
-- Replace the categorical policy with a Gaussian one (`Normal(mean, std)` heads), and try a continuous-control env like `Pendulum-v1`. The clipping, GAE, and outer loop are unchanged — only the policy distribution differs.
+- Replace the categorical policy with a Gaussian one (`Normal(mean, std)` heads), and try a continuous-control env like `Pendulum-v1`. The clipping, GAE, and outer loop are unchanged; only the policy distribution differs.

@@ -12,7 +12,7 @@ Pull ML conference paper lists, filter for the [Sutro Group](https://github.com/
 
 Source: [papercopilot/paperlists](https://github.com/papercopilot/paperlists). Starts with ICLR 2026 (~20K records); generalizes to NeurIPS, ICML, etc.
 
-## Latest run — ICLR 2026
+## Latest run: ICLR 2026
 
 | | Count |
 |--|------:|
@@ -34,7 +34,7 @@ fetch  →  ingest  →  filter (keywords)  →  score (LLM)  →  deepen (on de
 
 Each stage is a CLI subcommand and writes to a SQLite database (`data/db/lit.sqlite`). The markdown / MkDocs site is generated from the DB.
 
-## LLM provider — pick one
+## LLM provider: pick one
 
 The scoring stage uses an LLM. Two providers are supported, controlled by `LIT_PROVIDER`. Override the model at any time with `LIT_MODEL=<name>`.
 
@@ -126,12 +126,12 @@ configs/keywords.yaml   # editable keyword groups
 
 | Stage | iclr2026 |
 |---|---|
-| fetch | done — 19,813 raw records (93 MB) |
-| ingest | done — 19,813 in DB |
-| filter | done — 4,842 keyword candidates |
-| score | done — 4,842 / 4,842 LLM-scored via `deepseek-v4-pro:cloud` (40 at score 3, 25 at 2, 134 at 1, 4,643 at 0) |
+| fetch | done: 19,813 raw records (93 MB) |
+| ingest | done: 19,813 in DB |
+| filter | done: 4,842 keyword candidates |
+| score | done: 4,842 / 4,842 LLM-scored via `deepseek-v4-pro:cloud` (40 at score 3, 25 at 2, 134 at 1, 4,643 at 0) |
 | deepen | implemented; on-demand per paper |
-| render | done — 4,196 markdown pages + index |
+| render | done: 4,196 markdown pages + index |
 | publish | live at https://0bserver07.github.io/iclr-lit-builder/ |
 
 ## Tests
@@ -145,7 +145,7 @@ PYTHONPATH=src python3 -m pytest tests -q       # 33 tests, all mocked LLM
 
 ## Running this in this repo
 
-Installed in an isolated venv at `tools/lit-builder/.venv` (so `lit` here is `tools/lit-builder/.venv/bin/lit`). Working data goes in `tools/lit-builder/data/` (gitignored). Already done: `fetch` + `ingest` + `filter` on ICLR 2026 — 19,813 papers ingested, 4,329 matched the RL keyword set in `configs/keywords.yaml`.
+Installed in an isolated venv at `tools/lit-builder/.venv` (so `lit` here is `tools/lit-builder/.venv/bin/lit`). Working data goes in `tools/lit-builder/data/` (gitignored). Already done: `fetch` + `ingest` + `filter` on ICLR 2026: 19,813 papers ingested, 4,329 matched the RL keyword set in `configs/keywords.yaml`.
 
 What's left needs an LLM credential. Pick one:
 
@@ -153,11 +153,11 @@ What's left needs an LLM credential. Pick one:
 cd tools/lit-builder
 LIT=.venv/bin/lit
 
-# Option A — Claude Haiku (cheap, fast):
+# Option A, Claude Haiku (cheap, fast):
 export LIT_PROVIDER=anthropic ANTHROPIC_API_KEY=sk-ant-...
-# Option B — Ollama Cloud (uses the :cloud models already pulled):
+# Option B, Ollama Cloud (uses the :cloud models already pulled):
 export LIT_PROVIDER=ollama OLLAMA_API_KEY=... LIT_MODEL=deepseek-v4-pro:cloud
-# Option C — a local model: `ollama pull llama3.1:8b` then LIT_PROVIDER=ollama LIT_MODEL=llama3.1:8b
+# Option C, a local model: `ollama pull llama3.1:8b` then LIT_PROVIDER=ollama LIT_MODEL=llama3.1:8b
 
 $LIT score  iclr2026 --limit 4329          # triage all survivors 0-3 (or a smaller --limit to test)
 $LIT list   iclr2026 --min-score 2          # the curated, relevance-ranked list

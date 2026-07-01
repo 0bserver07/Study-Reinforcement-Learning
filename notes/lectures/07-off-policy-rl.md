@@ -2,7 +2,7 @@
 
 # Lecture 07: Off-Policy Learning - SAC and TD3
 
-_Unreviewed — no one has checked this end to end. Treat the math, code, and citations as unverified._
+_Unreviewed: no one has checked this end to end. Treat the math, code, and citations as unverified._
 
 **Duration:** ~90 minutes
 **Prerequisites:** Lecture 03 (DQN), Lecture 04 (Actor-Critic), Lecture 06 (PPO)
@@ -759,10 +759,10 @@ Off-policy methods store experience in a replay buffer and can reuse past transi
 
 ## References
 
-1. **DDPG:** Lillicrap et al. (2015/ICLR 2016) "Continuous Control with Deep Reinforcement Learning" — arXiv:1509.02971
-2. **TD3:** Fujimoto, van Hoof, Meger (ICML 2018) "Addressing Function Approximation Error in Actor-Critic Methods" — arXiv:1802.09477
-3. **SAC:** Haarnoja, Zhou, Abbeel, Levine (ICML 2018) "Soft Actor-Critic: Off-Policy Maximum Entropy Deep Reinforcement Learning with a Stochastic Actor" — arXiv:1801.01290
-4. **SAC with automatic temperature tuning:** Haarnoja et al. (2018/2019) "Soft Actor-Critic Algorithms and Applications" — arXiv:1812.05905
+1. **DDPG:** Lillicrap et al. (2015/ICLR 2016) "Continuous Control with Deep Reinforcement Learning." arXiv:1509.02971
+2. **TD3:** Fujimoto, van Hoof, Meger (ICML 2018) "Addressing Function Approximation Error in Actor-Critic Methods." arXiv:1802.09477
+3. **SAC:** Haarnoja, Zhou, Abbeel, Levine (ICML 2018) "Soft Actor-Critic: Off-Policy Maximum Entropy Deep Reinforcement Learning with a Stochastic Actor." arXiv:1801.01290
+4. **SAC with automatic temperature tuning:** Haarnoja et al. (2018/2019) "Soft Actor-Critic Algorithms and Applications." arXiv:1812.05905
 
 ---
 

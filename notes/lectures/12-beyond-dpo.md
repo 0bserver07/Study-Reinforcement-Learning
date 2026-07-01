@@ -1,8 +1,8 @@
 <!-- status: unreviewed | last-reviewed: never -->
 
-# Lecture 12: Beyond DPO — GRPO, RRHF, IPO, and post-DPO methods
+# Lecture 12: Beyond DPO (GRPO, RRHF, IPO, and post-DPO methods)
 
-_Unreviewed — no one has checked this end to end. Treat the math, code, and citations as unverified._
+_Unreviewed: no one has checked this end to end. Treat the math, code, and citations as unverified._
 
 **Time**: 4-5 hours | **Prerequisites**: Lectures 09-11
 
@@ -54,7 +54,7 @@ Direct Methods (2023+)
 
 ---
 
-## Part 2: GRPO — Group Relative Policy Optimization
+## Part 2: GRPO (Group Relative Policy Optimization)
 
 ### The core idea
 
@@ -405,7 +405,7 @@ if __name__ == "__main__":
 
 ### RRHF - Rank Responses to align Human Feedback
 
-**Paper**: "RRHF: Rank Responses to Align Language Models with Human Feedback without tears" — Yuan et al. 2023, NeurIPS 2023, arXiv:2304.05302
+**Paper**: "RRHF: Rank Responses to Align Language Models with Human Feedback without tears," Yuan et al. 2023, NeurIPS 2023, arXiv:2304.05302
 
 **Key idea**: Use ranking loss directly on multiple responses.
 
@@ -446,7 +446,7 @@ def rrhf_loss(scores: List[float], log_probs: List[float]) -> torch.Tensor:
 
 ### IPO - Identity Preference Optimization
 
-**Paper**: "A General Theoretical Paradigm to Understand Learning from Human Preferences" — Azar et al. 2023, arXiv:2310.12036
+**Paper**: "A General Theoretical Paradigm to Understand Learning from Human Preferences," Azar et al. 2023, arXiv:2310.12036
 
 **Key idea**: DPO's implicit regularization might be too weak. Use explicit L2 regularization.
 
@@ -491,7 +491,7 @@ def dpo_loss(chosen_log_prob, rejected_log_prob, ref_chosen, ref_rejected, beta)
 
 ### KTO - Kahneman-Tversky Optimization
 
-**Paper**: "KTO: Model Alignment as Prospect Theoretic Optimization" — Ethayarajh et al. 2024, ICML 2024, arXiv:2402.01306
+**Paper**: "KTO: Model Alignment as Prospect Theoretic Optimization," Ethayarajh et al. 2024, ICML 2024, arXiv:2402.01306
 
 **Key insight**: Don't need pairwise comparisons! Just thumbs up/down is enough.
 
@@ -544,7 +544,7 @@ total_loss = loss_good + loss_bad
 
 ### ORPO - Odds Ratio Preference Optimization
 
-**Paper**: "ORPO: Monolithic Preference Optimization without Reference Model" — Hong et al. 2024, EMNLP 2024, arXiv:2403.07691
+**Paper**: "ORPO: Monolithic Preference Optimization without Reference Model," Hong et al. 2024, EMNLP 2024, arXiv:2403.07691
 
 **Key idea**: Combine SFT and preference optimization in one step.
 
@@ -627,7 +627,7 @@ def choose_method(your_situation):
 
 ### DeepSeekMath (2024) - GRPO success story
 
-**Paper**: "DeepSeekMath: Pushing the Limits of Mathematical Reasoning in Open Language Models" — Shao et al. 2024, arXiv:2402.03300 (introduces GRPO)
+**Paper**: "DeepSeekMath: Pushing the Limits of Mathematical Reasoning in Open Language Models," Shao et al. 2024, arXiv:2402.03300 (introduces GRPO)
 
 **Their approach**:
 ```python
@@ -779,13 +779,13 @@ class CodeGRPOTrainer:
 
 ## Recap
 
-GRPO shines when you have objective scoring (math, code) and can sample many responses per prompt. KTO requires only binary feedback, so it's cheap to collect data. IPO is a more conservative replacement for DPO that avoids overconfidence at high KL. RRHF uses a listwise ranking loss over multiple responses. ORPO folds SFT and preference learning into one pass. Method choice depends mostly on what data you have — pairwise, ranked, or binary — and whether your task has a ground-truth metric.
+GRPO shines when you have objective scoring (math, code) and can sample many responses per prompt. KTO requires only binary feedback, so it's cheap to collect data. IPO is a more conservative replacement for DPO that avoids overconfidence at high KL. RRHF uses a listwise ranking loss over multiple responses. ORPO folds SFT and preference learning into one pass. Method choice depends mostly on what data you have (pairwise, ranked, or binary) and whether your task has a ground-truth metric.
 
 ---
 
 ## Next steps
 
-Good follow-up: implement GRPO on a toy task with a clear scoring function, then compare against DPO on the same data. The DeepSeekMath paper (arXiv:2402.03300) is worth reading in full — the GRPO section is self-contained.
+Good follow-up: implement GRPO on a toy task with a clear scoring function, then compare against DPO on the same data. The DeepSeekMath paper (arXiv:2402.03300) is worth reading in full; the GRPO section is self-contained.
 
 **Next lecture**: [Lecture 13: RLHF for Code Generation](./13-rlhf-code-generation.md)
 
@@ -794,7 +794,7 @@ Good follow-up: implement GRPO on a toy task with a clear scoring function, then
 ## References
 
 **GRPO / DeepSeekMath**:
-- Shao et al. 2024. "DeepSeekMath: Pushing the Limits of Mathematical Reasoning in Open Language Models." arXiv:2402.03300 — introduces GRPO.
+- Shao et al. 2024. "DeepSeekMath: Pushing the Limits of Mathematical Reasoning in Open Language Models." arXiv:2402.03300 (introduces GRPO).
 
 **DPO** (prerequisite):
 - Rafailov et al. 2023. "Direct Preference Optimization." arXiv:2305.18290.

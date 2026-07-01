@@ -2,7 +2,7 @@
 
 # Lecture 03: Value Functions & Q-Learning
 
-_Unreviewed — no one has checked this end to end. Treat the math, code, and citations as unverified._
+_Unreviewed: no one has checked this end to end. Treat the math, code, and citations as unverified._
 
 **Time**: ~90 min · **Prerequisites**: Lecture 01 · **Exercise**: [`03-q-learning`](../../exercises/03-q-learning/) (tabular Q-learning on FrozenLake)
 
@@ -10,7 +10,7 @@ _Unreviewed — no one has checked this end to end. Treat the math, code, and ci
 
 ## Why value-based RL
 
-Lecture 02 optimized the policy π(a|s) directly. The other route: learn how good each action is — Q(s,a) — and act greedily. That buys you sample efficiency (you can replay old data), off-policy learning (learn from any data, including random exploration), and a simple deterministic policy for discrete actions. DeepMind's 2013 Atari result — the paper usually credited with kicking off deep RL — was a Q-learning method, DQN. This lecture builds up to it.
+Lecture 02 optimized the policy π(a|s) directly. The other route: learn how good each action is (Q(s,a)) and act greedily. That buys you sample efficiency (you can replay old data), off-policy learning (learn from any data, including random exploration), and a simple deterministic policy for discrete actions. DeepMind's 2013 Atari result, the paper usually credited with kicking off deep RL, was a Q-learning method, DQN. This lecture builds up to it.
 
 ---
 
@@ -37,7 +37,7 @@ If you know Q*(s,a) for the optimal policy, you can act optimally just by taking
 π*(s) = argmax_a Q*(s,a)
 ```
 
-So you don't store a policy separately — the Q-table (or Q-network) *is* the policy. Note this needs Q, not V: with only V*(s) you'd need the transition model P to look one step ahead.
+So you don't store a policy separately: the Q-table (or Q-network) *is* the policy. Note this needs Q, not V: with only V*(s) you'd need the transition model P to look one step ahead.
 
 ---
 
@@ -138,8 +138,8 @@ def train_q_learning(env_name='FrozenLake-v1', n_episodes=10000):
     States: 16 (one for each grid cell)
     Actions: 4 (up, down, left, right)
     """
-    # Note: FrozenLake-v1 is slippery by default — your action goes sideways 1/3
-    # of the time — so even the optimal policy doesn't win every episode (~0.74
+    # Note: FrozenLake-v1 is slippery by default, your action goes sideways 1/3
+    # of the time: so even the optimal policy doesn't win every episode (~0.74
     # success rate). Pass is_slippery=False for a deterministic version that
     # tabular Q-learning solves cleanly (success rate -> 1.0).
     env = gym.make(env_name)
@@ -758,23 +758,23 @@ epsilon = max(0.01, epsilon * 0.995)  # After each episode
 
 ## Recap
 
-Q-learning learns Q(s,a) by repeatedly nudging it toward the TD target `r + γ max_a' Q(s',a')`, then acts greedily — off-policy, and able to reuse old data. DQN replaces the table with a network and needs two tricks to be stable: experience replay (sample random past transitions instead of correlated consecutive ones) and a slowly-updated target network (so the TD target isn't chasing the network you're training). The common follow-ups — Double DQN (curb overestimation), Dueling DQN (split V and A), prioritized replay (sample high-TD-error transitions more often) — each fix one specific failure mode. All of it is discrete-actions only; continuous control wants DDPG / SAC (Lecture 07).
+Q-learning learns Q(s,a) by repeatedly nudging it toward the TD target `r + γ max_a' Q(s',a')`, then acts greedily, off-policy, and able to reuse old data. DQN replaces the table with a network and needs two tricks to be stable: experience replay (sample random past transitions instead of correlated consecutive ones) and a slowly-updated target network (so the TD target isn't chasing the network you're training). The common follow-ups, Double DQN (curb overestimation), Dueling DQN (split V and A), prioritized replay (sample high-TD-error transitions more often), each fix one specific failure mode. All of it is discrete-actions only; continuous control wants DDPG / SAC (Lecture 07).
 
 ---
 
 ## Next Lecture
 
-**[Lecture 04: Actor-Critic Methods](./04-actor-critic.md)** — policy gradients with a learned value function as the baseline. DQN learns Q and reads the policy off it; actor-critic learns both, explicitly.
+**[Lecture 04: Actor-Critic Methods](./04-actor-critic.md)**: policy gradients with a learned value function as the baseline. DQN learns Q and reads the policy off it; actor-critic learns both, explicitly.
 
 ---
 
 ## References
 
-- **Watkins (1989)**, *Learning from Delayed Rewards* (Cambridge PhD thesis) — Q-learning. Convergence: **Watkins & Dayan (1992)**, *Q-learning*, *Machine Learning* 8.
-- **Mnih et al. (2013)**, *Playing Atari with Deep Reinforcement Learning* — DQN. [arXiv:1312.5602](https://arxiv.org/abs/1312.5602)
-- **Mnih et al. (2015)**, *Human-level control through deep reinforcement learning* — the DQN Nature paper. (*Nature* 518.)
-- **van Hasselt, Guez, Silver (2016)**, *Deep Reinforcement Learning with Double Q-learning* — Double DQN. [arXiv:1509.06461](https://arxiv.org/abs/1509.06461)
-- **Wang et al. (2016)**, *Dueling Network Architectures for Deep Reinforcement Learning* — Dueling DQN. [arXiv:1511.06581](https://arxiv.org/abs/1511.06581)
+- **Watkins (1989)**, *Learning from Delayed Rewards* (Cambridge PhD thesis): Q-learning. Convergence: **Watkins & Dayan (1992)**, *Q-learning*, *Machine Learning* 8.
+- **Mnih et al. (2013)**, *Playing Atari with Deep Reinforcement Learning*: DQN. [arXiv:1312.5602](https://arxiv.org/abs/1312.5602)
+- **Mnih et al. (2015)**, *Human-level control through deep reinforcement learning*: the DQN Nature paper. (*Nature* 518.)
+- **van Hasselt, Guez, Silver (2016)**, *Deep Reinforcement Learning with Double Q-learning*: Double DQN. [arXiv:1509.06461](https://arxiv.org/abs/1509.06461)
+- **Wang et al. (2016)**, *Dueling Network Architectures for Deep Reinforcement Learning*: Dueling DQN. [arXiv:1511.06581](https://arxiv.org/abs/1511.06581)
 - **Schaul et al. (2016)**, *Prioritized Experience Replay*. [arXiv:1511.05952](https://arxiv.org/abs/1511.05952)
 
 ---
@@ -783,4 +783,4 @@ Q-learning learns Q(s,a) by repeatedly nudging it toward the TD target `r + γ m
 
 [`exercises/03-q-learning/`](../../exercises/03-q-learning/): implement tabular Q-learning (ε-greedy action selection, the TD update, the loop) and solve `FrozenLake-v1` with `is_slippery=False`. Tests there, hints if you're stuck.
 
-After that, the natural next step (not graded here yet) is DQN on CartPole: take the `SimpleDQN` above, add the replay buffer and target network, train ~500 episodes. Plain DQN on CartPole is finicky — expect variance run to run — but when it works it's noticeably more sample-efficient than REINFORCE from Lecture 02. Then try Double DQN and Dueling DQN and compare.
+After that, the natural next step (not graded here yet) is DQN on CartPole: take the `SimpleDQN` above, add the replay buffer and target network, train ~500 episodes. Plain DQN on CartPole is finicky (expect variance run to run) but when it works it's noticeably more sample-efficient than REINFORCE from Lecture 02. Then try Double DQN and Dueling DQN and compare.

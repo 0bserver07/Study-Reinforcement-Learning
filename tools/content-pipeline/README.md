@@ -1,8 +1,8 @@
 # content-pipeline
 
-Small scripts for drafting write-ups (blog posts, threads) about papers using an LLM API. Auxiliary — not part of the study path. The drafts it produces are starting points; they need editing before they're worth anything.
+Small scripts for drafting write-ups (blog posts, threads) about papers using an LLM API. Auxiliary: not part of the study path. The drafts it produces are starting points; they need editing before they're worth anything.
 
-> Note: an earlier version of this README described a much larger system — templates, workflows, a dozen generator scripts, publishing integrations. Most of that was never built. What's actually here is below. Read the source for the exact command-line flags.
+> Note: an earlier version of this README described a much larger system: templates, workflows, a dozen generator scripts, publishing integrations. Most of that was never built. What's actually here is below. Read the source for the exact command-line flags.
 
 ## What's here
 

@@ -2,7 +2,7 @@
 
 # Lecture 25: Long-horizon credit assignment
 
-_Unreviewed — no one has checked this end to end. Treat the math, code, and citations as unverified._
+_Unreviewed: no one has checked this end to end. Treat the math, code, and citations as unverified._
 
 **Time**: ~3 h · **Prerequisites**: Lectures 02, 04, 16
 
@@ -10,13 +10,13 @@ _Unreviewed — no one has checked this end to end. Treat the math, code, and ci
 
 ## Where this fits
 
-[Lecture 16](./16-agentic-rl.md) set up the agentic RL loop: a policy emits an action, an environment returns an observation, the history grows, and a terminal reward shows up at the end. The example episodes there were short — a 3-action code fix, a ReAct call-and-answer trace — and the GRPO group baseline was enough to make policy gradient work.
+[Lecture 16](./16-agentic-rl.md) set up the agentic RL loop: a policy emits an action, an environment returns an observation, the history grows, and a terminal reward shows up at the end. The example episodes there were short (a 3-action code fix, a ReAct call-and-answer trace), and the GRPO group baseline was enough to make policy gradient work.
 
 This lecture is about what breaks when the episode gets long. The horizon stops being 5 or 20 steps. It becomes 50, 500, or 5000. The model edits dozens of files, runs hundreds of shell commands, queries a search index a thousand times, negotiates back-and-forth across 200 turns, or runs a literature review that takes a research-grade afternoon. At the end, a single bit comes back: solved, or not.
 
 How do you decide that the file rename on step 7 was the move that mattered? How do you assign credit to the action at step 312 in a 500-step trajectory when 311 of the other actions were also taken and the episode succeeded? This is the long-horizon credit assignment problem, and as of early 2026 it is the hardest open problem in agentic RL. There is no agreed answer.
 
-The lecture is in four parts. First, set up the problem and the classical answers (TD(λ), GAE, baselines) and explain why they don't translate cleanly to the LLM-agent setting. Second, walk through the modern (2023-2025) heuristics — outcome reward + group baselines, process reward models, hindsight relabeling, self-critique, tree search at training time, curriculum decomposition — and what each one buys and costs. Third, two code sketches: a hindsight-relabel loop and a tree-search-then-train recipe. Fourth, the open questions.
+The lecture is in four parts. First, set up the problem and the classical answers (TD(λ), GAE, baselines) and explain why they don't translate cleanly to the LLM-agent setting. Second, walk through the modern (2023-2025) heuristics: outcome reward + group baselines, process reward models, hindsight relabeling, self-critique, tree search at training time, curriculum decomposition, and what each one buys and costs. Third, two code sketches: a hindsight-relabel loop and a tree-search-then-train recipe. Fourth, the open questions.
 
 ---
 
@@ -36,21 +36,21 @@ The policy gradient ([Lecture 02](./02-policy-gradients.md)) for this setting is
 ∇_θ J(θ) = E_τ [ R(τ) · Σ_{t=1}^{T} ∇_θ log π_θ(aₜ | sₜ) ]
 ```
 
-Every action's log-prob gets scaled by the same scalar — the terminal reward. The action at step 7 and the action at step 312 are treated as equally responsible for whether `R(τ) = 1` or `R(τ) = 0`. That is the credit assignment problem at its starkest: the gradient estimator has no way to tell them apart.
+Every action's log-prob gets scaled by the same scalar: the terminal reward. The action at step 7 and the action at step 312 are treated as equally responsible for whether `R(τ) = 1` or `R(τ) = 0`. That is the credit assignment problem at its starkest: the gradient estimator has no way to tell them apart.
 
 ### Why the variance grows with the horizon
 
-Take T independent actions, each of which contributes some randomness to the trajectory. The log-prob gradient ∇ log π_θ(aₜ | sₜ) is a vector whose magnitude is roughly constant across t (it doesn't shrink with horizon). The sum Σₜ ∇ log π_θ(aₜ | sₜ) is a sum of T noisy vectors, so its variance scales linearly with T. Multiply by the terminal reward R(τ) — also a noisy scalar across the population of trajectories — and the variance of the gradient estimator is `O(T · Var(R))`.
+Take T independent actions, each of which contributes some randomness to the trajectory. The log-prob gradient ∇ log π_θ(aₜ | sₜ) is a vector whose magnitude is roughly constant across t (it doesn't shrink with horizon). The sum Σₜ ∇ log π_θ(aₜ | sₜ) is a sum of T noisy vectors, so its variance scales linearly with T. Multiply by the terminal reward R(τ), also a noisy scalar across the population of trajectories, and the variance of the gradient estimator is `O(T · Var(R))`.
 
-In CartPole with T ≈ 200, that variance is already enough to make REINFORCE unstable without baselines and returns-to-go ([Lecture 02 Part 6](./02-policy-gradients.md#part-6-the-gotchas)). At T = 500, with a binary reward and a success rate of, say, 5%, the gradient estimator from a single batch is mostly noise. At T = 5000, you can run a 50-trajectory batch and still see no signal — the policy doesn't move in a recognizable direction. The gradient is unbiased; it just has so much variance that you can't detect the underlying mean from any tractable number of samples.
+In CartPole with T ≈ 200, that variance is already enough to make REINFORCE unstable without baselines and returns-to-go ([Lecture 02 Part 6](./02-policy-gradients.md#part-6-the-gotchas)). At T = 500, with a binary reward and a success rate of, say, 5%, the gradient estimator from a single batch is mostly noise. At T = 5000, you can run a 50-trajectory batch and still see no signal; the policy doesn't move in a recognizable direction. The gradient is unbiased; it just has so much variance that you can't detect the underlying mean from any tractable number of samples.
 
 This is not a hyperparameter problem. No amount of learning-rate tuning fixes it. The variance is in the estimator.
 
 ### The discount factor stops meaning what you want
 
-In tabular RL, the discount γ ∈ (0, 1) plays two roles. Mathematically, it keeps infinite-horizon returns finite. Modeling-wise, it expresses that rewards in the distant future are worth less than rewards now — partly because of uncertainty, partly because the agent might die before getting there.
+In tabular RL, the discount γ ∈ (0, 1) plays two roles. Mathematically, it keeps infinite-horizon returns finite. Modeling-wise, it expresses that rewards in the distant future are worth less than rewards now, partly because of uncertainty, partly because the agent might die before getting there.
 
-For an agentic episode with sparse terminal reward, γᵀ⁻ᵗ becomes the credit assigned to the action at step t. If γ = 0.99 and T = 500, the action at step 1 gets γ⁴⁹⁹ ≈ 0.007 of the reward. The action at step 499 gets γ¹ = 0.99. Essentially all the credit lands on the last handful of actions — which are probably the cleanup actions (writing the answer, calling `finish()`), not the ones that mattered.
+For an agentic episode with sparse terminal reward, γᵀ⁻ᵗ becomes the credit assigned to the action at step t. If γ = 0.99 and T = 500, the action at step 1 gets γ⁴⁹⁹ ≈ 0.007 of the reward. The action at step 499 gets γ¹ = 0.99. Essentially all the credit lands on the last handful of actions, which are probably the cleanup actions (writing the answer, calling `finish()`), not the ones that mattered.
 
 Setting γ = 1 removes that bias but reintroduces the variance problem in its full ugly form: every action gets the same credit, regardless of position. Setting γ close to 0 turns the problem into nearly-myopic optimization, which is fine if the reward is dense but useless when the reward only arrives at step T.
 
@@ -75,13 +75,13 @@ For an LLM agent at T = 500, GAE doesn't translate cleanly. The reasons are inte
 
 ### Why classical fixes break in the LLM-agent regime
 
-**1. The value function is expensive.** V̂(sₜ) is supposed to estimate the expected return from state sₜ. In the agentic setting, sₜ is the entire conversation history plus environment state up to step t — for a 500-step trajectory in a SWE-bench-style task, that's tens of thousands of tokens of context. A value head bolted on top of the policy LM has to process that context, which means full forward-pass cost per step. If the policy is a 70B model, the critic is either also 70B (doubling memory and compute) or a separate, smaller model that doesn't have the same world-understanding as the policy and produces low-quality value estimates.
+**1. The value function is expensive.** V̂(sₜ) is supposed to estimate the expected return from state sₜ. In the agentic setting, sₜ is the entire conversation history plus environment state up to step t; for a 500-step trajectory in a SWE-bench-style task, that's tens of thousands of tokens of context. A value head bolted on top of the policy LM has to process that context, which means full forward-pass cost per step. If the policy is a 70B model, the critic is either also 70B (doubling memory and compute) or a separate, smaller model that doesn't have the same world-understanding as the policy and produces low-quality value estimates.
 
-**2. The value function is untrained, especially at the start.** In CartPole, the value function gets supervised by the Monte Carlo returns of every episode, and a few thousand episodes is enough to fit a small network. In agentic RL, episodes are expensive (each step is a model call plus an environment call), success rates are low (5% on a hard task means most episodes return zero), and the value function has nothing to fit to for the first many thousands of gradient steps. Until the policy starts succeeding regularly, the critic's "predictions" are essentially the empirical mean reward, which is what GRPO uses as the group baseline anyway — without the cost of training a separate network.
+**2. The value function is untrained, especially at the start.** In CartPole, the value function gets supervised by the Monte Carlo returns of every episode, and a few thousand episodes is enough to fit a small network. In agentic RL, episodes are expensive (each step is a model call plus an environment call), success rates are low (5% on a hard task means most episodes return zero), and the value function has nothing to fit to for the first many thousands of gradient steps. Until the policy starts succeeding regularly, the critic's "predictions" are essentially the empirical mean reward, which is what GRPO uses as the group baseline anyway, without the cost of training a separate network.
 
-**3. The state is unstructured text.** Tabular value functions exploit state structure (this state is similar to that state). In LLM-agent settings, two states that look superficially similar (same files open, same error messages) can have wildly different value because of subtle differences in conversation history. Generalization across states is hard, and a value function that doesn't generalize well doesn't reduce variance — it just adds bias.
+**3. The state is unstructured text.** Tabular value functions exploit state structure (this state is similar to that state). In LLM-agent settings, two states that look superficially similar (same files open, same error messages) can have wildly different value because of subtle differences in conversation history. Generalization across states is hard, and a value function that doesn't generalize well doesn't reduce variance; it just adds bias.
 
-**4. Per-step rewards usually don't exist.** Even if you had a value function, GAE-style bootstrapping needs per-step rewards (the δₜ terms). For most agentic tasks, the only nonzero reward is at the end. You can fake intermediate rewards (a process reward model — see below), but now you're back to the question the lecture is about: how do you generate trustworthy per-step credit when you don't have a way to verify per-step correctness?
+**4. Per-step rewards usually don't exist.** Even if you had a value function, GAE-style bootstrapping needs per-step rewards (the δₜ terms). For most agentic tasks, the only nonzero reward is at the end. You can fake intermediate rewards (a process reward model, see below), but now you're back to the question the lecture is about: how do you generate trustworthy per-step credit when you don't have a way to verify per-step correctness?
 
 This is why standard RLHF training pipelines for agentic tasks usually skip GAE and use trajectory-level outcome rewards with GRPO-style group baselines (as in [Lecture 16](./16-agentic-rl.md) and the DeepSeek-R1 training recipe; DeepSeek-AI 2025, [arXiv:2501.12948](https://arxiv.org/abs/2501.12948)). They eat the high variance, throw more rollouts at the problem, and hope the policy still moves in a useful direction. For tasks with T ≈ 30 or so, this works. For T in the hundreds, the wall starts showing.
 
@@ -101,13 +101,13 @@ Each token in trajectory τ_i is weighted by A_i during the policy gradient upda
 
 When K is large enough and the trajectories are independent samples (e.g., K independent attempts at solving the same problem), the group-relative advantage is well-defined: trajectories that did better than the group get pushed up, ones that did worse get pushed down. The policy moves toward what works.
 
-The horizon-length issue is real but bounded. For math reasoning tasks, T is roughly the length of the chain-of-thought — say, 1000 tokens but only one "step" in the agentic sense. For agentic coding tasks at T ≈ 20-30, K = 8 to 16 trajectories per task is enough to get a usable signal as long as the success rate is in a reasonable range (5% to 95%). DeepSeek-R1's training recipe uses this structure for math and code; the SWE-RL paper (Wei et al. 2025, [arXiv:2502.18449](https://arxiv.org/abs/2502.18449)) uses a similar structure for software-engineering-style tasks.
+The horizon-length issue is real but bounded. For math reasoning tasks, T is roughly the length of the chain-of-thought: say, 1000 tokens but only one "step" in the agentic sense. For agentic coding tasks at T ≈ 20-30, K = 8 to 16 trajectories per task is enough to get a usable signal as long as the success rate is in a reasonable range (5% to 95%). DeepSeek-R1's training recipe uses this structure for math and code; the SWE-RL paper (Wei et al. 2025, [arXiv:2502.18449](https://arxiv.org/abs/2502.18449)) uses a similar structure for software-engineering-style tasks.
 
 ### Why this breaks at scale
 
 A few failure modes show up as the horizon grows.
 
-**Effective batch size collapses.** When the success rate is very low (e.g., 1% on a hard task), most batches contain only failures. The group mean is zero, the std is zero, and the advantage is undefined or noise. The policy doesn't move. You need either (a) a much larger K (which is expensive — K × T tokens of rollout per task per update) or (b) a curriculum that keeps the task in a difficulty range where the success rate is nonzero (more on this below).
+**Effective batch size collapses.** When the success rate is very low (e.g., 1% on a hard task), most batches contain only failures. The group mean is zero, the std is zero, and the advantage is undefined or noise. The policy doesn't move. You need either (a) a much larger K (which is expensive: K × T tokens of rollout per task per update) or (b) a curriculum that keeps the task in a difficulty range where the success rate is nonzero (more on this below).
 
 **All-or-nothing credit.** Uniform weighting across all tokens in a successful trajectory means the model gets equally credited for the action at step 1 (which mattered) and the action at step 312 (which was a cleanup commit). For long horizons, this means most of the gradient mass goes toward tokens that weren't causally responsible for the outcome. The policy still moves in the right direction on average, but slowly, and it can pick up superficial patterns that correlate with success without being the cause of it.
 
@@ -121,7 +121,7 @@ GRPO scales fine to the horizons used in reasoning models (where T is the chain-
 
 A process reward model (PRM) replaces the missing value function with a learned per-step judge. Given a (history, action) pair, the PRM outputs a scalar estimating whether that step looks like a good step. During training, the agent gets the PRM's per-step scores as a dense reward signal, which the policy gradient can then assign as credit per step.
 
-This was first developed seriously for math reasoning. Lightman et al. (2023, [arXiv:2305.20050](https://arxiv.org/abs/2305.20050)) — "Let's Verify Step by Step" — trained a PRM on PRM800K, a dataset of 800K human-labeled step-level judgments on math problems, and showed that process supervision outperformed outcome supervision for both filtering and reranking solutions. Math-Shepherd (Wang et al. 2023, [arXiv:2312.08935](https://arxiv.org/abs/2312.08935)) extended this without requiring human step labels by using Monte Carlo rollouts to score steps: a step is "good" to the extent that rollouts starting from it tend to succeed.
+This was first developed seriously for math reasoning. Lightman et al. (2023, [arXiv:2305.20050](https://arxiv.org/abs/2305.20050)) ("Let's Verify Step by Step") trained a PRM on PRM800K, a dataset of 800K human-labeled step-level judgments on math problems, and showed that process supervision outperformed outcome supervision for both filtering and reranking solutions. Math-Shepherd (Wang et al. 2023, [arXiv:2312.08935](https://arxiv.org/abs/2312.08935)) extended this without requiring human step labels by using Monte Carlo rollouts to score steps: a step is "good" to the extent that rollouts starting from it tend to succeed.
 
 The lecture-17 derivation aside, the PRM gives you something like a value function: a per-step scalar you can use for credit assignment. The shape of the modified policy gradient is then:
 
@@ -135,9 +135,9 @@ For math reasoning specifically, the wins are real. Process supervision detects 
 
 ### What PRMs cost, and where they break
 
-**Cost: PRM training data is expensive.** PRM800K had 800K human-judged steps. Most domains don't have a dataset of that size, and creating one is expensive enough that it bottlenecks the approach. Math-Shepherd's MC-rollout-based labeling reduces the human-labeling cost but multiplies the compute cost — to label one step, you run K rollouts from that step to estimate the success rate, which is exactly the variance problem the PRM was supposed to solve, just pushed into the label-generation stage.
+**Cost: PRM training data is expensive.** PRM800K had 800K human-judged steps. Most domains don't have a dataset of that size, and creating one is expensive enough that it bottlenecks the approach. Math-Shepherd's MC-rollout-based labeling reduces the human-labeling cost but multiplies the compute cost: to label one step, you run K rollouts from that step to estimate the success rate, which is exactly the variance problem the PRM was supposed to solve, just pushed into the label-generation stage.
 
-**Break case 1: PRMs are themselves gameable.** A PRM is a learned model. The policy will eventually find inputs that the PRM scores highly without actually being good steps — the standard reward hacking failure mode from [Lecture 09](./09-reward-modeling.md) and [Lecture 15](./15-rl-verifiable-rewards.md). The policy might learn to produce text that looks like a productive reasoning step (using PRM-favored phrases, structure, vocabulary) while not actually solving the problem.
+**Break case 1: PRMs are themselves gameable.** A PRM is a learned model. The policy will eventually find inputs that the PRM scores highly without actually being good steps, the standard reward hacking failure mode from [Lecture 09](./09-reward-modeling.md) and [Lecture 15](./15-rl-verifiable-rewards.md). The policy might learn to produce text that looks like a productive reasoning step (using PRM-favored phrases, structure, vocabulary) while not actually solving the problem.
 
 **Break case 2: PRM generalization is brittle.** A PRM trained on math reasoning doesn't transfer to code editing. A PRM trained on SWE-bench-style tasks doesn't transfer to web browsing. The "what is a good step" judgment is task-dependent, and each new domain requires either fresh training data or a much more general-purpose judge. As of 2026, general-purpose process reward models that work across agentic domains do not exist publicly.
 
@@ -145,19 +145,19 @@ For math reasoning specifically, the wins are real. Process supervision detects 
 
 ### The fundamental tension
 
-Dense process reward gives low-variance credit assignment but is gameable and expensive to label. Sparse outcome reward is honest but high-variance. There is no version of this tradeoff that gives you both at once. The current best practice — for the small set of domains where it works — is to use outcome reward as the ground truth and PRM-derived dense rewards as a variance-reduction tool that you weight carefully, and to be ready to retrain the PRM as the policy distribution shifts.
+Dense process reward gives low-variance credit assignment but is gameable and expensive to label. Sparse outcome reward is honest but high-variance. There is no version of this tradeoff that gives you both at once. The current best practice, for the small set of domains where it works, is to use outcome reward as the ground truth and PRM-derived dense rewards as a variance-reduction tool that you weight carefully, and to be ready to retrain the PRM as the policy distribution shifts.
 
 ---
 
 ## Hindsight relabeling
 
-Hindsight Experience Replay (HER; Andrychowicz, Wolski, Ray, Schneider, Fong, Welinder, McGrew, Tobin, Abbeel, Zaremba 2017, [arXiv:1707.01495](https://arxiv.org/abs/1707.01495)) is the foundational idea: if the agent failed to achieve goal g but did achieve some other state s', you can treat the trajectory as a successful attempt to achieve s'. The trajectory is "relabeled" — the goal in the data is rewritten to match what was actually accomplished — and the agent gets a positive reward signal where there would otherwise have been zero.
+Hindsight Experience Replay (HER; Andrychowicz, Wolski, Ray, Schneider, Fong, Welinder, McGrew, Tobin, Abbeel, Zaremba 2017, [arXiv:1707.01495](https://arxiv.org/abs/1707.01495)) is the foundational idea: if the agent failed to achieve goal g but did achieve some other state s', you can treat the trajectory as a successful attempt to achieve s'. The trajectory is "relabeled": the goal in the data is rewritten to match what was actually accomplished, and the agent gets a positive reward signal where there would otherwise have been zero.
 
 This is a particularly clean fit for goal-conditioned policies in physical control (where "achieve some state" is a natural goal description) but it generalizes: the underlying idea is that a failed trajectory under one specification is a successful trajectory under a different specification, and you can extract learning signal from the second specification even though the first one returned zero.
 
 ### HER in the LLM-agent setting
 
-The LLM-agent variant is less mechanical. A failed SWE-bench attempt — the agent's patch didn't pass the hidden tests — is not obviously a successful attempt at anything. But several relabeling strategies have been explored in the 2023-2025 period:
+The LLM-agent variant is less mechanical. A failed SWE-bench attempt (the agent's patch didn't pass the hidden tests) is not obviously a successful attempt at anything. But several relabeling strategies have been explored in the 2023-2025 period:
 
 **1. Substring goals.** If the task was "fix the bug so the tests pass" and the agent didn't fix the bug but did refactor function X, relabel the trajectory as "refactor function X" and use that as a positive example for a different distribution of tasks. Useful for building a curriculum of subtasks; less useful for the main reward.
 
@@ -165,7 +165,7 @@ The LLM-agent variant is less mechanical. A failed SWE-bench attempt — the age
 
 **3. Capability extraction.** Across a population of failed trajectories, look for recurring useful sub-behaviors (the agent reliably reads the right file before editing; the agent reliably runs tests before declaring success). Relabel those sub-behaviors as the targets of separate, smaller tasks and train on them. This is closer to skill discovery than HER proper.
 
-The risk in all these is the same: relabeling generates apparent positive signal where there was none, but it's signal toward a goal the user did not specify. The policy can learn to be very good at "achieve some state I can describe after the fact" while remaining bad at "achieve the goal the user actually wanted." This is a flavor of the goal-misgeneralization failure mode discussed in alignment work, and there is no clean technical fix — it has to be managed via the choice of which relabelings to allow and how to weight them against the original-goal outcome reward.
+The risk in all these is the same: relabeling generates apparent positive signal where there was none, but it's signal toward a goal the user did not specify. The policy can learn to be very good at "achieve some state I can describe after the fact" while remaining bad at "achieve the goal the user actually wanted." This is a flavor of the goal-misgeneralization failure mode discussed in alignment work, and there is no clean technical fix; it has to be managed via the choice of which relabelings to allow and how to weight them against the original-goal outcome reward.
 
 ### Where it helps
 
@@ -175,7 +175,7 @@ Hindsight relabeling is most useful as a way to bootstrap learning when the succ
 
 ## Self-critique and self-reflection loops
 
-Reflexion (Shinn, Cassano, Berman, Gopinath, Narasimhan, Yao 2023, [arXiv:2303.11366](https://arxiv.org/abs/2303.11366)) introduced a different style of credit assignment: the agent generates a verbal critique of its own failed trajectory, stores that critique in a separate memory, and uses it as additional context for the next attempt. The original work was inference-time only — no gradient updates — but the same idea has been extended to training-time procedures where the critique itself becomes a learning signal.
+Reflexion (Shinn, Cassano, Berman, Gopinath, Narasimhan, Yao 2023, [arXiv:2303.11366](https://arxiv.org/abs/2303.11366)) introduced a different style of credit assignment: the agent generates a verbal critique of its own failed trajectory, stores that critique in a separate memory, and uses it as additional context for the next attempt. The original work was inference-time only, no gradient updates, but the same idea has been extended to training-time procedures where the critique itself becomes a learning signal.
 
 The schematic:
 
@@ -199,13 +199,13 @@ In settings where the same task gets retried multiple times, self-critique can d
 
 For training (not just inference), critiques can be used in at least two ways:
 
-**1. As input features.** Train the policy to perform well when conditioned on prior critiques. This is essentially in-context learning at training time — the policy learns to use the critique signal effectively.
+**1. As input features.** Train the policy to perform well when conditioned on prior critiques. This is essentially in-context learning at training time: the policy learns to use the critique signal effectively.
 
 **2. As targets.** Train a separate critique-generator model to produce critiques that, when used as context for a new attempt, improve success rate. This requires a measurable feedback loop (run the next attempt, see if it works) and is expensive.
 
 ### Where this breaks
 
-The critic is part of the agent. If the agent's critique-generation is wrong (the critic blames the wrong step, identifies a pattern that wasn't actually present), the next attempt's context is contaminated with confidently-wrong analysis. This can be worse than no critique at all — the agent may "fix" things that weren't broken and break things that worked.
+The critic is part of the agent. If the agent's critique-generation is wrong (the critic blames the wrong step, identifies a pattern that wasn't actually present), the next attempt's context is contaminated with confidently-wrong analysis. This can be worse than no critique at all: the agent may "fix" things that weren't broken and break things that worked.
 
 Self-critique works best when there is some external validation between attempts: a partial-credit check, a test runner, a human in the loop. Without that, the agent is just talking to itself with confident analysis, and the failure mode is exactly what you would expect.
 
@@ -215,7 +215,7 @@ Self-critique works best when there is some external validation between attempts
 
 The general recipe: instead of sampling K independent trajectories per task and using GRPO over them, search the trajectory space more systematically. Find a high-reward trajectory using search (MCTS, beam search, ToT-style branching), then train the policy on that trajectory as if it had been sampled from a normal rollout. This is the AlphaGo-style approach generalized to language agents.
 
-Tree of Thoughts (Yao, Yu, Zhao, Shafran, Griffiths, Cao, Narasimhan 2023, [arXiv:2305.10601](https://arxiv.org/abs/2305.10601)) is the canonical reference for the inference-time version. ToT branches the model's reasoning into multiple candidate thoughts at each step, evaluates them with the model itself (using LM-as-judge), and searches across the tree. The original ToT was inference-time only — no training — but the recipe extends naturally to training-time use: run ToT to find a successful trajectory on a task where greedy decoding fails, then use that trajectory as a training example.
+Tree of Thoughts (Yao, Yu, Zhao, Shafran, Griffiths, Cao, Narasimhan 2023, [arXiv:2305.10601](https://arxiv.org/abs/2305.10601)) is the canonical reference for the inference-time version. ToT branches the model's reasoning into multiple candidate thoughts at each step, evaluates them with the model itself (using LM-as-judge), and searches across the tree. The original ToT was inference-time only, no training, but the recipe extends naturally to training-time use: run ToT to find a successful trajectory on a task where greedy decoding fails, then use that trajectory as a training example.
 
 ### The recipe
 
@@ -253,7 +253,7 @@ The brute-force way to make long-horizon problems tractable is to not give the m
 
 If the target task has T = 500, start training on T = 20 instances. Get the success rate up. Move to T = 50. Get the success rate up. Move to T = 100. Eventually reach T = 500 with a policy that has working primitives for each sub-skill.
 
-This is the standard curriculum-learning idea, applied to horizon as the difficulty axis. It works when there is a natural decomposition (a 500-step coding task is approximately a sequence of independent 20-step coding tasks). It doesn't work when the long horizon comes from genuinely long dependencies — a 500-step task where the action at step 7 is only useful in combination with the action at step 314 cannot be solved by mastering 20-step segments in isolation.
+This is the standard curriculum-learning idea, applied to horizon as the difficulty axis. It works when there is a natural decomposition (a 500-step coding task is approximately a sequence of independent 20-step coding tasks). It doesn't work when the long horizon comes from genuinely long dependencies: a 500-step task where the action at step 7 is only useful in combination with the action at step 314 cannot be solved by mastering 20-step segments in isolation.
 
 ### Hierarchical RL with subgoals
 
@@ -315,7 +315,7 @@ def goal_match_reward(trajectory, goal: str) -> float:
     For relabeling to be safe, this verifier should be cheap and reliable for the
     relabeled goal. Typical implementations: regex on the final file diff, schema
     check on the final output, exact-match on a final string. The verifier here is
-    NOT the original task's verifier — it's a goal-specific check.
+    NOT the original task's verifier; it's a goal-specific check.
 
     Returns 1.0 if the trajectory achieves goal, 0.0 otherwise.
     """
@@ -403,7 +403,7 @@ def train_with_hindsight(
 
 Notes on this sketch.
 
-`describe_what_happened` is doing a lot of work in not many lines. In practice, this is the hardest part of an LLM-agent hindsight pipeline — generating accurate descriptions of what was actually accomplished, in a vocabulary that the policy can then re-target. The dumb version is "look at the final file diff and describe it"; the smart version involves running a separate LM to read the trajectory and write the goal description. Either way, the description's quality bounds the quality of the relabeling.
+`describe_what_happened` is doing a lot of work in not many lines. In practice, this is the hardest part of an LLM-agent hindsight pipeline: generating accurate descriptions of what was actually accomplished, in a vocabulary that the policy can then re-target. The dumb version is "look at the final file diff and describe it"; the smart version involves running a separate LM to read the trajectory and write the goal description. Either way, the description's quality bounds the quality of the relabeling.
 
 `goal_match_reward` is a per-relabeled-goal verifier. This is a different verifier from the one used for the original task. It needs to be cheap (called on every relabel) and reliable (otherwise the relabel signal is just noise). Typical patterns: regex match on the final state, schema validation, exact-match on a target string.
 
@@ -488,7 +488,7 @@ def tree_search(
     for sim in range(n_simulations):
         # --- 1. SELECT ---
         node = root
-        env.restore(task)  # reset env to root state; in practice this is the hard part —
+        env.restore(task)  # reset env to root state; in practice this is the hard part:
                            # the env must support deterministic resets, or you must
                            # replay the trajectory of actions to reach the node
         while node.children and not node.is_terminal:
@@ -657,25 +657,25 @@ A few research directions: shared trunks between policy and value (the value hea
 
 A separate model that takes a full trajectory plus a terminal reward and outputs per-step credit weights. The idea: if you can't fit a value function, maybe you can fit a function that says "for this kind of trajectory, this step was 30% responsible for the outcome." Train the credit network end-to-end using the policy gradient on the policy as the downstream signal.
 
-This is appealing in principle and has been explored in classical RL (under names like "return decomposition" and "RUDDER-style attribution"). For LLM-agent settings, the open problem is the same as for value functions: how to fit the credit network when the data is sparse and the contexts are huge. The advantage over a value function is that the credit network doesn't need to predict the reward — it only needs to attribute it — which is potentially a more tractable problem.
+This is appealing in principle and has been explored in classical RL (under names like "return decomposition" and "RUDDER-style attribution"). For LLM-agent settings, the open problem is the same as for value functions: how to fit the credit network when the data is sparse and the contexts are huge. The advantage over a value function is that the credit network doesn't need to predict the reward; it only needs to attribute it, which is potentially a more tractable problem.
 
 ### Persistent memory across trajectories
 
 A trajectory ends. The agent forgets everything. The next trajectory starts from scratch. This is grossly wasteful: across many attempts at similar tasks, the agent re-learns the same primitive facts (this file is at this path; this command takes these flags; this test failure usually means this thing) every time.
 
-A persistent memory — a structured store that survives between trajectories and can be queried by the agent at relevant moments — would compress the effective horizon. If the agent can pull "I learned last time that the test runner needs the --no-cache flag" from memory at step 3, the trajectory needed to solve the task is much shorter. Long-horizon credit assignment becomes easier when the horizon is shorter.
+A persistent memory, a structured store that survives between trajectories and can be queried by the agent at relevant moments, would compress the effective horizon. If the agent can pull "I learned last time that the test runner needs the --no-cache flag" from memory at step 3, the trajectory needed to solve the task is much shorter. Long-horizon credit assignment becomes easier when the horizon is shorter.
 
 The open questions are: what to put in memory (everything is too much; nothing is too little), how to retrieve from it (the retrieval model is itself part of the policy and needs to be trained), and how to update it (memory should grow but also should not accumulate noise that degrades retrieval). None of these are solved as of 2026, though several research efforts are visibly working on them.
 
 ### Better trajectory-level baselines
 
-The GRPO group baseline works for tasks where you can afford K independent rollouts. For some agentic settings (slow environments, expensive rollouts), even K = 8 is too expensive. Better baselines that exploit cross-task structure — the success rate on similar previous tasks, an LM's estimate of task difficulty, a learned baseline conditioned on the prompt — could reduce variance without requiring more rollouts.
+The GRPO group baseline works for tasks where you can afford K independent rollouts. For some agentic settings (slow environments, expensive rollouts), even K = 8 is too expensive. Better baselines that exploit cross-task structure (the success rate on similar previous tasks, an LM's estimate of task difficulty, a learned baseline conditioned on the prompt) could reduce variance without requiring more rollouts.
 
 A few public efforts: prompt-difficulty conditioning (the baseline is a learned function of the task description, not just the within-batch mean), task-level value functions (one value per task rather than one per state), historical-mean baselines (running average of success rate on this task). These are incremental improvements over plain group baselines, not breakthroughs.
 
 ### What might not be solvable
 
-It is worth naming the possibility that long-horizon credit assignment in the strict sense — figuring out which action at step 7 was responsible for success at step 500 — may not be solvable without a lot of extra structure. The information just isn't in the data. A 500-step trajectory with one bit of terminal reward has, by definition, one bit of signal about 500 actions. Even an oracle credit-assignment scheme cannot recover more than that from a single trajectory.
+It is worth naming the possibility that long-horizon credit assignment in the strict sense, figuring out which action at step 7 was responsible for success at step 500, may not be solvable without a lot of extra structure. The information just isn't in the data. A 500-step trajectory with one bit of terminal reward has, by definition, one bit of signal about 500 actions. Even an oracle credit-assignment scheme cannot recover more than that from a single trajectory.
 
 The way out is to add structure: more rollouts (group baselines), denser reward (PRMs), search-based exploration (tree search), task decomposition (curriculum), or memory (persistent context). Each of these is a way of injecting prior information or computational effort to overcome the information-theoretic limit. The interesting research is not in "solving" credit assignment but in figuring out which combinations of these tricks work for which classes of tasks, and at what compute cost.
 
@@ -715,31 +715,31 @@ These are projects, not 30-minute problems. Treat them as integration exercises 
 
 ## References
 
-**Schulman, Moritz, Levine, Jordan, Abbeel (2015)** — "High-Dimensional Continuous Control Using Generalized Advantage Estimation." [arXiv:1506.02438](https://arxiv.org/abs/1506.02438). Verified. The GAE estimator; introduces λ-interpolation between Monte Carlo and TD for variance reduction. Foundational for any modern policy-gradient method.
+**Schulman, Moritz, Levine, Jordan, Abbeel (2015)**: "High-Dimensional Continuous Control Using Generalized Advantage Estimation." [arXiv:1506.02438](https://arxiv.org/abs/1506.02438). Verified. The GAE estimator; introduces λ-interpolation between Monte Carlo and TD for variance reduction. Foundational for any modern policy-gradient method.
 
-**Andrychowicz, Wolski, Ray, Schneider, Fong, Welinder, McGrew, Tobin, Abbeel, Zaremba (2017)** — "Hindsight Experience Replay." [arXiv:1707.01495](https://arxiv.org/abs/1707.01495). Verified. The original HER paper; relabels failed trajectories with the goals they actually accomplished. Critical primitive for the hindsight-relabel approach in LLM-agent settings.
+**Andrychowicz, Wolski, Ray, Schneider, Fong, Welinder, McGrew, Tobin, Abbeel, Zaremba (2017)**: "Hindsight Experience Replay." [arXiv:1707.01495](https://arxiv.org/abs/1707.01495). Verified. The original HER paper; relabels failed trajectories with the goals they actually accomplished. Critical primitive for the hindsight-relabel approach in LLM-agent settings.
 
-**Schulman, Wolski, Dhariwal, Radford, Klimov (2017)** — "Proximal Policy Optimization Algorithms." [arXiv:1707.06347](https://arxiv.org/abs/1707.06347). Verified. Background for the clipped surrogate used in most modern policy-gradient implementations.
+**Schulman, Wolski, Dhariwal, Radford, Klimov (2017)**: "Proximal Policy Optimization Algorithms." [arXiv:1707.06347](https://arxiv.org/abs/1707.06347). Verified. Background for the clipped surrogate used in most modern policy-gradient implementations.
 
-**Yao, Zhao, Yu, Du, Shafran, Narasimhan, Cao (2022)** — "ReAct: Synergizing Reasoning and Acting in Language Models." [arXiv:2210.03629](https://arxiv.org/abs/2210.03629). Verified. The scaffold ([Lecture 16](./16-agentic-rl.md)) on which most agentic RL training operates.
+**Yao, Zhao, Yu, Du, Shafran, Narasimhan, Cao (2022)**: "ReAct: Synergizing Reasoning and Acting in Language Models." [arXiv:2210.03629](https://arxiv.org/abs/2210.03629). Verified. The scaffold ([Lecture 16](./16-agentic-rl.md)) on which most agentic RL training operates.
 
-**Shinn, Cassano, Berman, Gopinath, Narasimhan, Yao (2023)** — "Reflexion: Language Agents with Verbal Reinforcement Learning." [arXiv:2303.11366](https://arxiv.org/abs/2303.11366). Verified. Self-critique loop where the agent generates verbal reflections between attempts; influential for the self-critique approach to credit assignment.
+**Shinn, Cassano, Berman, Gopinath, Narasimhan, Yao (2023)**: "Reflexion: Language Agents with Verbal Reinforcement Learning." [arXiv:2303.11366](https://arxiv.org/abs/2303.11366). Verified. Self-critique loop where the agent generates verbal reflections between attempts; influential for the self-critique approach to credit assignment.
 
-**Yao, Yu, Zhao, Shafran, Griffiths, Cao, Narasimhan (2023)** — "Tree of Thoughts: Deliberate Problem Solving with Large Language Models." [arXiv:2305.10601](https://arxiv.org/abs/2305.10601). Verified, NeurIPS 2023. ToT-style branching at inference time; the structural basis for tree-search-then-train recipes.
+**Yao, Yu, Zhao, Shafran, Griffiths, Cao, Narasimhan (2023)**: "Tree of Thoughts: Deliberate Problem Solving with Large Language Models." [arXiv:2305.10601](https://arxiv.org/abs/2305.10601). Verified, NeurIPS 2023. ToT-style branching at inference time; the structural basis for tree-search-then-train recipes.
 
-**Lightman, Kosaraju, Burda, Edwards, Baker, Lee, Leike, Schulman, Sutskever, Cobbe (2023)** — "Let's Verify Step by Step." [arXiv:2305.20050](https://arxiv.org/abs/2305.20050). Verified. The PRM800K dataset and process-reward-model approach for math reasoning; shows process supervision outperforms outcome supervision in that setting.
+**Lightman, Kosaraju, Burda, Edwards, Baker, Lee, Leike, Schulman, Sutskever, Cobbe (2023)**: "Let's Verify Step by Step." [arXiv:2305.20050](https://arxiv.org/abs/2305.20050). Verified. The PRM800K dataset and process-reward-model approach for math reasoning; shows process supervision outperforms outcome supervision in that setting.
 
-**Jimenez, Yang, Wettig, Yao, Pei, Press, Narasimhan (2023)** — "SWE-bench: Can Language Models Resolve Real-World GitHub Issues?" [arXiv:2310.06770](https://arxiv.org/abs/2310.06770), ICLR 2024. Verified. The benchmark that defines the long-horizon agentic coding setting referenced throughout this lecture.
+**Jimenez, Yang, Wettig, Yao, Pei, Press, Narasimhan (2023)**: "SWE-bench: Can Language Models Resolve Real-World GitHub Issues?" [arXiv:2310.06770](https://arxiv.org/abs/2310.06770), ICLR 2024. Verified. The benchmark that defines the long-horizon agentic coding setting referenced throughout this lecture.
 
-**Wang, Li, Shao, Xu, Dai, Li, Chen, Wu, Sui (2023)** — "Math-Shepherd: Verify and Reinforce LLMs Step-by-step without Human Annotations." [arXiv:2312.08935](https://arxiv.org/abs/2312.08935). Verified. PRM training without human step labels by using MC-rollout-based step scoring; extends "Let's Verify Step by Step" to a cheaper labeling scheme.
+**Wang, Li, Shao, Xu, Dai, Li, Chen, Wu, Sui (2023)**: "Math-Shepherd: Verify and Reinforce LLMs Step-by-step without Human Annotations." [arXiv:2312.08935](https://arxiv.org/abs/2312.08935). Verified. PRM training without human step labels by using MC-rollout-based step scoring; extends "Let's Verify Step by Step" to a cheaper labeling scheme.
 
-**Shao, Wang, Zhu, Xu, Song, Bi, Zhang, Zhang, Li, Wu, Guo (2024)** — "DeepSeekMath: Pushing the Limits of Mathematical Reasoning in Open Language Models." [arXiv:2402.03300](https://arxiv.org/abs/2402.03300). Verified. Introduces GRPO; the trajectory-level outcome reward + group baseline approach that dominates current practice.
+**Shao, Wang, Zhu, Xu, Song, Bi, Zhang, Zhang, Li, Wu, Guo (2024)**: "DeepSeekMath: Pushing the Limits of Mathematical Reasoning in Open Language Models." [arXiv:2402.03300](https://arxiv.org/abs/2402.03300). Verified. Introduces GRPO; the trajectory-level outcome reward + group baseline approach that dominates current practice.
 
-**Zhang, Huang, Zhou, Li, Ouyang (2024)** — "Accessing GPT-4 level Mathematical Olympiad Solutions via Monte Carlo Tree Self-refine with LLaMa-3 8B." [arXiv:2406.07394](https://arxiv.org/abs/2406.07394). Verified (existence and metadata). Representative MCTS-style application of search to math reasoning; treat specific performance claims as unverified.
+**Zhang, Huang, Zhou, Li, Ouyang (2024)**: "Accessing GPT-4 level Mathematical Olympiad Solutions via Monte Carlo Tree Self-refine with LLaMa-3 8B." [arXiv:2406.07394](https://arxiv.org/abs/2406.07394). Verified (existence and metadata). Representative MCTS-style application of search to math reasoning; treat specific performance claims as unverified.
 
-**DeepSeek-AI (2025)** — "DeepSeek-R1: Incentivizing Reasoning Capability in LLMs via Reinforcement Learning." [arXiv:2501.12948](https://arxiv.org/abs/2501.12948). Verified. The public R1 training recipe; uses GRPO-style outcome rewards on verifiable tasks (math, code, STEM).
+**DeepSeek-AI (2025)**: "DeepSeek-R1: Incentivizing Reasoning Capability in LLMs via Reinforcement Learning." [arXiv:2501.12948](https://arxiv.org/abs/2501.12948). Verified. The public R1 training recipe; uses GRPO-style outcome rewards on verifiable tasks (math, code, STEM).
 
-**Wei, Duchenne, Copet, Carbonneaux, Zhang, Fried, Synnaeve, Singh, Wang (2025)** — "SWE-RL: Advancing LLM Reasoning via Reinforcement Learning on Open Software Evolution." [arXiv:2502.18449](https://arxiv.org/abs/2502.18449), NeurIPS 2025. Verified. RL on agentic software evolution data; representative of the current published state of long-horizon agentic training, with the limitations discussed above.
+**Wei, Duchenne, Copet, Carbonneaux, Zhang, Fried, Synnaeve, Singh, Wang (2025)**: "SWE-RL: Advancing LLM Reasoning via Reinforcement Learning on Open Software Evolution." [arXiv:2502.18449](https://arxiv.org/abs/2502.18449), NeurIPS 2025. Verified. RL on agentic software evolution data; representative of the current published state of long-horizon agentic training, with the limitations discussed above.
 
 **Systems with proprietary training details.** Several of the highest-performing agentic coding systems and research agents in 2024-2026 are described in blog posts or technical reports without specifying their credit-assignment approach. References in this lecture to "what works at scale" are necessarily based on the public literature; the proprietary systems may use techniques that are not documented anywhere referenceable.
 
