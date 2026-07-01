@@ -29,10 +29,25 @@ Each lecture tries to do four things: give the intuition before the math, show c
 | 17 | [Online & iterative preference optimization](./lectures/17-online-iterative-preference.md) | unreviewed (new draft) |
 | 18 | [Distillation of reasoning models](./lectures/18-distillation-reasoning.md) | unreviewed (new draft) |
 | 19 | [Offline RL](./lectures/19-offline-rl.md) | unreviewed (new draft) |
+| 20 | [Exploration: from ε-greedy to intrinsic motivation](./lectures/20-exploration.md) — exercise: [`20-exploration`](../exercises/20-exploration/) | unreviewed (new draft) |
+| 21 | [Multi-agent RL and self-play](./lectures/21-multi-agent-rl.md) | unreviewed (new draft) |
+| 22 | [World models](./lectures/22-world-models.md) | unreviewed (new draft) |
+| 23 | [Process reward models vs outcome reward models](./lectures/23-process-reward-models.md) | unreviewed (new draft) |
+| 24 | [Computer use and browser agents](./lectures/24-computer-use-agents.md) | unreviewed (new draft) |
+| 25 | [Long-horizon credit assignment](./lectures/25-long-horizon-credit.md) | unreviewed (new draft) |
+| 26 | [RL for mathematical reasoning](./lectures/26-rl-math-reasoning.md) | unreviewed (new draft) |
+| 27 | [RLAIF and synthetic preferences at scale](./lectures/27-rlaif.md) | unreviewed (new draft) |
+| 28 | [Reward hacking and verifier design](./lectures/28-reward-hacking.md) | unreviewed (new draft) |
+| 29 | [Distributed RL systems](./lectures/29-distributed-rl-systems.md) | unreviewed (new draft) |
+| 30 | [RL inference infrastructure for LLMs](./lectures/30-rl-inference-infra.md) | unreviewed (new draft) |
+| 31 | [Hardware for RL](./lectures/31-hardware-for-rl.md) | unreviewed (new draft) |
+| 32 | [Meta-RL and in-context RL](./lectures/32-meta-rl-in-context.md) | unreviewed (new draft) |
+| 33 | [Robotics RL](./lectures/33-robotics-rl.md) | unreviewed (new draft) |
+| 34 | [Self-distillation and self-improvement loops](./lectures/34-self-distillation.md) | unreviewed (new draft) |
 
-Planned: a curated paper layer in [`../reference/papers/`](../reference/papers/), built from `../tools/lit-builder/` once the LLM scoring step has been run (it needs a credential). Optionally: an exploration lecture (intrinsic motivation, count-based methods, RND) — the one remaining foundational gap.
+Planned: a curated paper layer in [`../reference/papers/`](../reference/papers/), built from `../tools/lit-builder/` once the LLM scoring step has been run (it needs a credential). Two new hand-curated topic READMEs have landed: [`GRPO-RLVR/`](../reference/papers/GRPO-RLVR/) and [`Agentic-RL/`](../reference/papers/Agentic-RL/); the auto-generated `PAPERS.md` files in those directories still need a collector run.
 
-Cheat sheets and diagrams are in [`cheat-sheets/`](./cheat-sheets/) and [`diagrams/`](./diagrams/) — also unreviewed.
+Cheat sheets and diagrams are in [`cheat-sheets/`](./cheat-sheets/) and [`diagrams/`](./diagrams/) — also unreviewed. Recent additions: `RLHF-vs-DPO-vs-GRPO.md` (side-by-side comparison of the alignment methods), `RL-LLM-loops-2026.md` (ASCII data-flow diagrams of every training loop), `KL-control.md` (KL penalties across TRPO/PPO/RLHF/DPO/GRPO), `RL-loss-functions.md` (one block per algorithm with loss, gradient, code, and tradeoff).
 
 ## How to use this
 
