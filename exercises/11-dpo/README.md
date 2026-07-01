@@ -1,8 +1,8 @@
-# Exercise 11 — DPO on a toy preference dataset
+# Exercise 11: DPO on a toy preference dataset
 
 Goes with [lecture 11 (DPO)](../../notes/lectures/11-dpo.md).
 
-You'll implement Direct Preference Optimization from scratch on a tiny dataset of (prompt, chosen, rejected) triples. No transformer, no tokenizer — the policy is a per-prompt categorical distribution, the same shape as the GRPO exercise. Everything runs in seconds on CPU, and the DPO loss and gradient flow are real.
+You'll implement Direct Preference Optimization from scratch on a tiny dataset of (prompt, chosen, rejected) triples. No transformer, no tokenizer: the policy is a per-prompt categorical distribution, the same shape as the GRPO exercise. Everything runs in seconds on CPU, and the DPO loss and gradient flow are real.
 
 ## The point
 
@@ -15,7 +15,7 @@ L_DPO = -log sigmoid( beta * [(log pi(y_w|x) - log pi_ref(y_w|x))
 
 `y_w` is the chosen (winning) answer, `y_l` is the rejected one, `pi` is the policy being trained, `pi_ref` is a frozen reference (in the LLM setting, the SFT model). Beta controls how far the policy is allowed to drift from the reference.
 
-You'll see directly that at initialisation, when the policy is a copy of the reference, the loss is exactly `log(2) ≈ 0.6931` — because the bracket is zero and `sigmoid(0) = 0.5`. As training progresses, the policy pushes log-prob mass from rejected answers to chosen ones.
+You'll see directly that at initialisation, when the policy is a copy of the reference, the loss is exactly `log(2) ≈ 0.6931`, because the bracket is zero and `sigmoid(0) = 0.5`. As training progresses, the policy pushes log-prob mass from rejected answers to chosen ones.
 
 ## The task
 
@@ -27,9 +27,9 @@ Setup:
 
 Fill in the TODOs in [`starter.py`](./starter.py). Three pieces:
 
-1. `Policy` — `nn.Embedding(n_prompts, n_answers)` outputting logits. `forward` should accept a single `int` (returns `(n_answers,)`) or a `LongTensor` of shape `(B,)` (returns `(B, n_answers)`).
-2. `dpo_loss(policy_logits, ref_logits, chosen, rejected, beta)` — the formula above. Use `F.log_softmax`, `.gather`, and `F.logsigmoid`.
-3. `train_dpo(...)` — the loop: sample a batch of triples, forward policy and ref, compute the loss, step. Log per-step loss and per-step greedy mean true reward.
+1. `Policy`: `nn.Embedding(n_prompts, n_answers)` outputting logits. `forward` should accept a single `int` (returns `(n_answers,)`) or a `LongTensor` of shape `(B,)` (returns `(B, n_answers)`).
+2. `dpo_loss(policy_logits, ref_logits, chosen, rejected, beta)`: the formula above. Use `F.log_softmax`, `.gather`, and `F.logsigmoid`.
+3. `train_dpo(...)`: the loop: sample a batch of triples, forward policy and ref, compute the loss, step. Log per-step loss and per-step greedy mean true reward.
 
 The reference, dataset generator, true-reward table, and evaluation helper are given. You don't fit a reward model.
 
@@ -52,7 +52,7 @@ You're done when the tests pass and you can explain: why the loss is `log(2)` at
 
 ## If you get stuck
 
-Read [`HINTS.md`](./HINTS.md) — one hint at a time. The reference implementation is in [`solution/dpo.py`](./solution/dpo.py); look at it after you've made a real attempt.
+Read [`HINTS.md`](./HINTS.md), one hint at a time. The reference implementation is in [`solution/dpo.py`](./solution/dpo.py); look at it after you've made a real attempt.
 
 ## Going further (optional)
 

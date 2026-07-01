@@ -2,7 +2,7 @@
 
 # Lecture 26: RL for mathematical reasoning
 
-_Unreviewed — no one has checked this end to end. Treat the math, code, and citations as unverified._
+_Unreviewed: no one has checked this end to end. Treat the math, code, and citations as unverified._
 
 **Time**: ~3 h · **Prerequisites**: Lectures 12, 15
 
@@ -12,13 +12,13 @@ _Unreviewed — no one has checked this end to end. Treat the math, code, and ci
 
 [Lecture 15](./15-rl-verifiable-rewards.md) covered the general shape of RL with verifiable rewards: a checker replaces a learned reward model, GRPO replaces PPO's critic, and the binary correctness signal turns out to be enough to shape long-horizon generation behavior. That lecture used math as the running example, but it framed RLVR as a general technique.
 
-This lecture is narrower. It's about the specific systems that pushed math reasoning past 90% on the MATH benchmark and into double-digit AIME pass rates during 2024 and 2025 — what their training data looked like, what their reward functions actually computed, what the loss curves did, and which failure modes are specific to the math setting.
+This lecture is narrower. It's about the specific systems that pushed math reasoning past 90% on the MATH benchmark and into double-digit AIME pass rates during 2024 and 2025: what their training data looked like, what their reward functions actually computed, what the loss curves did, and which failure modes are specific to the math setting.
 
 Math is the cleanest domain for RLVR, which is why most of the public work happened here first. Answers are short. Verification is mechanical. Difficulty graduates smoothly from grade-school arithmetic up to olympiad problems. Datasets exist with verified answers at every level. None of that holds for open-ended writing, agentic tasks, or even most code generation, where verifier quality varies wildly. So the math-reasoning systems are where the recipe is most worked out, and they're the place to look if you want to understand what RLVR can do when nothing else is in the way.
 
 The story compresses into a few moves: prompting (chain-of-thought) bought a lot. Self-training (STaR) bought more. Process supervision (PRM800K) bought additional reliability on harder problems. GRPO with rule-based rewards (DeepSeekMath, then R1) bought the jump from "good" to "competitive with human olympiad performers on some subsets." Tool use (PAL, then formal provers) bought a different axis of improvement by changing what the model has to do unaided.
 
-This lecture goes through those moves in order. The algorithmic content for the RL parts is in Lecture 15 — what's here is what's specific to math.
+This lecture goes through those moves in order. The algorithmic content for the RL parts is in Lecture 15; what's here is what's specific to math.
 
 ---
 
@@ -28,9 +28,9 @@ Benchmark choice shaped the whole research program. The systems described later 
 
 ### GSM8K
 
-Cobbe et al. 2021 (arXiv:2110.14168). 8.5K grade-school math word problems, each with a step-by-step worked solution and a single numeric answer. Problems are linguistically diverse but mathematically simple — the typical solution takes 2–8 steps of basic arithmetic.
+Cobbe et al. 2021 (arXiv:2110.14168). 8.5K grade-school math word problems, each with a step-by-step worked solution and a single numeric answer. Problems are linguistically diverse but mathematically simple: the typical solution takes 2–8 steps of basic arithmetic.
 
-GSM8K was the benchmark that made chain-of-thought prompting look impressive (Wei et al. 2022, arXiv:2201.11903, hit 56.9% with a 540B model). It was also the benchmark where outcome-based verifier training was first studied at scale, in the original paper by Cobbe et al. — the verifier training described there is a precursor to the RLVR work that came later.
+GSM8K was the benchmark that made chain-of-thought prompting look impressive (Wei et al. 2022, arXiv:2201.11903, hit 56.9% with a 540B model). It was also the benchmark where outcome-based verifier training was first studied at scale, in the original paper by Cobbe et al. The verifier training described there is a precursor to the RLVR work that came later.
 
 By 2024 GSM8K is essentially saturated. Frontier models score in the high 90s. It's still a useful smoke test (a model that can't crack GSM8K isn't going to do well anywhere else), but it doesn't differentiate between strong reasoning models any more.
 
@@ -38,13 +38,13 @@ By 2024 GSM8K is essentially saturated. Frontier models score in the high 90s. I
 
 Hendrycks et al. 2021 (arXiv:2103.03874). 12,500 problems drawn from US high-school competition mathematics (AMC, AIME, and similar), each labeled with a difficulty level (1–5) and one of seven subject categories (algebra, geometry, number theory, counting and probability, intermediate algebra, prealgebra, precalculus). Each problem has a worked solution and a final answer in `\boxed{...}` form.
 
-MATH is where the 2024–2025 jump showed up most clearly. The Hendrycks paper itself reported that scaling alone wasn't getting models past around 7% pass rate at the time of publication, and concluded that "new algorithmic advancements" would be needed. That conclusion turned out to be right — chain-of-thought, then self-consistency, then process supervision, then GRPO, each moved the number up substantially. DeepSeek-R1 reports around 97% pass@1 on MATH-500 (the common 500-problem evaluation subset), which would have been surprising at the time of the original benchmark paper.
+MATH is where the 2024–2025 jump showed up most clearly. The Hendrycks paper itself reported that scaling alone wasn't getting models past around 7% pass rate at the time of publication, and concluded that "new algorithmic advancements" would be needed. That conclusion turned out to be right: chain-of-thought, then self-consistency, then process supervision, then GRPO, each moved the number up substantially. DeepSeek-R1 reports around 97% pass@1 on MATH-500 (the common 500-problem evaluation subset), which would have been surprising at the time of the original benchmark paper.
 
-The reason MATH is harder than GSM8K isn't just the math content — it's the answer space. GSM8K answers are integers (small ones, usually). MATH answers can be expressions, fractions, surds, ordered tuples, intervals, sets. The verifier has to handle equivalent forms (`1/2` and `0.5`, `\sqrt{2}/2` and `\frac{1}{\sqrt{2}}`), units, and formatting variations. The answer-extraction heuristic and the equivalence checker do a lot of work, and weaknesses in either show up directly as inflated or deflated pass rates.
+The reason MATH is harder than GSM8K isn't just the math content: it's the answer space. GSM8K answers are integers (small ones, usually). MATH answers can be expressions, fractions, surds, ordered tuples, intervals, sets. The verifier has to handle equivalent forms (`1/2` and `0.5`, `\sqrt{2}/2` and `\frac{1}{\sqrt{2}}`), units, and formatting variations. The answer-extraction heuristic and the equivalence checker do a lot of work, and weaknesses in either show up directly as inflated or deflated pass rates.
 
 ### AIME
 
-American Invitational Mathematics Examination. A 15-problem competition for top US high-school math students, with integer answers in 0–999. No public arXiv paper for the benchmark itself — it's just the competition problems, scraped or transcribed from past years.
+American Invitational Mathematics Examination. A 15-problem competition for top US high-school math students, with integer answers in 0–999. No public arXiv paper for the benchmark itself: it's just the competition problems, scraped or transcribed from past years.
 
 AIME 2024 became the de facto "frontier reasoning" benchmark during 2024–2025 because problems were recent enough to not be in pre-training corpora at scale, hard enough that even strong models scored well below 100%, and short enough (integer answers) that verification is trivial.
 
@@ -52,7 +52,7 @@ The number reported is usually pass@1 averaged across problems, with multiple sa
 
 Because there are only 15 problems per year, pass@1 numbers on AIME jump around. A single problem flipping correct/incorrect is 6.7% on the score. Treat AIME numbers as noisy; report multiple-sample variance if you can.
 
-The other thing to watch for on AIME: contamination. Older years (pre-2023) have been on the public web for a long time, and worked solutions appear in many tutoring sites and pre-training crawls. Reported AIME numbers on those years are inflated to the extent that the model has effectively memorized the answer. AIME 2024 became standard partly because it was recent enough to plausibly be outside pre-training cutoffs for most models published in late 2024 and 2025. By the time you read this, AIME 2024 may itself be contaminated for newer models — switch to the most recent year's problems for the cleanest signal.
+The other thing to watch for on AIME: contamination. Older years (pre-2023) have been on the public web for a long time, and worked solutions appear in many tutoring sites and pre-training crawls. Reported AIME numbers on those years are inflated to the extent that the model has effectively memorized the answer. AIME 2024 became standard partly because it was recent enough to plausibly be outside pre-training cutoffs for most models published in late 2024 and 2025. By the time you read this, AIME 2024 may itself be contaminated for newer models; switch to the most recent year's problems for the cleanest signal.
 
 ### MMLU-STEM
 
@@ -66,7 +66,7 @@ He et al. 2024 (arXiv:2402.14008). 8,476 olympiad-level problems in math and phy
 
 Zheng, Han, Polu 2021 (arXiv:2109.00110). 488 formal-math problem statements (in Lean, Coq, Isabelle, Metamath, HOL Light) drawn from AIME, AMC, IMO, and academic coursework. Cross-system: the same theorem is stated in multiple proof assistants, so results are comparable across systems.
 
-MiniF2F is the standard formal-reasoning benchmark. Unlike the natural-language benchmarks above, the verifier here is a proof assistant — the model has to produce a proof that the assistant accepts, not just a correct final answer. This changes the reward structure dramatically (more on this in the tool-use section).
+MiniF2F is the standard formal-reasoning benchmark. Unlike the natural-language benchmarks above, the verifier here is a proof assistant: the model has to produce a proof that the assistant accepts, not just a correct final answer. This changes the reward structure dramatically (more on this in the tool-use section).
 
 ### The benchmark hierarchy
 
@@ -91,7 +91,7 @@ Chain-of-thought prompting (Wei et al. 2022, arXiv:2201.11903) is the pre-RL bas
 
 What CoT does mechanically: it conditions the answer token on a long sequence of reasoning tokens, which lets the model use intermediate computation rather than producing the answer in one forward pass. The model that produces "3 + 4 + 5 = 12" before the answer is doing work that the model producing only "12" can't do.
 
-CoT doesn't require any training. It's a prompting technique. But its existence is what made RLVR worth trying — if the model can already produce correct chains some fraction of the time, you have positive examples to filter and train on. Without CoT-capable base models, the reward signal from a math verifier would be nearly always zero, and there would be nothing for GRPO to amplify.
+CoT doesn't require any training. It's a prompting technique. But its existence is what made RLVR worth trying: if the model can already produce correct chains some fraction of the time, you have positive examples to filter and train on. Without CoT-capable base models, the reward signal from a math verifier would be nearly always zero, and there would be nothing for GRPO to amplify.
 
 Self-consistency (Wang et al. 2022, arXiv:2203.11171) is the natural complement. Sample many chains from the model, extract the final answer from each, take the majority answer. Performance scales with sample count up to some plateau. On GSM8K, self-consistency at K=40 added roughly 18 points on top of greedy CoT.
 
@@ -103,9 +103,9 @@ Self-consistency is the cheapest version of inference-time compute scaling. Lect
 
 PAL (Gao et al. 2022, arXiv:2211.10435) takes the chain-of-thought idea and offloads the arithmetic to a Python interpreter. The model generates code that computes the answer rather than producing the answer in natural language. The interpreter runs the code and returns the result.
 
-On GSM8K, PAL with a 540B Codex-class model hit 72% — substantially better than CoT alone on the same model. The improvement is mostly on problems that require multi-step arithmetic, where the model knows the right operations but is unreliable at executing them token-by-token. Offloading the arithmetic to a deterministic interpreter removes that failure mode entirely.
+On GSM8K, PAL with a 540B Codex-class model hit 72%, substantially better than CoT alone on the same model. The improvement is mostly on problems that require multi-step arithmetic, where the model knows the right operations but is unreliable at executing them token-by-token. Offloading the arithmetic to a deterministic interpreter removes that failure mode entirely.
 
-PAL is a precursor to the tool-use story later in this lecture. The reward structure changes once you have a tool in the loop — the model is no longer being credited for arithmetic, only for getting the problem framing right and calling the right tool. That has implications for what RL training shapes.
+PAL is a precursor to the tool-use story later in this lecture. The reward structure changes once you have a tool in the loop: the model is no longer being credited for arithmetic, only for getting the problem framing right and calling the right tool. That has implications for what RL training shapes.
 
 ---
 
@@ -116,7 +116,7 @@ STaR (Self-Taught Reasoner, Zelikman et al. 2022, arXiv:2203.14465) was the firs
 1. Sample chains of thought from the current model on a labeled math dataset.
 2. For each problem, check whether the final answer matches the labeled correct answer.
 3. Keep the (problem, chain, answer) triples where the answer was correct.
-4. SFT the model on those triples — train it to produce the chain it produced when it got the right answer.
+4. SFT the model on those triples: train it to produce the chain it produced when it got the right answer.
 5. Repeat.
 
 For problems where the model fails on every attempt, STaR adds a "rationalization" step: condition the model on the correct answer and ask it to generate a chain that leads to it. The rationalized chain isn't necessarily faithful to how the model "would have" solved the problem, but it provides a positive training example for problems the model otherwise can't get any signal from.
@@ -129,19 +129,19 @@ What STaR establishes for everything later:
 - Iteration matters: as the model improves, it succeeds on harder problems, which feed back into the training set. The corpus difficulty grows with the model's capability.
 - A bootstrapping problem exists: if the model can't solve any problems in a class at all, no amount of self-training on that class will fix it. The rationalization step is one patch; using a stronger teacher (the distillation approach from [Lecture 18](./18-distillation-reasoning.md)) is another.
 
-STaR isn't an RL method — there's no gradient flowing through a reward signal, just an SFT loss on filtered chains. But the filter-and-train loop is the same template that GRPO formalizes with policy gradients. Practically, STaR is cheaper than RL and works fine when the base model has enough latent capability to solve problems often enough that filtering yields a usable corpus.
+STaR isn't an RL method: there's no gradient flowing through a reward signal, just an SFT loss on filtered chains. But the filter-and-train loop is the same template that GRPO formalizes with policy gradients. Practically, STaR is cheaper than RL and works fine when the base model has enough latent capability to solve problems often enough that filtering yields a usable corpus.
 
 ---
 
 ## Process supervision: PRM800K
 
-Outcome supervision tells the model whether its final answer was right. Process supervision tells the model whether each intermediate step was right. Lightman et al. 2023 (arXiv:2305.20050) released PRM800K — 800,000 step-level human-feedback labels on MATH solutions — and trained a process reward model on top.
+Outcome supervision tells the model whether its final answer was right. Process supervision tells the model whether each intermediate step was right. Lightman et al. 2023 (arXiv:2305.20050) released PRM800K, 800,000 step-level human-feedback labels on MATH solutions, and trained a process reward model on top.
 
 The dataset construction: take chains of thought generated by a strong model on MATH problems, segment them into steps (roughly sentence-level), have human annotators label each step as positive (correct and useful), neutral (true but not progressing), or negative (incorrect). Train a reward model to predict step labels given the prefix up to that step.
 
 The PRM is then used for best-of-N selection at inference time: generate N chains, score each step with the PRM, sum or aggregate per-chain, return the chain with the highest aggregate score. Lightman et al. showed this outperforms outcome-based best-of-N (where the reward model only sees the final answer) at matched N. The process reward model is more reliable because it can identify and downweight chains that arrived at correct answers via flawed reasoning.
 
-The process reward model can also be used for training, not just inference. The gradient signal is much denser than an outcome reward — every step gets a score, instead of one number per chain. This denser signal helps the model learn what good intermediate steps look like, not just what correct final answers look like. The Uesato et al. 2022 paper (arXiv:2211.14275) had run an earlier comparison of process vs. outcome supervision on GSM8K and found them comparable in final-answer accuracy but different in reasoning-error rate; the Lightman PRM800K work is the version that scaled the approach and showed clearer wins on MATH.
+The process reward model can also be used for training, not just inference. The gradient signal is much denser than an outcome reward: every step gets a score, instead of one number per chain. This denser signal helps the model learn what good intermediate steps look like, not just what correct final answers look like. The Uesato et al. 2022 paper (arXiv:2211.14275) had run an earlier comparison of process vs. outcome supervision on GSM8K and found them comparable in final-answer accuracy but different in reasoning-error rate; the Lightman PRM800K work is the version that scaled the approach and showed clearer wins on MATH.
 
 Why PRMs haven't completely displaced outcome supervision: cost. 800K step-level human labels is expensive. Most current systems use outcome supervision (DeepSeek-R1 uses outcome rewards in its RL stage, not a PRM, by the description in arXiv:2501.12948). PRMs show up more often at inference time, where they're used for best-of-N selection over chains generated by a model trained with outcome supervision. The training pipeline ends up being: outcome RL → PRM-based inference search.
 
@@ -155,11 +155,11 @@ A pragmatic middle position several recent systems take: outcome rewards for RL 
 
 ## DeepSeekMath and GRPO
 
-DeepSeekMath (Shao et al. 2024, arXiv:2402.03300) introduced GRPO and applied it to math reasoning. The algorithmic mechanics are in Lecture 15 — what's worth surfacing here is what the paper did specifically with math.
+DeepSeekMath (Shao et al. 2024, arXiv:2402.03300) introduced GRPO and applied it to math reasoning. The algorithmic mechanics are in Lecture 15; what's worth surfacing here is what the paper did specifically with math.
 
 The setup:
 
-1. Pre-train a base model (DeepSeek-LLM 7B in the paper) on a large math-heavy corpus. The corpus construction was a substantial part of the work — they filtered Common Crawl for math content using a classifier trained on known-good math text, then iteratively refined.
+1. Pre-train a base model (DeepSeek-LLM 7B in the paper) on a large math-heavy corpus. The corpus construction was a substantial part of the work: they filtered Common Crawl for math content using a classifier trained on known-good math text, then iteratively refined.
 2. SFT on a math instruction-tuning dataset.
 3. Run GRPO with rule-based rewards. The reward is binary: 1 if the extracted final answer matches the labeled correct answer (after normalization), 0 otherwise.
 
@@ -193,9 +193,9 @@ The math portion of the RL training data was a mix of public math problem corpor
 - Olympiad problems with verified answers (similar to OlympiadBench, but pulled from various competition archives).
 - Synthetic problems generated by a teacher model and filtered by another model or a symbolic solver.
 
-The exact mix isn't documented in the paper. What matters for training stability is that the problems have a difficulty distribution that gives the model some signal — too easy and group-relative advantages collapse to zero (everyone gets r=1), too hard and they collapse the other way (everyone gets r=0). The training curriculum is implicitly shaped by which problems land in the "10-80% success rate" zone for the current policy.
+The exact mix isn't documented in the paper. What matters for training stability is that the problems have a difficulty distribution that gives the model some signal: too easy and group-relative advantages collapse to zero (everyone gets r=1), too hard and they collapse the other way (everyone gets r=0). The training curriculum is implicitly shaped by which problems land in the "10-80% success rate" zone for the current policy.
 
-Code and other domains were mixed in alongside the math problems. Both contribute verifiable reward signal, and the policy improvement on one transfers somewhat to the other through shared reasoning patterns (read-the-problem-carefully, plan-then-execute, check-your-work). The total RL training set was described as substantial — hundreds of thousands of problems with verified answers, across math, code, and adjacent domains.
+Code and other domains were mixed in alongside the math problems. Both contribute verifiable reward signal, and the policy improvement on one transfers somewhat to the other through shared reasoning patterns (read-the-problem-carefully, plan-then-execute, check-your-work). The total RL training set was described as substantial: hundreds of thousands of problems with verified answers, across math, code, and adjacent domains.
 
 ### Reward function
 
@@ -220,21 +220,21 @@ This is the math version of the general RLVR reward function from [Lecture 15](.
 The training dynamics reported in the R1 paper, as far as is publicly described:
 
 - **Format reward** rises quickly (within a few hundred steps) and plateaus near maximum. The model learns the output structure long before it learns to solve harder problems.
-- **Correctness reward** rises more gradually over thousands of steps. The shape is concave — fast early improvement on the easier problems in the distribution, slower improvement on the harder ones.
-- **Response length** grows substantially over training. The R1 paper highlights this: average tokens per response increases from a few hundred at the start of RL to many thousands by the end. The growth isn't explicitly rewarded — it emerges because longer chains are more often correct on hard problems, so the policy learns to extend chains where extension helps.
-- **KL divergence to the reference policy** grows steadily. With `kl_beta` around 0.04 (typical), the KL plateaus rather than exploding, but it doesn't return to zero — the policy has genuinely shifted away from the reference distribution.
+- **Correctness reward** rises more gradually over thousands of steps. The shape is concave: fast early improvement on the easier problems in the distribution, slower improvement on the harder ones.
+- **Response length** grows substantially over training. The R1 paper highlights this: average tokens per response increases from a few hundred at the start of RL to many thousands by the end. The growth isn't explicitly rewarded: it emerges because longer chains are more often correct on hard problems, so the policy learns to extend chains where extension helps.
+- **KL divergence to the reference policy** grows steadily. With `kl_beta` around 0.04 (typical), the KL plateaus rather than exploding, but it doesn't return to zero: the policy has genuinely shifted away from the reference distribution.
 
-The response-length growth deserves emphasis. It's one of the more interesting features of R1-style training: the model spontaneously learns to allocate more tokens to harder problems. Looking at a curve of average response length vs. training step, the growth is roughly monotonic and substantial — often 5–10x increase from start to end of RL training. This is what people mean by "test-time compute emerging from RL" — the model itself learns to spend more inference compute where it helps, without being explicitly told to.
+The response-length growth deserves emphasis. It's one of the more interesting features of R1-style training: the model spontaneously learns to allocate more tokens to harder problems. Looking at a curve of average response length vs. training step, the growth is roughly monotonic and substantial: often 5–10x increase from start to end of RL training. This is what people mean by "test-time compute emerging from RL": the model itself learns to spend more inference compute where it helps, without being explicitly told to.
 
 ### The "aha moment"
 
-The R1 paper describes a qualitative phenomenon: at some training step (the paper shows it at around step 8000 of R1-Zero training), the model begins producing explicit reflection in its chains — phrases like "wait, let me reconsider" or "I made an error above; let me try again." These weren't in the training data (R1-Zero starts from a base model with no SFT), and they weren't explicitly rewarded. They emerged because backtracking from incorrect intermediate steps is instrumentally useful for getting the correctness reward.
+The R1 paper describes a qualitative phenomenon: at some training step (the paper shows it at around step 8000 of R1-Zero training), the model begins producing explicit reflection in its chains, phrases like "wait, let me reconsider" or "I made an error above; let me try again." These weren't in the training data (R1-Zero starts from a base model with no SFT), and they weren't explicitly rewarded. They emerged because backtracking from incorrect intermediate steps is instrumentally useful for getting the correctness reward.
 
-The "aha moment" framing is somewhat romanticized — the underlying mechanism is just that the policy gradient pushes toward behaviors that correlate with reward, and explicit self-correction correlates with reward on harder problems where the first attempt is more often wrong. But the emergence is genuine: the model develops self-reflection behaviors without any direct training signal for them.
+The "aha moment" framing is somewhat romanticized: the underlying mechanism is just that the policy gradient pushes toward behaviors that correlate with reward, and explicit self-correction correlates with reward on harder problems where the first attempt is more often wrong. But the emergence is genuine: the model develops self-reflection behaviors without any direct training signal for them.
 
 This is the strongest piece of evidence for the "RL amplifies latent capability" interpretation discussed in Lecture 15. The base model could already produce self-reflective text (it was in the pre-training corpus somewhere), but rarely. RL made it systematic.
 
-A subtlety worth being explicit about: the "aha moment" is reported as a step-localized phenomenon in the paper's figures, but it's not a phase transition in the mathematical sense. The frequency of self-reflective phrases in the model's outputs grows continuously over training; what makes the moment notable is that it crosses a threshold of being visible and consistent rather than sporadic. Models earlier in training also produce these phrases occasionally — just not reliably enough that you'd say the model "uses self-reflection." The paper's framing is partly narrative; the underlying dynamics are gradient-driven and gradual. Don't expect a clean spike when you reproduce this in your own training runs; expect a slow climb that becomes visible once it's above some inspection threshold.
+A subtlety worth being explicit about: the "aha moment" is reported as a step-localized phenomenon in the paper's figures, but it's not a phase transition in the mathematical sense. The frequency of self-reflective phrases in the model's outputs grows continuously over training; what makes the moment notable is that it crosses a threshold of being visible and consistent rather than sporadic. Models earlier in training also produce these phrases occasionally, just not reliably enough that you'd say the model "uses self-reflection." The paper's framing is partly narrative; the underlying dynamics are gradient-driven and gradual. Don't expect a clean spike when you reproduce this in your own training runs; expect a slow climb that becomes visible once it's above some inspection threshold.
 
 ### R1-Zero failure modes
 
@@ -259,12 +259,12 @@ OpenAI's o1 (announced September 2024) was the first widely-publicized reasoning
 What's documented publicly:
 
 - o1 is trained with RL on chain-of-thought.
-- Performance on math and coding benchmarks scales with inference token budget — longer reasoning traces score higher, up to a plateau.
+- Performance on math and coding benchmarks scales with inference token budget: longer reasoning traces score higher, up to a plateau.
 - The training compute and the inference compute are described as two separable levers.
 
-What isn't documented publicly: the specific RL algorithm, whether a learned PRM is used for inference search, the reward function structure, how inference compute is allocated. Anything beyond the blog post is speculation. Treat claims about o1's internals from secondary sources with skepticism — the official description is intentionally high-level, and the people who know aren't writing public papers.
+What isn't documented publicly: the specific RL algorithm, whether a learned PRM is used for inference search, the reward function structure, how inference compute is allocated. Anything beyond the blog post is speculation. Treat claims about o1's internals from secondary sources with skepticism: the official description is intentionally high-level, and the people who know aren't writing public papers.
 
-Qwen's QwQ ("Qwen with Questions," released as a preview by Alibaba's Qwen team in late 2024) is another reasoning model in the same lineage. As of writing, there's no full technical paper for QwQ either — it's been described in blog posts and release notes. The behavior is similar to R1-Zero and o1: long structured reasoning chains, scaling with inference compute, RL training on verifiable rewards.
+Qwen's QwQ ("Qwen with Questions," released as a preview by Alibaba's Qwen team in late 2024) is another reasoning model in the same lineage. As of writing, there's no full technical paper for QwQ either: it's been described in blog posts and release notes. The behavior is similar to R1-Zero and o1: long structured reasoning chains, scaling with inference compute, RL training on verifiable rewards.
 
 The pattern: OpenAI announced o1 in September 2024, DeepSeek released R1 in January 2025 with a full open paper and open weights, and several other groups followed with similar systems. R1 is the system you can study in depth because the paper, weights, and (subsequently) reproductions are all available. The others share a recipe family with R1 but have to be inferred from external behavior and partial disclosures.
 
@@ -274,7 +274,7 @@ For learning purposes: read the R1 paper carefully, treat o1 and QwQ as confirma
 
 ## A code sketch: the math RLVR rollout loop
 
-The full GRPO update is in [Lecture 15](./15-rl-verifiable-rewards.md). What's specific to math is the rollout-and-verify loop — sampling K completions per problem, extracting and normalizing answers, comparing to gold, producing the rewards tensor that GRPO consumes.
+The full GRPO update is in [Lecture 15](./15-rl-verifiable-rewards.md). What's specific to math is the rollout-and-verify loop: sampling K completions per problem, extracting and normalizing answers, comparing to gold, producing the rewards tensor that GRPO consumes.
 
 This is a simplified version of the math verifier and rollout loop. It's not optimized; it's meant to make the structure clear.
 
@@ -347,7 +347,7 @@ def normalize_answer(s: str) -> str:
     Returns a canonical string representation.
     """
     s = _strip_units(s)
-    # Try fraction normalization first — handles most numeric cases.
+    # Try fraction normalization first: handles most numeric cases.
     f = _normalize_fraction(s)
     if f is not None:
         if f.denominator == 1:
@@ -461,7 +461,7 @@ Things worth noticing in the verifier code:
 - The answer extractor returns the *last* matched answer, not the first. Models often write intermediate "the answer might be X" phrases before committing; the final answer is what counts.
 - The normalization handles LaTeX `\boxed{}` and `\frac{}{}` because MATH labels them this way, and a naive string match would reject `\frac{1}{2}` against `1/2`.
 - The format check is generous on purpose. A strict check (e.g., requiring specific whitespace around `<think>` tags) gives more false negatives, which makes the format reward noisier without much benefit.
-- The fraction normalization uses `Fraction.limit_denominator(10**6)` to handle decimal approximations. Without this, `0.333` would fail to compare equal to `1/3`. With it, `0.333` becomes `333/1000` after parsing, which is still not `1/3` — so the comparison falls through to string match. This is a real edge case in MATH verifiers; some implementations accept "close enough" decimal answers, others require exact rational equality. Decide which based on the dataset.
+- The fraction normalization uses `Fraction.limit_denominator(10**6)` to handle decimal approximations. Without this, `0.333` would fail to compare equal to `1/3`. With it, `0.333` becomes `333/1000` after parsing, which is still not `1/3`, so the comparison falls through to string match. This is a real edge case in MATH verifiers; some implementations accept "close enough" decimal answers, others require exact rational equality. Decide which based on the dataset.
 
 The verifier is the most failure-prone piece of an RLVR math system. When the reward isn't behaving as expected, the bug is more often in the verifier than in the RL algorithm.
 
@@ -473,7 +473,7 @@ Lecture 15 covers reward hacking in general. This section covers what shows up s
 
 ### Spurious correlations in the answer distribution
 
-If the training set has systematic patterns in the answer distribution — say, problems whose correct answer is a small positive integer between 1 and 20 are overrepresented — the model can learn to bias its guesses toward that range and pick up reward without doing the underlying reasoning. The model isn't solving the problem; it's pattern-matching on superficial features that correlate with answer range.
+If the training set has systematic patterns in the answer distribution (say, problems whose correct answer is a small positive integer between 1 and 20 are overrepresented), the model can learn to bias its guesses toward that range and pick up reward without doing the underlying reasoning. The model isn't solving the problem; it's pattern-matching on superficial features that correlate with answer range.
 
 This is detectable: hold out a test set where the answer distribution doesn't match training, and measure whether the model's accuracy drops. If it does, the model was surface-matching. GSM8K is somewhat susceptible to this because the answers cluster on small integers; AIME (where answers are integers 0–999, uniformly distributed) is less susceptible.
 
@@ -481,7 +481,7 @@ This is detectable: hold out a test set where the answer distribution doesn't ma
 
 A more subtle version: the model memorizes the answer pattern for specific problem types rather than learning to derive them. "Find the area of a triangle with sides 3, 4, 5" always has the same answer (6), and the model can learn to map the surface features to the answer without doing the Heron's formula computation.
 
-This is hard to detect on standard benchmarks because the training data and the test data often share problem types. A model that memorizes "the area of a 3-4-5 triangle is 6" looks just as good on a test of 3-4-5 triangle problems as a model that derives it. To detect memorization, you need novel problem types not present in any standard math corpus — which is part of why AIME 2024 became the de facto frontier benchmark in 2025: the problems were post-cutoff for most pre-training corpora, so the test set was less likely to overlap with training.
+This is hard to detect on standard benchmarks because the training data and the test data often share problem types. A model that memorizes "the area of a 3-4-5 triangle is 6" looks just as good on a test of 3-4-5 triangle problems as a model that derives it. To detect memorization, you need novel problem types not present in any standard math corpus, which is part of why AIME 2024 became the de facto frontier benchmark in 2025: the problems were post-cutoff for most pre-training corpora, so the test set was less likely to overlap with training.
 
 The general principle: be skeptical of benchmark numbers when the model's training data contains close paraphrases or templates of the benchmark problems. The RL training stage doesn't create memorization (the gradients are usually weak enough that it can't memorize 800K problems verbatim), but the pre-training and SFT stages can.
 
@@ -494,22 +494,22 @@ The math verifier is a stack of normalization rules and equivalence checks. Ever
 - **Numerically equal but textually different forms.** `1/2 == 0.5 == 2/4`, but a naive checker might reject 2/4. Most production checkers reduce fractions; many don't handle decimal-to-fraction equivalence.
 - **Symbolically equal forms.** `\sqrt{2}` vs `2^{1/2}` vs `1.414`. Symbolic equivalence requires a CAS (computer algebra system) to check reliably.
 - **Set and tuple representations.** If the answer is the set `{1, 2, 3}`, the model might write `1, 2, 3` or `[1, 2, 3]` or `(1, 2, 3)` or `{3, 2, 1}`. The checker has to decide which of these count.
-- **Units.** "5 meters" vs "5 m" vs "5" — depends on whether the question specifies units.
+- **Units.** "5 meters" vs "5 m" vs "5": depends on whether the question specifies units.
 - **Interval notation.** `(0, 1)` (open interval) vs `0 < x < 1` vs `]0, 1[` (continental European convention).
 
-Every one of these is a place where a correct chain gets zero reward because the answer extractor or normalizer didn't handle the form. The model's policy can't tell whether it's being penalized for reasoning errors or verifier mismatches — they look the same in the reward signal.
+Every one of these is a place where a correct chain gets zero reward because the answer extractor or normalizer didn't handle the form. The model's policy can't tell whether it's being penalized for reasoning errors or verifier mismatches: they look the same in the reward signal.
 
-The practical mitigation: log a sample of "incorrect" responses periodically and check by hand whether they're verifier failures rather than reasoning failures. If 10% of zero-reward responses turn out to be correct answers in unexpected forms, fix the verifier — that's a meaningful chunk of training signal you're throwing away.
+The practical mitigation: log a sample of "incorrect" responses periodically and check by hand whether they're verifier failures rather than reasoning failures. If 10% of zero-reward responses turn out to be correct answers in unexpected forms, fix the verifier: that's a meaningful chunk of training signal you're throwing away.
 
 ### Length hacking
 
 If something in the pipeline rewards length (a length bonus, or a correlation between length and correctness that the model latches onto), the model can produce arbitrarily long chains without adding reasoning. R1-Zero in particular sometimes produces very long chains with substantial padding, repetition, or redundant verification steps.
 
-This isn't always bad — longer chains often are better, as the response-length growth in R1 training shows. But the failure mode to watch for is unproductive length: chains that grow because length itself was implicitly rewarded, not because longer reasoning was solving harder problems. Monitor average chain length vs. average correctness over training. If length keeps growing while correctness has plateaued, the policy may be over-investing in length.
+This isn't always bad: longer chains often are better, as the response-length growth in R1 training shows. But the failure mode to watch for is unproductive length: chains that grow because length itself was implicitly rewarded, not because longer reasoning was solving harder problems. Monitor average chain length vs. average correctness over training. If length keeps growing while correctness has plateaued, the policy may be over-investing in length.
 
 ### Reward signal from leakage in the problem statement
 
-Some math problems contain hints in the problem statement that the model can pattern-match without doing the math. "Find the largest prime less than 100. Hint: it's 97" is an extreme example; subtler versions appear in problems where the answer is implicit in the setup. A model trained against a verifier on these problems learns to mine the problem statement rather than reason from first principles. Filter your training set for problems whose answer is too easily extractable from the prompt — usually by running a zero-CoT baseline (just predicting the answer from the prompt directly) and excluding problems where the baseline does well.
+Some math problems contain hints in the problem statement that the model can pattern-match without doing the math. "Find the largest prime less than 100. Hint: it's 97" is an extreme example; subtler versions appear in problems where the answer is implicit in the setup. A model trained against a verifier on these problems learns to mine the problem statement rather than reason from first principles. Filter your training set for problems whose answer is too easily extractable from the prompt: usually by running a zero-CoT baseline (just predicting the answer from the prompt directly) and excluding problems where the baseline does well.
 
 ---
 
@@ -517,7 +517,7 @@ Some math problems contain hints in the problem statement that the model can pat
 
 Math reasoning splits cleanly into two regimes based on what the model has to do unaided.
 
-**Pure-LLM math** (the GSM8K/MATH/AIME setting described above): the model produces natural-language reasoning and a final answer, and the only external check is on the final answer. Everything else — arithmetic, algebra, symbolic manipulation — happens inside the model's chain of thought, in natural language tokens. The model is doing math from scratch each time, with no calculator and no proof assistant to verify intermediate steps.
+**Pure-LLM math** (the GSM8K/MATH/AIME setting described above): the model produces natural-language reasoning and a final answer, and the only external check is on the final answer. Everything else (arithmetic, algebra, symbolic manipulation) happens inside the model's chain of thought, in natural language tokens. The model is doing math from scratch each time, with no calculator and no proof assistant to verify intermediate steps.
 
 **Tool-augmented math**: the model can call an external tool to handle some part of the work. Common tools include a Python interpreter (PAL-style), a CAS, a formal proof assistant (Lean, Coq, Isabelle, Metamath), or a calculator. The model produces code or proof terms; the tool executes them; the result is fed back into the model's context.
 
@@ -527,13 +527,13 @@ The shift from pure-LLM to tool-augmented changes what the model needs to do and
 - **Symbolic offload.** With a CAS, the model can offload algebraic manipulation, integration, factorization. The model decides what symbolic operation to apply; the CAS executes it.
 - **Proof checking offload.** For formal math, the proof assistant is the ground truth. The model proposes proof steps; the assistant accepts or rejects each one. The reward signal is per-step (does this tactic close this goal or produce valid subgoals), which is denser than the outcome-only reward in pure-LLM math.
 
-The tool-augmented setting changes the reward structure in important ways. In pure-LLM math, the reward is sparse: one number per chain, only on the final answer. In tool-augmented math, the tool calls produce intermediate signals — a Python interpreter that errors out tells you the code was wrong; a proof tactic that closes a goal tells you the step was correct. These intermediate signals can be used as part of the reward, giving GRPO a denser learning signal than pure outcome supervision.
+The tool-augmented setting changes the reward structure in important ways. In pure-LLM math, the reward is sparse: one number per chain, only on the final answer. In tool-augmented math, the tool calls produce intermediate signals: a Python interpreter that errors out tells you the code was wrong; a proof tactic that closes a goal tells you the step was correct. These intermediate signals can be used as part of the reward, giving GRPO a denser learning signal than pure outcome supervision.
 
 ### Formal proofs: AlphaProof and the IMO 2024 result
 
-DeepMind announced in July 2024 that a combination of two systems (AlphaProof and AlphaGeometry 2) achieved a silver-medal-level performance on the 2024 International Mathematical Olympiad — solving 4 of 6 problems. AlphaProof was the system for the algebraic and number-theoretic problems, and it used the Lean proof assistant as its verifier.
+DeepMind announced in July 2024 that a combination of two systems (AlphaProof and AlphaGeometry 2) achieved a silver-medal-level performance on the 2024 International Mathematical Olympiad, solving 4 of 6 problems. AlphaProof was the system for the algebraic and number-theoretic problems, and it used the Lean proof assistant as its verifier.
 
-There is, as of writing, no full technical paper for AlphaProof. The announcement was a blog post; a paper was suggested as forthcoming. Treat this section accordingly — the high-level approach is publicly stated, the details are not.
+There is, as of writing, no full technical paper for AlphaProof. The announcement was a blog post; a paper was suggested as forthcoming. Treat this section accordingly: the high-level approach is publicly stated, the details are not.
 
 What's publicly described:
 
@@ -552,7 +552,7 @@ What earlier work this builds on:
 - "Draft, Sketch, and Prove" (Jiang et al. 2022, arXiv:2210.12283) connected informal natural-language proof sketches to formal proof construction in Isabelle.
 - MiniF2F (Zheng, Han, Polu 2021, arXiv:2109.00110) provided the cross-system benchmark these methods are evaluated against.
 
-AlphaProof builds on this line of work — RL on top of a Lean-based proof search, scaled up substantially and combined with strong autoformalization (translating natural-language statements into formal Lean). The IMO 2024 result was widely treated as a milestone, but the absence of a full paper means the specifics aren't reproducible from public information yet.
+AlphaProof builds on this line of work: RL on top of a Lean-based proof search, scaled up substantially and combined with strong autoformalization (translating natural-language statements into formal Lean). The IMO 2024 result was widely treated as a milestone, but the absence of a full paper means the specifics aren't reproducible from public information yet.
 
 ### When to use tools in RL training
 
@@ -564,7 +564,7 @@ If you want maximum performance on a math benchmark and don't mind the deploymen
 
 If you want formal correctness guarantees (no plausible-but-wrong reasoning), use a proof assistant. The verifier is exact, and the reward signal is denser. The cost is that everything has to be formalizable, which excludes most natural-language problem statements unless you also build a translation layer.
 
-The tradeoffs aren't unique to math — they show up wherever RL meets a domain with tool support — but math is where the design space has been most thoroughly explored.
+The tradeoffs aren't unique to math: they show up wherever RL meets a domain with tool support. But math is where the design space has been most thoroughly explored.
 
 One under-discussed cost of tool-augmented RL: the rollout pipeline gets slower and harder to parallelize. Pure-LLM rollouts are dominated by GPU forward passes, which batch cleanly. Tool-augmented rollouts have a tool-call step where the GPU sits idle waiting for an external process (a Python sandbox spinning up, a Lean compiler checking a proof). At K=16 rollouts per problem and a batch of hundreds of problems, the cumulative tool-call latency can be the bottleneck. Practical setups handle this with asynchronous evaluation pipelines, pre-warmed tool processes, and batching tool calls across rollouts where possible. None of this is conceptually hard, but it's a non-trivial engineering layer that pure-LLM RLVR doesn't need.
 
@@ -574,12 +574,12 @@ One under-discussed cost of tool-augmented RL: the rollout pipeline gets slower 
 
 Most of what's in Lecture 15's "practical training dynamics" section applies here. What's worth adding specifically for math:
 
-- **Curriculum on difficulty.** If your training set is mostly easy problems (GSM8K-style), the model saturates quickly and the gradient signal goes to zero. If it's mostly hard problems (AIME-style), pass rates are too low to give signal on most problems. A mix that lands the model in the 20-70% pass rate range per problem is what gives the most useful gradient. In practice this is handled by including problems across difficulty levels and letting the implicit curriculum shape itself — easier problems contribute signal early in training, harder problems contribute signal later.
-- **Length stability.** Watch the average response length over training. R1-style growth is healthy (longer chains, higher accuracy). Sudden spikes in length without corresponding accuracy improvements are usually length hacking — investigate.
+- **Curriculum on difficulty.** If your training set is mostly easy problems (GSM8K-style), the model saturates quickly and the gradient signal goes to zero. If it's mostly hard problems (AIME-style), pass rates are too low to give signal on most problems. A mix that lands the model in the 20-70% pass rate range per problem is what gives the most useful gradient. In practice this is handled by including problems across difficulty levels and letting the implicit curriculum shape itself: easier problems contribute signal early in training, harder problems contribute signal later.
+- **Length stability.** Watch the average response length over training. R1-style growth is healthy (longer chains, higher accuracy). Sudden spikes in length without corresponding accuracy improvements are usually length hacking: investigate.
 - **Verifier sampling.** Periodically pull random "incorrect" responses and check them by hand. If a non-trivial fraction are actually correct answers in forms the verifier rejected, fix the verifier. This pays for itself: a verifier that accepts 5% more correct answers is equivalent to 5% more positive training examples.
 - **Reward-distribution per problem.** Log the distribution of rewards within each problem group across training. Healthy distributions have a mix of high and low rewards (which gives advantages with non-zero variance). All-zero or all-one groups produce no learning signal. If most groups are degenerate, your problem difficulty is mismatched to your model's capability.
 
-The Lecture 15 hyperparameter table is a reasonable starting point for math RLVR (K=4-16, clip_eps=0.1-0.3, kl_beta=0.01-0.1, lr around 1e-6). The one parameter worth tuning more carefully for math is `K` — math is cheap to verify (a regex match, not a code execution), so larger K is more feasible than for code. K=16-32 is reasonable when the verifier is fast.
+The Lecture 15 hyperparameter table is a reasonable starting point for math RLVR (K=4-16, clip_eps=0.1-0.3, kl_beta=0.01-0.1, lr around 1e-6). The one parameter worth tuning more carefully for math is `K`: math is cheap to verify (a regex match, not a code execution), so larger K is more feasible than for code. K=16-32 is reasonable when the verifier is fast.
 
 ---
 
@@ -590,7 +590,7 @@ The full math-reasoning recipe is worth using when:
 - You want frontier-class math performance from an open-weight or self-trained model.
 - You have access to a verifiable problem corpus with reliable answer labels.
 - You can run inference on a large base model at scale (for either RL rollouts or teacher-generation in a distillation setup).
-- The math domain is "in-distribution" for the kind of math you care about — competition-style problems, with short numeric or symbolic answers. The recipe transfers less directly to research-level mathematics where the "answer" is a proof or a construction.
+- The math domain is "in-distribution" for the kind of math you care about: competition-style problems, with short numeric or symbolic answers. The recipe transfers less directly to research-level mathematics where the "answer" is a proof or a construction.
 
 The cheaper paths that may be sufficient:
 
@@ -608,7 +608,7 @@ A practical decision tree for picking among the options:
 
 ```
 Do you need frontier-class performance on competition math (AIME, OlympiadBench)?
-├── No — GSM8K / MATH-500 level is enough?
+├── No: GSM8K / MATH-500 level is enough?
 │    ├── Have a strong base model? → CoT prompting + self-consistency may suffice.
 │    └── Smaller base model? → STaR or distill from an open reasoning teacher.
 └── Yes
@@ -625,8 +625,8 @@ The path that's clearly dominated: running GRPO from scratch on a small model wi
 ## Exercises
 
 - **Build a MATH verifier.** Take the MATH test set, pick a 100-problem subset, and write an answer extractor + equivalence checker for it. Compare your verifier's accept rate on known-correct human solutions to a baseline (string-match only). The gap is the fraction of correct answers your verifier handles that string-match doesn't. Aim for >95% accept rate on labeled correct solutions.
-- **Run STaR on a small math model.** Use a 1B-class model and the GSM8K training set. Sample chains, filter to correct ones, SFT, repeat. Measure pass@1 on GSM8K test after each round. Plot the curve. Notice where it plateaus — usually after 2–4 rounds, depending on the model's starting capability.
-- **Self-consistency curve.** Take a CoT-prompted model on GSM8K. Sample K chains per problem for K in {1, 2, 4, 8, 16, 32, 64}. Plot majority-vote pass rate vs K. Where does the curve flatten? Compare to single-sample greedy pass rate — the gap is your inference-time compute benefit.
+- **Run STaR on a small math model.** Use a 1B-class model and the GSM8K training set. Sample chains, filter to correct ones, SFT, repeat. Measure pass@1 on GSM8K test after each round. Plot the curve. Notice where it plateaus: usually after 2–4 rounds, depending on the model's starting capability.
+- **Self-consistency curve.** Take a CoT-prompted model on GSM8K. Sample K chains per problem for K in {1, 2, 4, 8, 16, 32, 64}. Plot majority-vote pass rate vs K. Where does the curve flatten? Compare to single-sample greedy pass rate: the gap is your inference-time compute benefit.
 - **Verifier-failure audit.** On the same GSM8K runs, pull random "incorrect" responses and check by hand whether they're verifier failures or reasoning failures. Estimate the fraction of each. This calibrates how much faith to put in benchmark numbers.
 - **Length vs. accuracy correlation.** On a model that produces variable-length chains (any CoT model will do), compute the correlation between chain length and correctness across a benchmark. Is the correlation positive (longer chains do better) or negative (correct answers can be reached quickly)? The R1 training dynamics suggest positive on hard problems, near-zero on easy ones. Reproduce this on your benchmark.
 - **Answer normalization sensitivity.** Take a MATH verifier and intentionally weaken the normalization (e.g., remove fraction reduction, remove LaTeX `\frac{}{}` handling). Measure how much the apparent pass rate of a fixed model drops. The drop is a lower bound on how much verifier engineering matters.
@@ -637,7 +637,7 @@ The path that's clearly dominated: running GRPO from scratch on a small model wi
 
 These are the math-specific items worth checking when something's off in an RLVR-on-math training run. The general RLVR debugging items are in [Lecture 15](./15-rl-verifiable-rewards.md).
 
-**Training reward not increasing on math but format reward is fine.** The model is producing well-formatted output but not solving problems. Check whether the verifier is accepting equivalent-form answers — pull a sample of "incorrect" responses by hand. If half of them are correct in unexpected forms, fix the verifier first, then resume training.
+**Training reward not increasing on math but format reward is fine.** The model is producing well-formatted output but not solving problems. Check whether the verifier is accepting equivalent-form answers: pull a sample of "incorrect" responses by hand. If half of them are correct in unexpected forms, fix the verifier first, then resume training.
 
 **Accuracy plateaus at low level (10-20%) on a benchmark.** Either the base model lacks the math capability to bootstrap (pre-train on math more, or use a stronger base), or the problems are too hard for the current policy and group-relative advantages are mostly zero. Look at the per-problem pass-rate distribution: if most problems have all-zero rewards, lower the problem difficulty or increase K to get some variance in the groups.
 
@@ -649,7 +649,7 @@ These are the math-specific items worth checking when something's off in an RLVR
 
 **Pass rate on AIME drops between training checkpoints.** AIME's small problem count (15) means single-problem flips dominate the pass rate. Average over more samples per problem (K=8 or K=32) before reporting. Also report pass@8 or pass@32 alongside pass@1 to give a less noisy signal.
 
-**KL to reference model spikes during math training.** Usually this means the policy is rapidly shifting away from the base model's distribution to handle a specific problem type. Lower the learning rate or raise `kl_beta`. If it persists, the model may be entering a mode where it produces math-specific outputs that aren't well-supported by the base model — which can be fine, but is worth watching.
+**KL to reference model spikes during math training.** Usually this means the policy is rapidly shifting away from the base model's distribution to handle a specific problem type. Lower the learning rate or raise `kl_beta`. If it persists, the model may be entering a mode where it produces math-specific outputs that aren't well-supported by the base model, which can be fine, but is worth watching.
 
 ---
 
@@ -659,50 +659,50 @@ All arXiv IDs verified against arxiv.org.
 
 **Benchmarks**
 
-- Cobbe, Kosaraju, Bavarian et al. 2021. "Training Verifiers to Solve Math Word Problems." OpenAI. arXiv:2110.14168. — Introduces GSM8K (8.5K grade-school word problems) and the verifier-training approach that anticipates RLVR.
-- Hendrycks, Burns, Kadavath et al. 2021. "Measuring Mathematical Problem Solving With the MATH Dataset." arXiv:2103.03874. — Introduces MATH (12,500 competition problems). The paper's conclusion that "scaling is not currently solving MATH" is what RLVR-on-math went on to disprove.
-- Hendrycks, Burns, Basart et al. 2020. "Measuring Massive Multitask Language Understanding." arXiv:2009.03300. — MMLU; the MMLU-STEM subset is occasionally used for reasoning-model comparison.
-- He, Luo, Bai et al. 2024. "OlympiadBench." arXiv:2402.14008. — 8,476 olympiad-level math and physics problems, bilingual.
-- Zheng, Han, Polu. 2021. "MiniF2F: a cross-system benchmark for formal Olympiad-level mathematics." arXiv:2109.00110. — Cross-system formal-math benchmark.
+- Cobbe, Kosaraju, Bavarian et al. 2021. "Training Verifiers to Solve Math Word Problems." OpenAI. arXiv:2110.14168. Introduces GSM8K (8.5K grade-school word problems) and the verifier-training approach that anticipates RLVR.
+- Hendrycks, Burns, Kadavath et al. 2021. "Measuring Mathematical Problem Solving With the MATH Dataset." arXiv:2103.03874. Introduces MATH (12,500 competition problems). The paper's conclusion that "scaling is not currently solving MATH" is what RLVR-on-math went on to disprove.
+- Hendrycks, Burns, Basart et al. 2020. "Measuring Massive Multitask Language Understanding." arXiv:2009.03300. MMLU; the MMLU-STEM subset is occasionally used for reasoning-model comparison.
+- He, Luo, Bai et al. 2024. "OlympiadBench." arXiv:2402.14008. 8,476 olympiad-level math and physics problems, bilingual.
+- Zheng, Han, Polu. 2021. "MiniF2F: a cross-system benchmark for formal Olympiad-level mathematics." arXiv:2109.00110. Cross-system formal-math benchmark.
 
 **Prompting baselines (pre-RL)**
 
-- Wei, Wang, Schuurmans et al. 2022. "Chain-of-Thought Prompting Elicits Reasoning in Large Language Models." arXiv:2201.11903. — Introduces CoT prompting; on GSM8K, 540B model jumps from ~18% to ~57% with few-shot CoT.
-- Wang, Wei, Schuurmans et al. 2022. "Self-Consistency Improves Chain of Thought Reasoning in Language Models." arXiv:2203.11171. — Sample many CoT chains, take majority vote; adds ~18 points on GSM8K at K=40.
-- Gao, Madaan, Zhou et al. 2022. "PAL: Program-aided Language Models." arXiv:2211.10435. — Offload arithmetic to a Python interpreter; on GSM8K hits 72% with Codex-class model.
+- Wei, Wang, Schuurmans et al. 2022. "Chain-of-Thought Prompting Elicits Reasoning in Large Language Models." arXiv:2201.11903. Introduces CoT prompting; on GSM8K, 540B model jumps from ~18% to ~57% with few-shot CoT.
+- Wang, Wei, Schuurmans et al. 2022. "Self-Consistency Improves Chain of Thought Reasoning in Language Models." arXiv:2203.11171. Sample many CoT chains, take majority vote; adds ~18 points on GSM8K at K=40.
+- Gao, Madaan, Zhou et al. 2022. "PAL: Program-aided Language Models." arXiv:2211.10435. Offload arithmetic to a Python interpreter; on GSM8K hits 72% with Codex-class model.
 
 **STaR and self-training**
 
-- Zelikman, Wu, Mu, Goodman. 2022. "STaR: Bootstrapping Reasoning With Reasoning." NeurIPS 2022. arXiv:2203.14465. — Sample chains, filter correct, SFT, repeat. Includes rationalization fallback for hard problems.
-- Gulcehre, Le Paine, Srinivasan et al. 2023. "Reinforced Self-Training (ReST) for Language Modeling." Google DeepMind. arXiv:2308.08998. — Offline version of the same loop; relevant as a cheaper alternative to GRPO.
+- Zelikman, Wu, Mu, Goodman. 2022. "STaR: Bootstrapping Reasoning With Reasoning." NeurIPS 2022. arXiv:2203.14465. Sample chains, filter correct, SFT, repeat. Includes rationalization fallback for hard problems.
+- Gulcehre, Le Paine, Srinivasan et al. 2023. "Reinforced Self-Training (ReST) for Language Modeling." Google DeepMind. arXiv:2308.08998. Offline version of the same loop; relevant as a cheaper alternative to GRPO.
 
 **Process supervision**
 
-- Uesato, Kushman, Kumar et al. 2022. "Solving math word problems with process- and outcome-based feedback." DeepMind. arXiv:2211.14275. — First systematic comparison of process vs. outcome supervision on GSM8K.
-- Lightman, Kosaraju, Burda et al. 2023. "Let's Verify Step by Step." OpenAI. arXiv:2305.20050. — Releases PRM800K (800K step-level human labels on MATH); process reward model outperforms outcome RM at matched scale.
+- Uesato, Kushman, Kumar et al. 2022. "Solving math word problems with process- and outcome-based feedback." DeepMind. arXiv:2211.14275. First systematic comparison of process vs. outcome supervision on GSM8K.
+- Lightman, Kosaraju, Burda et al. 2023. "Let's Verify Step by Step." OpenAI. arXiv:2305.20050. Releases PRM800K (800K step-level human labels on MATH); process reward model outperforms outcome RM at matched scale.
 
 **GRPO and DeepSeek-R1**
 
-- Shao, Wang, Zhu et al. 2024. "DeepSeekMath: Pushing the Limits of Mathematical Reasoning in Open Language Models." DeepSeek-AI. arXiv:2402.03300. — Introduces GRPO; applies it to a math-pre-trained 7B model and hits MATH 51.7%.
-- DeepSeek-AI. 2025. "DeepSeek-R1: Incentivizing Reasoning Capability in LLMs via Reinforcement Learning." arXiv:2501.12948. — R1-Zero (RL on base model) and R1 (cold-start SFT + RL + alignment). The primary source for the modern math-reasoning recipe at scale.
+- Shao, Wang, Zhu et al. 2024. "DeepSeekMath: Pushing the Limits of Mathematical Reasoning in Open Language Models." DeepSeek-AI. arXiv:2402.03300. Introduces GRPO; applies it to a math-pre-trained 7B model and hits MATH 51.7%.
+- DeepSeek-AI. 2025. "DeepSeek-R1: Incentivizing Reasoning Capability in LLMs via Reinforcement Learning." arXiv:2501.12948. R1-Zero (RL on base model) and R1 (cold-start SFT + RL + alignment). The primary source for the modern math-reasoning recipe at scale.
 
 **Formal proofs and tool-augmented math**
 
-- Polu, Sutskever. 2020. "Generative Language Modeling for Automated Theorem Proving." arXiv:2009.03393. — GPT-f; transformer-based theorem proving in Metamath. An early proof-search system.
-- Jiang, Welleck, Zhou et al. 2022. "Draft, Sketch, and Prove: Guiding Formal Theorem Provers with Informal Proofs." arXiv:2210.12283. — Connects informal natural-language sketches to formal proof construction.
-- DeepMind. 2024. "AI achieves silver-medal standard solving International Mathematical Olympiad problems." Blog post, July 2024. — AlphaProof + AlphaGeometry 2 solve 4 of 6 IMO 2024 problems. No full technical paper available as of writing; treat specifics as not yet documented.
+- Polu, Sutskever. 2020. "Generative Language Modeling for Automated Theorem Proving." arXiv:2009.03393. GPT-f; transformer-based theorem proving in Metamath. An early proof-search system.
+- Jiang, Welleck, Zhou et al. 2022. "Draft, Sketch, and Prove: Guiding Formal Theorem Provers with Informal Proofs." arXiv:2210.12283. Connects informal natural-language sketches to formal proof construction.
+- DeepMind. 2024. "AI achieves silver-medal standard solving International Mathematical Olympiad problems." Blog post, July 2024. AlphaProof + AlphaGeometry 2 solve 4 of 6 IMO 2024 problems. No full technical paper available as of writing; treat specifics as not yet documented.
 
 **Publicly announced systems without full papers**
 
-- OpenAI. September 2024. "Learning to reason with LLMs." Blog post. — Describes o1's training-and-inference-compute split at a high level. No technical paper. Claims about o1's specific algorithm or reward function not in this blog post are speculative.
-- Qwen Team (Alibaba). Late 2024. "QwQ: Reflect Deeply on the Boundaries of the Unknown." Blog/preview release. — Qwen's reasoning model preview. No full technical paper. Behavior consistent with the R1/o1 recipe family.
+- OpenAI. September 2024. "Learning to reason with LLMs." Blog post. Describes o1's training-and-inference-compute split at a high level. No technical paper. Claims about o1's specific algorithm or reward function not in this blog post are speculative.
+- Qwen Team (Alibaba). Late 2024. "QwQ: Reflect Deeply on the Boundaries of the Unknown." Blog/preview release. Qwen's reasoning model preview. No full technical paper. Behavior consistent with the R1/o1 recipe family.
 
 **Reading order suggestion**
 
-If you're reading the primary sources end-to-end: start with the Hendrycks MATH paper (arXiv:2103.03874) for the benchmark context, then Wei's CoT paper (arXiv:2201.11903) for the prompting baseline. STaR (arXiv:2203.14465) is short and worth reading in full; it's the cleanest of the early self-training papers. Then DeepSeekMath (arXiv:2402.03300) for GRPO and the math-pre-training emphasis, then the R1 paper (arXiv:2501.12948) for the full recipe. The Lightman PRM800K paper (arXiv:2305.20050) is the reference for process supervision and is the clearest source on what step-level labels look like. The IMO 2024 blog post and the o1 blog post are short reads but lack technical depth — read them for context, not for implementation details.
+If you're reading the primary sources end-to-end: start with the Hendrycks MATH paper (arXiv:2103.03874) for the benchmark context, then Wei's CoT paper (arXiv:2201.11903) for the prompting baseline. STaR (arXiv:2203.14465) is short and worth reading in full; it's the cleanest of the early self-training papers. Then DeepSeekMath (arXiv:2402.03300) for GRPO and the math-pre-training emphasis, then the R1 paper (arXiv:2501.12948) for the full recipe. The Lightman PRM800K paper (arXiv:2305.20050) is the reference for process supervision and is the clearest source on what step-level labels look like. The IMO 2024 blog post and the o1 blog post are short reads but lack technical depth: read them for context, not for implementation details.
 
 ---
 
 ## Next lecture
 
-This is part of the late-stage curriculum covering specific application domains. The neighboring lectures cover other RL-for-LLM specializations — see `notes/README.md` for the current index.
+This is part of the late-stage curriculum covering specific application domains. The neighboring lectures cover other RL-for-LLM specializations: see `notes/README.md` for the current index.

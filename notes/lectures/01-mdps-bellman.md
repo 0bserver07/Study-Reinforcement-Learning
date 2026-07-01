@@ -2,7 +2,7 @@
 
 # Lecture 01: MDPs and Bellman Equations
 
-_Unreviewed — no one has checked this end to end. Treat the math, code, and citations as unverified._
+_Unreviewed: no one has checked this end to end. Treat the math, code, and citations as unverified._
 
 **Time**: 3-4 hours · **Prerequisites**: basic probability, Python
 
@@ -10,7 +10,7 @@ _Unreviewed — no one has checked this end to end. Treat the math, code, and ci
 
 ## Why MDPs
 
-Every RL method — Q-learning, PPO, RLHF for LLMs — is solving a Markov decision process. The MDP is the object; the algorithms are different ways of finding a good policy in it. This lecture sets up the object and solves a small one exactly, by hand.
+Every RL method (Q-learning, PPO, RLHF for LLMs) is solving a Markov decision process. The MDP is the object; the algorithms are different ways of finding a good policy in it. This lecture sets up the object and solves a small one exactly, by hand.
 
 ---
 
@@ -95,7 +95,7 @@ state = (x, y)  # Missing "facing" and "has_package"!
 # Same state could require different actions depending on history
 ```
 
-**Gotcha**: if the state leaves out something the dynamics depend on (velocity, for a moving robot), the Markov property fails — the same `(x, y)` can need different actions depending on history, and a deterministic policy can't express that. Symptom: the agent behaves erratically and you can't figure out why.
+**Gotcha**: if the state leaves out something the dynamics depend on (velocity, for a moving robot), the Markov property fails. The same `(x, y)` can need different actions depending on history, and a deterministic policy can't express that. Symptom: the agent behaves erratically and you can't figure out why.
 
 ---
 
@@ -179,13 +179,13 @@ def reward(state: State, action: Action, next_state: State) -> float:
     return -1.0
 ```
 
-**The reward function is your objective.** Get it wrong and you get the wrong behavior — there's no separate "and also be sensible" term that saves you.
+**The reward function is your objective.** Get it wrong and you get the wrong behavior; there's no separate "and also be sensible" term that saves you.
 
 ```python
 # Sparse reward: only the goal pays.
 def sparse_reward(state, action, next_state):
     return 10.0 if next_state.is_goal() else 0.0
-# A policy that maximizes this has no reason to be efficient — wandering until
+# A policy that maximizes this has no reason to be efficient: wandering until
 # it stumbles onto the goal is optimal under this reward.
 
 # Add a per-step penalty and "shortest path" becomes the optimal behavior:
@@ -193,7 +193,7 @@ def reward(state, action, next_state):
     return 10.0 if next_state.is_goal() else -1.0
 ```
 
-Designing rewards is harder than it looks — reward hacking, sparse-reward exploration, conflicting objectives. Lecture 09 is about learning a reward from human preferences instead of writing one by hand.
+Designing rewards is harder than it looks: reward hacking, sparse-reward exploration, conflicting objectives. Lecture 09 is about learning a reward from human preferences instead of writing one by hand.
 
 ---
 
@@ -594,7 +594,7 @@ if __name__ == "__main__":
         print(' '.join(row))
 ```
 
-**What you should see**: it converges in 2–3 policy-iteration rounds (each round runs policy evaluation to convergence, then does one greedy improvement). The value function comes out highest near the goal and falls off as you move away — not by exactly 1 per step, because the +10 terminal reward and γ < 1 pull the numbers around; the goal cell prints `0.00` because it's terminal and never updated. The greedy policy points every cell toward the goal at row 0, column 4:
+**What you should see**: it converges in 2–3 policy-iteration rounds (each round runs policy evaluation to convergence, then does one greedy improvement). The value function comes out highest near the goal and falls off as you move away, not by exactly 1 per step, because the +10 terminal reward and γ < 1 pull the numbers around; the goal cell prints `0.00` because it's terminal and never updated. The greedy policy points every cell toward the goal at row 0, column 4:
 ```
 Optimal Policy:
 → → → → G
@@ -603,7 +603,7 @@ Optimal Policy:
 ↑ ↑ ↑ ↑ ↑
 ↑ ↑ ↑ ↑ ↑
 ```
-Run it and check the arrows. If "up" doesn't point toward the goal in your run, your action-to-direction mapping is off — a classic gridworld bug.
+Run it and check the arrows. If "up" doesn't point toward the goal in your run, your action-to-direction mapping is off, a classic gridworld bug.
 
 ---
 
@@ -755,8 +755,8 @@ But first, make sure you:
 
 ## References
 
-- **Bellman (1957)**, *A Markovian Decision Process* — *Journal of Mathematics and Mechanics* 6(5). And the book *Dynamic Programming* (Princeton, 1957), where the principle of optimality and the recursive decomposition of value come from.
-- **Howard (1960)**, *Dynamic Programming and Markov Processes* (MIT Press) — the policy iteration algorithm and its convergence.
-- **Puterman (1994)**, *Markov Decision Processes: Discrete Stochastic Dynamic Programming* (Wiley) — the reference text; convergence proofs.
-- **Silver et al. (2017)**, *Mastering Chess and Shogi by Self-Play with a General Reinforcement Learning Algorithm* (AlphaZero) — self-play training structured much like policy iteration. [arXiv:1712.01815](https://arxiv.org/abs/1712.01815)
-- **Ouyang et al. (2022)**, *Training language models to follow instructions with human feedback* (InstructGPT) — RLHF posed as an MDP over token sequences. [arXiv:2203.02155](https://arxiv.org/abs/2203.02155)
+- **Bellman (1957)**, *A Markovian Decision Process*: *Journal of Mathematics and Mechanics* 6(5). And the book *Dynamic Programming* (Princeton, 1957), where the principle of optimality and the recursive decomposition of value come from.
+- **Howard (1960)**, *Dynamic Programming and Markov Processes* (MIT Press): the policy iteration algorithm and its convergence.
+- **Puterman (1994)**, *Markov Decision Processes: Discrete Stochastic Dynamic Programming* (Wiley): the reference text; convergence proofs.
+- **Silver et al. (2017)**, *Mastering Chess and Shogi by Self-Play with a General Reinforcement Learning Algorithm* (AlphaZero): self-play training structured much like policy iteration. [arXiv:1712.01815](https://arxiv.org/abs/1712.01815)
+- **Ouyang et al. (2022)**, *Training language models to follow instructions with human feedback* (InstructGPT): RLHF posed as an MDP over token sequences. [arXiv:2203.02155](https://arxiv.org/abs/2203.02155)

@@ -2,7 +2,7 @@
 
 # Lecture 05: Trust Region Policy Optimization (TRPO)
 
-_Unreviewed — no one has checked this end to end. Treat the math, code, and citations as unverified._
+_Unreviewed: no one has checked this end to end. Treat the math, code, and citations as unverified._
 
 **Duration:** ~90 minutes
 **Prerequisites:** Lecture 04 (Actor-Critic), basic calculus
@@ -17,7 +17,7 @@ In Lecture 04 (A2C), we updated policies with gradient descent:
 θ_new = θ_old + α * ∇J(θ)
 ```
 
-One bad update can destroy a policy. A common failure mode: after hundreds of episodes of learning, a single large gradient step causes the agent to forget everything and start acting randomly — and it never recovers. This is not a freak event; policy gradient methods hit it regularly.
+One bad update can destroy a policy. A common failure mode: after hundreds of episodes of learning, a single large gradient step causes the agent to forget everything and start acting randomly, and it never recovers. This is not a freak event; policy gradient methods hit it regularly.
 
 TRPO solves this by asking: what's the largest policy update we can make safely? This lecture is about that question and TRPO's answer. Lecture 06 (PPO) covers a simpler approximation that everyone actually uses.
 
@@ -624,20 +624,20 @@ TRPO is slow relative to alternatives. Each update requires multiple Hessian-vec
 
 ## Recap
 
-Policy gradients fail catastrophically when a single update moves the policy too far. Trust regions address this by constraining the KL divergence between old and new policies. TRPO formalizes that constraint and solves it using conjugate gradient and line search, giving an approximate monotonic improvement guarantee. The cost is steep: ~30x more computation than vanilla policy gradient, plus a complex implementation. PPO achieves similar stability with a simple clipped objective — see Lecture 06.
+Policy gradients fail catastrophically when a single update moves the policy too far. Trust regions address this by constraining the KL divergence between old and new policies. TRPO formalizes that constraint and solves it using conjugate gradient and line search, giving an approximate monotonic improvement guarantee. The cost is steep: ~30x more computation than vanilla policy gradient, plus a complex implementation. PPO achieves similar stability with a simple clipped objective (see Lecture 06).
 
 ---
 
 ## What's next
 
-Next lecture ([06: PPO](./06-ppo.md)) covers Proximal Policy Optimization. PPO achieves TRPO's benefits with a much simpler implementation — just a clipped surrogate objective, no conjugate gradient required. It's now the most widely used deep RL algorithm.
+Next lecture ([06: PPO](./06-ppo.md)) covers Proximal Policy Optimization. PPO achieves TRPO's benefits with a much simpler implementation: just a clipped surrogate objective, no conjugate gradient required. It's now the most widely used deep RL algorithm.
 
 ---
 
 ## References
 
 1. Schulman, Levine, Abbeel, Jordan, Moritz. "Trust Region Policy Optimization." ICML 2015. arXiv:1502.05477
-2. Kakade. "A Natural Policy Gradient." NeurIPS 2001. (Proceedings published 2002; no arXiv preprint — predates ML arXiv adoption.)
+2. Kakade. "A Natural Policy Gradient." NeurIPS 2001. (Proceedings published 2002; no arXiv preprint: predates ML arXiv adoption.)
 3. Schulman, Wolski, Dhariwal, Radford, Klimov. "Proximal Policy Optimization Algorithms." arXiv:1707.06347, 2017.
 
 See also `../../reference/papers/`.
@@ -650,6 +650,6 @@ Don't implement TRPO from scratch unless you specifically need to. Instead:
 
 1. Read the TRPO paper (arXiv:1502.05477) to understand trust regions conceptually
 2. Compare the algorithm to PPO (next lecture)
-3. Work through the conjugate gradient derivation on paper — it clarifies why the Fisher-vector product trick works
+3. Work through the conjugate gradient derivation on paper; it clarifies why the Fisher-vector product trick works
 
 Note: implementing TRPO end-to-end is a useful exercise for understanding constrained optimization in RL, but it's fragile and slow in practice. PPO covers the same ground with a fraction of the code.

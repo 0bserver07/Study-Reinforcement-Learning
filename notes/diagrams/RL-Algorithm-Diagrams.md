@@ -2,7 +2,7 @@
 
 # RL Algorithm Diagrams Collection
 
-_Unreviewed — no one has checked this end to end. Treat the math, code, and citations as unverified._
+_Unreviewed: no one has checked this end to end. Treat the math, code, and citations as unverified._
 
 **How to use**:
 1. Copy Mermaid code to [Mermaid Live Editor](https://mermaid.live)

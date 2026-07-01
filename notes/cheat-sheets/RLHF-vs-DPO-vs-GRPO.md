@@ -1,10 +1,10 @@
 <!-- status: unreviewed | last-reviewed: never -->
 
-# RLHF vs DPO vs GRPO vs RLVR — cheat sheet
+# RLHF vs DPO vs GRPO vs RLVR: cheat sheet
 
-_Unreviewed — no one has checked this end to end. Treat the math and citations as unverified._
+_Unreviewed: no one has checked this end to end. Treat the math and citations as unverified._
 
-Side-by-side reference for the main RL methods used to align LLMs: PPO-RLHF, DPO and its preference-optimization cousins (IPO, KTO, ORPO, SimPO), GRPO, and the verifiable-reward GRPO loop that drives DeepSeek-R1. Use this when picking a method, not when learning one — the lectures it points back to do the teaching.
+Side-by-side reference for the main RL methods used to align LLMs: PPO-RLHF, DPO and its preference-optimization cousins (IPO, KTO, ORPO, SimPO), GRPO, and the verifiable-reward GRPO loop that drives DeepSeek-R1. Use this when picking a method, not when learning one; the lectures it points back to do the teaching.
 
 Related: [`./RL-Quick-Reference.md`](./RL-Quick-Reference.md) for general deep-RL algorithms, [`./RL-Math-Formulas.md`](./RL-Math-Formulas.md) for the underlying math.
 
@@ -25,7 +25,7 @@ Related: [`./RL-Quick-Reference.md`](./RL-Quick-Reference.md) for general deep-R
 | `σ` | sigmoid; `logσ` is `log(sigmoid(.))` |
 | `K` | number of completions sampled per prompt (group methods) |
 
-All log-probabilities are summed over response tokens only — prompt tokens are masked. Forgetting this mask is the most common silent bug; see the debugging note at the end.
+All log-probabilities are summed over response tokens only; prompt tokens are masked. Forgetting this mask is the most common silent bug; see the debugging note at the end.
 
 ---
 
@@ -42,7 +42,7 @@ All log-probabilities are summed over response tokens only — prompt tokens are
 | **GRPO** (Shao 2024, arXiv:2402.03300) | optional (`r_φ` or rule) | yes (KL penalty) | prompt + K sampled completions, each scored | on-policy | ~0.45–0.55× (no critic; K extra forward passes) | baseline collapse when all-K-same; entropy collapse | objective scorer available; want PPO without a critic |
 | **RLVR / R1-style GRPO** (DeepSeek-R1, arXiv:2501.12948) | no (rule-based checker) | yes | prompt + K completions, verifier-scored | on-policy | ~0.45–0.55× + verifier cost | verifier hacking; format-vs-correctness reward imbalance | verifiable domain (math, code, proofs); want reasoning to emerge |
 
-Cost numbers are rough order-of-magnitude estimates from the lecture notes and from informal practitioner reports — they swing widely with model size, K, and how aggressively you batch.
+Cost numbers are rough order-of-magnitude estimates from the lecture notes and from informal practitioner reports; they swing widely with model size, K, and how aggressively you batch.
 
 ---
 
@@ -63,7 +63,7 @@ L_PPO = -E[ min( ratio · A,  clip(ratio, 1-ε, 1+ε) · A ) ]
 ratio = π_θ(a_t | s_t) / π_old(a_t | s_t)
 ```
 
-where `A` is a GAE advantage from a learned value head. The reward `r_φ(x, y)` is sparse — it lands at the last token of the completion. The KL term contributes a per-token shaping reward `−β · (log π_θ − log π_ref)`.
+where `A` is a GAE advantage from a learned value head. The reward `r_φ(x, y)` is sparse; it lands at the last token of the completion. The KL term contributes a per-token shaping reward `−β · (log π_θ − log π_ref)`.
 
 **Data**: ~10–50k SFT demos, ~30–100k preference pairs for `r_φ`, ~30k+ prompts for the PPO rollout phase. (InstructGPT scale.)
 
@@ -154,7 +154,7 @@ The `1/(2β)` term is the fixed target margin for the log-ratio gap.
 **Failure modes**:
 - Slower convergence than DPO; needs more steps.
 - Underfits if the preference data is actually well-separated.
-- `β` plays a different role than in DPO — it sets the target margin, not the loss steepness.
+- `β` plays a different role than in DPO; it sets the target margin, not the loss steepness.
 
 **Code sketch**:
 
@@ -206,7 +206,7 @@ def kto_loss(logp, ref_logp, is_desirable, z_ref, beta=0.1,
     return torch.where(is_desirable, desirable_loss, undesirable_loss).mean()
 ```
 
-(The published KTO loss has additional bookkeeping for how `z_ref` is computed within a minibatch. Treat the sketch as the shape, not the exact algorithm — check §4 of the paper.)
+(The published KTO loss has additional bookkeeping for how `z_ref` is computed within a minibatch. Treat the sketch as the shape, not the exact algorithm; check §4 of the paper.)
 
 ---
 
@@ -224,7 +224,7 @@ odds(y | x) = π_θ(y|x) / (1 − π_θ(y|x))
 
 In practice the odds are computed in log-space using `log(1 − exp(logp))` (numerically stable via `log1mexp`).
 
-**Data**: paired preferences. But you skip the SFT stage — ORPO does both at once.
+**Data**: paired preferences. But you skip the SFT stage; ORPO does both at once.
 
 **Failure modes**:
 - No KL anchor → policy can drift if `λ` is too high or SFT signal is weak.
@@ -301,7 +301,7 @@ L_KL     = β · ( log π_θ(y_i|x) − log π_ref(y_i|x) )
 L_GRPO   = mean_i ( L_CLIP_i + L_KL_i )
 ```
 
-The reward `r_i` is a single scalar per completion. All tokens in `y_i` share the same advantage — there is no per-token credit assignment.
+The reward `r_i` is a single scalar per completion. All tokens in `y_i` share the same advantage; there is no per-token credit assignment.
 
 **Data**: prompts plus a scorer. The scorer can be a learned `r_φ`, a rule (math correctness, code tests), or an LLM judge. K is typically 4–16.
 
@@ -314,7 +314,7 @@ The reward `r_i` is a single scalar per completion. All tokens in `y_i` share th
 
 ```python
 def group_advantages(rewards, eps=1e-8):
-    # rewards: [B, K] — one scalar per completion per prompt
+    # rewards: [B, K], one scalar per completion per prompt
     mean = rewards.mean(dim=1, keepdim=True)
     std  = rewards.std(dim=1, keepdim=True) + eps
     return (rewards - mean) / std
@@ -342,9 +342,9 @@ reward(y, y*) = format_reward(y) + correctness_reward(y, y*)
 ```
 
 - `format_reward`: did the model emit `<think>...</think>` followed by an answer? (Usually 0 or 0.1.)
-- `correctness_reward`: does the extracted answer match `y*`? (Usually 0 or 1.0 — exact match on normalized numeric answer for math; pass rate on a test suite for code.)
+- `correctness_reward`: does the extracted answer match `y*`? (Usually 0 or 1.0: exact match on normalized numeric answer for math; pass rate on a test suite for code.)
 
-The early phase of training is carried by the format reward — it's the only dense signal before the model can solve anything. As correctness reward grows, format reward saturates and contributes little.
+The early phase of training is carried by the format reward; it's the only dense signal before the model can solve anything. As correctness reward grows, format reward saturates and contributes little.
 
 **R1-Zero**: GRPO directly on a base model (no SFT). Reasoning behaviors (longer chains on harder problems, backtracking, self-check) emerged without being explicitly rewarded.
 
@@ -378,7 +378,7 @@ See [`../lectures/15-rl-verifiable-rewards.md`](../lectures/15-rl-verifiable-rew
 
 ---
 
-## Decision tree — which method to reach for
+## Decision tree: which method to reach for
 
 Walk top to bottom, take the first match.
 
@@ -491,7 +491,7 @@ response_logp = per_token_logp[prompt_len:].sum()      # response only
 - **PPO for non-LLM RL** (Atari, MuJoCo, etc.) → [`./RL-Quick-Reference.md`](./RL-Quick-Reference.md).
 - **Reward model architecture and training** → [`../lectures/09-reward-modeling.md`](../lectures/09-reward-modeling.md).
 - **Constitutional AI / RLAIF** (replacing human labels with AI labels) → [`../lectures/27-rlaif.md`](../lectures/27-rlaif.md).
-- **RRHF** (Yuan 2023, arXiv:2304.05302) — listwise ranking loss; covered briefly in [`../lectures/12-beyond-dpo.md`](../lectures/12-beyond-dpo.md), omitted here because it's largely subsumed by GRPO in practice.
+- **RRHF** (Yuan 2023, arXiv:2304.05302): listwise ranking loss; covered briefly in [`../lectures/12-beyond-dpo.md`](../lectures/12-beyond-dpo.md), omitted here because it's largely subsumed by GRPO in practice.
 - **Process reward models** (Lightman 2023, arXiv:2305.20050) → [`../lectures/15-rl-verifiable-rewards.md`](../lectures/15-rl-verifiable-rewards.md).
 - **Reward hacking theory** (Gao, Schulman, Hilton 2022, arXiv:2210.10760) → referenced in [`../lectures/12-beyond-dpo.md`](../lectures/12-beyond-dpo.md).
 
@@ -499,13 +499,13 @@ response_logp = per_token_logp[prompt_len:].sum()      # response only
 
 ## Citations (verified against the lecture notes and arXiv IDs)
 
-- **PPO-RLHF / InstructGPT** — Ouyang et al. 2022, "Training language models to follow instructions with human feedback." arXiv:2203.02155. NeurIPS 2022.
-- **DPO** — Rafailov et al. 2023, "Direct Preference Optimization: Your Language Model is Secretly a Reward Model." arXiv:2305.18290. NeurIPS 2023.
-- **IPO** — Azar et al. 2023, "A General Theoretical Paradigm to Understand Learning from Human Preferences." arXiv:2310.12036.
-- **KTO** — Ethayarajh et al. 2024, "KTO: Model Alignment as Prospect Theoretic Optimization." arXiv:2402.01306. ICML 2024.
-- **ORPO** — Hong et al. 2024, "ORPO: Monolithic Preference Optimization without Reference Model." arXiv:2403.07691. EMNLP 2024.
-- **SimPO** — Meng et al. 2024, "SimPO: Simple Preference Optimization with a Reference-Free Reward." arXiv:2405.14734.
-- **GRPO / DeepSeekMath** — Shao et al. 2024, "DeepSeekMath: Pushing the Limits of Mathematical Reasoning in Open Language Models." arXiv:2402.03300.
-- **DeepSeek-R1** — DeepSeek-AI 2025, "DeepSeek-R1: Incentivizing Reasoning Capability in LLMs via Reinforcement Learning." arXiv:2501.12948.
+- **PPO-RLHF / InstructGPT**: Ouyang et al. 2022, "Training language models to follow instructions with human feedback." arXiv:2203.02155. NeurIPS 2022.
+- **DPO**: Rafailov et al. 2023, "Direct Preference Optimization: Your Language Model is Secretly a Reward Model." arXiv:2305.18290. NeurIPS 2023.
+- **IPO**: Azar et al. 2023, "A General Theoretical Paradigm to Understand Learning from Human Preferences." arXiv:2310.12036.
+- **KTO**: Ethayarajh et al. 2024, "KTO: Model Alignment as Prospect Theoretic Optimization." arXiv:2402.01306. ICML 2024.
+- **ORPO**: Hong et al. 2024, "ORPO: Monolithic Preference Optimization without Reference Model." arXiv:2403.07691. EMNLP 2024.
+- **SimPO**: Meng et al. 2024, "SimPO: Simple Preference Optimization with a Reference-Free Reward." arXiv:2405.14734.
+- **GRPO / DeepSeekMath**: Shao et al. 2024, "DeepSeekMath: Pushing the Limits of Mathematical Reasoning in Open Language Models." arXiv:2402.03300.
+- **DeepSeek-R1**: DeepSeek-AI 2025, "DeepSeek-R1: Incentivizing Reasoning Capability in LLMs via Reinforcement Learning." arXiv:2501.12948.
 
 The exact functional forms of IPO and KTO above are simplifications of the published losses (different parameterizations are equivalent). Before relying on the constants in production code, verify against §4 of each paper.

@@ -2,7 +2,7 @@
 
 # Lecture 02: Policy Gradients from Scratch
 
-_Unreviewed — no one has checked this end to end. Treat the math, code, and citations as unverified._
+_Unreviewed: no one has checked this end to end. Treat the math, code, and citations as unverified._
 
 **Time**: ~4 hours, with the [exercise](../../exercises/02-policy-gradients/) · **Prerequisites**: Lecture 01, basic calculus
 
@@ -10,7 +10,7 @@ _Unreviewed — no one has checked this end to end. Treat the math, code, and ci
 
 ## Why policy gradients
 
-Policy iteration works on a 5×5 gridworld. It doesn't scale: an LLM's "state" is the whole token sequence so far, so there's no value table big enough, and the action space (the vocabulary) is huge. Policy gradients drop the table — you parameterize the policy with a network and move its parameters by gradient ascent. PPO, which is how RLHF trains LLMs, is a policy-gradient method, so this is the thing it's built on.
+Policy iteration works on a 5×5 gridworld. It doesn't scale: an LLM's "state" is the whole token sequence so far, so there's no value table big enough, and the action space (the vocabulary) is huge. Policy gradients drop the table: you parameterize the policy with a network and move its parameters by gradient ascent. PPO, which is how RLHF trains LLMs, is a policy-gradient method, so this is the thing it's built on.
 
 ---
 
@@ -93,7 +93,7 @@ We need ∇_θ J(θ) to do gradient ascent:
 
 ### Why this form is useful
 
-1. **No model needed**: you never need P(s'|s,a) — the dynamics drop out (see Part 5)
+1. **No model needed**: you never need P(s'|s,a); the dynamics drop out (see Part 5)
 2. **Differentiable**: it's just `log π_θ(a|s)`, so autodiff handles it
 3. **Works for any action space**: discrete, continuous, structured (tokens)
 
@@ -113,7 +113,7 @@ R(τ) = Σ γ^t r_t  # Total return
 #   → negative R(τ) reverses the gradient
 ```
 
-**Note**: It helps to read this as supervised learning where the "label" is "do more of this if it worked, less if it didn't" — and the strength of that label is the return.
+**Note**: It helps to read this as supervised learning where the "label" is "do more of this if it worked, less if it didn't", and the strength of that label is the return.
 
 ---
 
@@ -335,7 +335,7 @@ Episode   50 | Avg Reward:  ~20-30
 Episode  200 | Avg Reward:  ~100-200   (climbing)
 Episode  500 | Avg Reward:  ~300-475   (usually solved around here, sometimes a dip first)
 ```
-REINFORCE on CartPole is noisy: it can climb and then collapse for a stretch before recovering. That's the variance problem this lecture is about — a value-function baseline (Lecture 04) is the usual fix.
+REINFORCE on CartPole is noisy: it can climb and then collapse for a stretch before recovering. That's the variance problem this lecture is about. A value-function baseline (Lecture 04) is the usual fix.
 
 ---
 
@@ -383,7 +383,7 @@ log P(τ|θ) = log p(s_0) + Σ_t [log P(s_{t+1}|s_t,a_t) + log π_θ(a_t|s_t)]
 ∇_θ J(θ) = 𝔼_{τ~π_θ}[Σ_t ∇_θ log π_θ(a_t|s_t) · R(τ)]
 ```
 
-**Note**: The environment dynamics P(s'|s,a) drop out of the gradient — you only differentiate the policy. That's the whole reason this works without a model of the environment.
+**Note**: The environment dynamics P(s'|s,a) drop out of the gradient. You only differentiate the policy. That's the whole reason this works without a model of the environment.
 
 ---
 
@@ -627,7 +627,7 @@ The graded version of this is [`exercises/02-policy-gradients/`](../../exercises
 
 ## Recap
 
-Policy gradients optimize the policy directly, no value table needed: `∇J = 𝔼[∑_t ∇ log π_θ(a_t|s_t) · A_t]`. REINFORCE is the Monte Carlo version — roll out an episode, use the (discounted, return-to-go) returns as `A_t`, take the step. The catch is variance; baselines and returns-to-go knock it down, and everything later (actor-critic, PPO, RLHF) is this update with a better `A_t` and guardrails on the step size.
+Policy gradients optimize the policy directly, no value table needed: `∇J = 𝔼[∑_t ∇ log π_θ(a_t|s_t) · A_t]`. REINFORCE is the Monte Carlo version: roll out an episode, use the (discounted, return-to-go) returns as `A_t`, take the step. The catch is variance; baselines and returns-to-go knock it down, and everything later (actor-critic, PPO, RLHF) is this update with a better `A_t` and guardrails on the step size.
 
 ---
 
@@ -645,12 +645,12 @@ But before that, make sure you:
 
 ## References
 
-- **Williams (1992)**, *Simple Statistical Gradient-Following Algorithms for Connectionist Reinforcement Learning* — introduces REINFORCE. (*Machine Learning* 8, 229–256.)
-- **Sutton, McAllester, Singh, Mansour (2000)**, *Policy Gradient Methods for Reinforcement Learning with Function Approximation* — the policy gradient theorem and the actor-critic framing. (NeurIPS 1999.)
-- **Schulman, Moritz, Levine, Jordan, Abbeel (2015)**, *High-Dimensional Continuous Control Using Generalized Advantage Estimation* — GAE, the advantage estimator usually paired with policy-gradient methods. [arXiv:1506.02438](https://arxiv.org/abs/1506.02438)
-- **Schulman, Wolski, Dhariwal, Radford, Klimov (2017)**, *Proximal Policy Optimization Algorithms* — PPO (Lecture 06). [arXiv:1707.06347](https://arxiv.org/abs/1707.06347)
-- **Ouyang et al. (2022)**, *Training language models to follow instructions with human feedback* (InstructGPT) — PPO applied to RLHF (Lecture 10). [arXiv:2203.02155](https://arxiv.org/abs/2203.02155)
-- **Silver et al. (2017)**, *Mastering the game of Go without human knowledge* (AlphaGo Zero) — policy gradients with self-play. (*Nature* 550, 354–359.)
+- **Williams (1992)**, *Simple Statistical Gradient-Following Algorithms for Connectionist Reinforcement Learning*: introduces REINFORCE. (*Machine Learning* 8, 229–256.)
+- **Sutton, McAllester, Singh, Mansour (2000)**, *Policy Gradient Methods for Reinforcement Learning with Function Approximation*: the policy gradient theorem and the actor-critic framing. (NeurIPS 1999.)
+- **Schulman, Moritz, Levine, Jordan, Abbeel (2015)**, *High-Dimensional Continuous Control Using Generalized Advantage Estimation*: GAE, the advantage estimator usually paired with policy-gradient methods. [arXiv:1506.02438](https://arxiv.org/abs/1506.02438)
+- **Schulman, Wolski, Dhariwal, Radford, Klimov (2017)**, *Proximal Policy Optimization Algorithms*: PPO (Lecture 06). [arXiv:1707.06347](https://arxiv.org/abs/1707.06347)
+- **Ouyang et al. (2022)**, *Training language models to follow instructions with human feedback* (InstructGPT): PPO applied to RLHF (Lecture 10). [arXiv:2203.02155](https://arxiv.org/abs/2203.02155)
+- **Silver et al. (2017)**, *Mastering the game of Go without human knowledge* (AlphaGo Zero): policy gradients with self-play. (*Nature* 550, 354–359.)
 
 ---
 
@@ -661,5 +661,5 @@ When the policy isn't learning:
 - **Print shapes.** Most policy-gradient bugs are shape or sign errors. `print(f"{returns.shape=} {log_probs[0].shape=}")` catches a lot.
 - **Check the sign of the loss.** It should be a *minus*: `-(log_prob * advantage)`. The policy gradient is an ascent direction; the optimizer descends.
 - **Make sure the log-prob carries gradient.** If you `.detach()`ed it, or stored `log_prob.item()` instead of the tensor, `loss.backward()` does nothing to the policy.
-- **Detach anything that shouldn't have a gradient** — e.g. a learned baseline `V(s)` when you use it inside the policy loss; a gradient leaking through there biases the estimate.
+- **Detach anything that shouldn't have a gradient**: e.g. a learned baseline `V(s)` when you use it inside the policy loss; a gradient leaking through there biases the estimate.
 - **Stack lists of tensors with `torch.stack`, not `torch.tensor`.** `torch.tensor([t1, t2, ...])` on a list of tensors does the wrong thing.

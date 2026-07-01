@@ -1,8 +1,8 @@
 <!-- status: unreviewed | last-reviewed: never -->
 
-# RL loss functions — cheat sheet
+# RL loss functions: cheat sheet
 
-_Unreviewed — no one has checked this end to end. Treat the math and citations as unverified._
+_Unreviewed: no one has checked this end to end. Treat the math and citations as unverified._
 
 One place to look up the loss for every major RL and RLHF algorithm in this repo. Each block uses the same template so you can scan side by side.
 
@@ -32,7 +32,7 @@ where `G_t = Σ_{k=t}^T γ^{k-t} r_k` is the return-to-go.
 ```
 ∇_θ J = E_{τ~π_θ} [ Σ_t ∇_θ log π_θ(a_t|s_t) · G_t ]
 ```
-Environment dynamics drop out — only the log-policy carries gradient. Derivation: [Lecture 02 Part 5](../lectures/02-policy-gradients.md).
+Environment dynamics drop out; only the log-policy carries gradient. Derivation: [Lecture 02 Part 5](../lectures/02-policy-gradients.md).
 
 ```python
 def reinforce_loss(log_probs, rewards, gamma=0.99):
@@ -48,7 +48,7 @@ def reinforce_loss(log_probs, rewards, gamma=0.99):
 
 **Tradeoff**: unbiased, very high variance (one MC sample per gradient estimate).
 
-**Watch**: the reward curve — REINFORCE on CartPole climbs and crashes mid-run. Loss going to ±∞ usually means missing gradient clipping or a tiny action prob.
+**Watch**: the reward curve. REINFORCE on CartPole climbs and crashes mid-run. Loss going to ±∞ usually means missing gradient clipping or a tiny action prob.
 
 ---
 
@@ -74,13 +74,13 @@ def reinforce_baseline_loss(log_probs, rewards, values, gamma=0.99):
     return policy + 0.5 * value
 ```
 
-**Tradeoff**: unbiased, lower variance. Detaching the baseline inside the policy term is essential — a gradient leak biases the estimate.
+**Tradeoff**: unbiased, lower variance. Detaching the baseline inside the policy term is essential; a gradient leak biases the estimate.
 
 **Watch**: advantage mean (should be ≈ 0 after the baseline kicks in) and value loss (plateauing high means the critic isn't fitting).
 
 ---
 
-## A2C — advantage actor-critic
+## A2C: advantage actor-critic
 
 Synchronous A3C (Mnih et al. 2016, arXiv:1602.01783). 1-step TD advantage.
 
@@ -109,11 +109,11 @@ def a2c_loss(log_probs, values, rewards, dones, logits, gamma=0.99,
 
 **Tradeoff**: lower variance than REINFORCE, biased by the critic's error (worst early in training).
 
-**Watch**: entropy. If it collapses to ~0 in the first few thousand updates, the policy stopped exploring — raise `c_e` or lower the LR.
+**Watch**: entropy. If it collapses to ~0 in the first few thousand updates, the policy stopped exploring. Raise `c_e` or lower the LR.
 
 ---
 
-## GAE — generalized advantage estimation
+## GAE: generalized advantage estimation
 
 Schulman et al. 2015 (arXiv:1506.02438). An advantage *estimator*, not an algorithm. Plugs into PPO, A2C, GRPO.
 
@@ -145,7 +145,7 @@ def compute_gae(rewards, values, dones, gamma=0.99, lam=0.95, last_value=0.0):
 
 ---
 
-## TRPO — surrogate objective with KL constraint
+## TRPO: surrogate objective with KL constraint
 
 Schulman et al. 2015 (arXiv:1502.05477). Constrained optimization instead of soft penalty.
 
@@ -175,7 +175,7 @@ def mean_kl(logits_old, logits_new):
 
 ---
 
-## PPO — clipped surrogate
+## PPO: clipped surrogate
 
 Schulman et al. 2017 (arXiv:1707.06347). Approximate the trust region with clipping. First-order.
 
@@ -187,7 +187,7 @@ L = - E [ min( r_t(θ) Â_t, clip(r_t(θ), 1-ε, 1+ε) Â_t ) ]
 ```
 `r_t(θ) = π_θ(a_t|s_t)/π_old(a_t|s_t)`, `ε ≈ 0.2`, `c_v ≈ 0.5`, `c_e ≈ 0.01`. `Â_t` is GAE, normalized.
 
-Where the clip is active the gradient w.r.t. θ is zero — by design the algorithm stops pushing.
+Where the clip is active the gradient w.r.t. θ is zero; by design the algorithm stops pushing.
 
 ```python
 def ppo_loss(logp_new, logp_old, advantages, values, returns,
@@ -205,11 +205,11 @@ def ppo_loss(logp_new, logp_old, advantages, values, returns,
 
 **Tradeoff**: stable and forgiving. Too many epochs over the same batch pushes `ratio` far from 1 and the clip dominates.
 
-**Watch**: **clip fraction** (fraction of samples where the clip activates) — healthy is 10–30%; above ~50% means lower the LR or epochs/batch. Also approximate KL between `π_old` and `π_θ`.
+**Watch**: **clip fraction** (fraction of samples where the clip activates). Healthy is 10–30%; above ~50% means lower the LR or epochs/batch. Also approximate KL between `π_old` and `π_θ`.
 
 ---
 
-## PPO — adaptive KL variant
+## PPO: adaptive KL variant
 
 Same paper, soft-penalty version. Often less robust in practice; clip is preferred.
 
@@ -247,7 +247,7 @@ y = r + γ · max_{a'} Q_{θ^-}(s', a')         (y = r if s' is terminal)
 ```
 `D` = replay buffer; `θ^-` = target net, periodically synced or Polyak-averaged. `y` is detached.
 
-**Gradient**: `∇_θ L = -2 · E[(y - Q_θ(s,a)) · ∇_θ Q_θ(s,a)]` — regression on a moving target.
+**Gradient**: `∇_θ L = -2 · E[(y - Q_θ(s,a)) · ∇_θ Q_θ(s,a)]`, regression on a moving target.
 
 ```python
 def dqn_loss(q_net, target_net, batch, gamma=0.99):
@@ -259,9 +259,9 @@ def dqn_loss(q_net, target_net, batch, gamma=0.99):
     return F.smooth_l1_loss(q_sa, y)                         # Huber; MSE also fine
 ```
 
-**Tradeoff**: stable thanks to target net + replay. The `max` biases Q *upward* — overestimation, fixed by Double DQN.
+**Tradeoff**: stable thanks to target net + replay. The `max` biases Q *upward* (overestimation, fixed by Double DQN).
 
-**Watch**: mean Q on a fixed eval state set — if it climbs while reward doesn't, you're overestimating. TD error magnitude should track reward scale.
+**Watch**: mean Q on a fixed eval state set. If it climbs while reward doesn't, you're overestimating. TD error magnitude should track reward scale.
 
 ---
 
@@ -293,7 +293,7 @@ def double_dqn_loss(q_net, target_net, batch, gamma=0.99):
 
 ## Dueling DQN (architectural)
 
-Wang et al. 2016 (arXiv:1511.06581). Not a loss change — same DQN or Double-DQN loss. Architecture only.
+Wang et al. 2016 (arXiv:1511.06581). Not a loss change: same DQN or Double-DQN loss. Architecture only.
 
 ```
 Q_θ(s,a) = V_θ(s) + ( A_θ(s,a) - mean_{a'} A_θ(s,a') )
@@ -321,7 +321,7 @@ class DuelingDQN(torch.nn.Module):
 
 ---
 
-## C51 — categorical DQN
+## C51: categorical DQN
 
 Bellemare, Dabney, Munos 2017 (arXiv:1707.06887). Learn the full *distribution* of returns; loss is cross-entropy on a projected distributional Bellman target.
 
@@ -329,7 +329,7 @@ Bellemare, Dabney, Munos 2017 (arXiv:1707.06887). Learn the full *distribution* 
 
 **Target** (before projection): `T̂Z(s,a) = r + γ · Z_{θ^-}(s', a*)` with `a* = argmax_{a'} Σ_i z_i · p_{θ^-}(s',a')_i`. This shifts atoms to `r + γ·z_i`, which don't line up with `{z_i}`. Project back by splitting each atom's mass linearly onto the two nearest support points → target distribution `m`.
 
-**Loss**: `L(θ) = - Σ_i m_i · log p_θ(s,a)_i` — standard cross-entropy.
+**Loss**: `L(θ) = - Σ_i m_i · log p_θ(s,a)_i`, standard cross-entropy.
 
 ```python
 def project_target(reward, gamma, done, p_next, atoms, v_min, v_max):
@@ -349,9 +349,9 @@ def c51_loss(p_logits_sa, target_p):
     return -(target_p * F.log_softmax(p_logits_sa, dim=-1)).sum(-1).mean()
 ```
 
-**Tradeoff**: lower-variance value estimates than scalar Q-learning. Sensitive to `V_min, V_max` — set them wrong and the projection clips real mass.
+**Tradeoff**: lower-variance value estimates than scalar Q-learning. Sensitive to `V_min, V_max`. Set them wrong and the projection clips real mass.
 
-**Watch**: the distribution itself on fixed eval states — piling up at boundary atoms means widen the support.
+**Watch**: the distribution itself on fixed eval states. Piling up at boundary atoms means widen the support.
 
 ---
 
@@ -380,7 +380,7 @@ def ddpg_losses(q, q_tar, mu, mu_tar, batch, gamma=0.99):
     return critic, actor
 ```
 
-**Tradeoff**: sample-efficient, notoriously brittle. Critic overestimation feeds bad gradients to the actor — TD3 was invented to fix this.
+**Tradeoff**: sample-efficient, notoriously brittle. Critic overestimation feeds bad gradients to the actor; TD3 was invented to fix this.
 
 **Watch**: critic value drift on a fixed eval batch (climbing without reward climbing → overestimation). Exploration noise schedule.
 
@@ -425,7 +425,7 @@ def td3_actor_loss(q1, mu, s):
 
 ---
 
-## SAC — soft actor-critic
+## SAC: soft actor-critic
 
 Haarnoja et al. 2018 (arXiv:1801.01290) + auto-temperature variant (arXiv:1812.05905). Maximum-entropy RL: per-step entropy bonus.
 
@@ -463,9 +463,9 @@ def sac_losses(pi, q1, q2, q1t, q2t, log_alpha, batch,
     return q_loss, pi_loss, alpha_loss
 ```
 
-**Tradeoff**: among the most stable continuous-control algorithms. Sensitive to action-space scale — normalize actions to `[-1, 1]`.
+**Tradeoff**: among the most stable continuous-control algorithms. Sensitive to action-space scale. Normalize actions to `[-1, 1]`.
 
-**Watch**: `α` itself — should settle to a value holding policy entropy near `H̄`. `α → 0` → deterministic policy; unbounded growth → unreachable entropy target.
+**Watch**: `α` itself: should settle to a value holding policy entropy near `H̄`. `α → 0` → deterministic policy; unbounded growth → unreachable entropy target.
 
 ---
 
@@ -524,7 +524,7 @@ def bt_reward_loss(r_chosen, r_rejected):
 
 **Tradeoff**: well-behaved logistic regression on differences. Variance in practice comes from annotator noise and unidentified additive scale of `r_φ`.
 
-**Watch**: pairwise accuracy on a held-out preference set (65–75% on noisy human data is normal, higher on synthetic). Also the average gap `Δ` — if it keeps growing, RM may be learning spurious features.
+**Watch**: pairwise accuracy on a held-out preference set (65–75% on noisy human data is normal, higher on synthetic). Also the average gap `Δ`. If it keeps growing, RM may be learning spurious features.
 
 ---
 
@@ -584,8 +584,8 @@ def dpo_loss(pol_lp_w, pol_lp_l, ref_lp_w, ref_lp_l, beta=0.1):
 **Tradeoff**: lower variance than PPO-RLHF (no MC rollouts). Bias from the BT model being an imperfect preference model.
 
 **Watch**:
-- **Chosen vs rejected logit gap** `β·(Δ_w - Δ_l)` — should climb.
-- `Δ_w` itself — the failure mode is `Δ_w < 0` (policy makes the *chosen* response less likely than the reference does); both `Δ_w, Δ_l` going strongly negative is a known DPO pathology.
+- **Chosen vs rejected logit gap** `β·(Δ_w - Δ_l)`: should climb.
+- `Δ_w` itself: the failure mode is `Δ_w < 0` (policy makes the *chosen* response less likely than the reference does); both `Δ_w, Δ_l` going strongly negative is a known DPO pathology.
 - Pairwise accuracy on a held-out preference set.
 
 ---
@@ -604,7 +604,7 @@ Pushes the policy toward a *fixed* log-ratio gap `1/(2β)` rather than maximizin
 ```
 ∇_θ L_IPO = 2 · E [ m · ( ∇_θ log π_θ(y_w|x) - ∇_θ log π_θ(y_l|x) ) ]
 ```
-Once `m ≈ 0`, the gradient vanishes — built-in regularization DPO lacks.
+Once `m ≈ 0`, the gradient vanishes: built-in regularization DPO lacks.
 
 ```python
 def ipo_loss(pol_lp_w, pol_lp_l, ref_lp_w, ref_lp_l, beta=0.1):
@@ -617,13 +617,13 @@ def ipo_loss(pol_lp_w, pol_lp_l, ref_lp_w, ref_lp_l, beta=0.1):
 
 **Tradeoff**: more stable than DPO when preferences are noisy or near-deterministic. Need to pick the target margin sensibly.
 
-**Watch**: margin distribution — should concentrate around `1/(2β)`. If many examples sit well above it, you're effectively running DPO.
+**Watch**: margin distribution: should concentrate around `1/(2β)`. If many examples sit well above it, you're effectively running DPO.
 
 ---
 
 ## KTO
 
-Ethayarajh et al. 2024 (arXiv:2402.01306, ICML 2024). Works on binary "this response is desirable / undesirable" labels — no pairs needed.
+Ethayarajh et al. 2024 (arXiv:2402.01306, ICML 2024). Works on binary "this response is desirable / undesirable" labels: no pairs needed.
 
 **Loss** (per example, with `ρ_θ(x,y) = β · (log π_θ(y|x) - log π_ref(y|x))` and a detached KL estimate `KL_est = E_{x'}[ KL(π_θ(·|x') || π_ref(·|x')) ]`):
 ```
@@ -644,7 +644,7 @@ def kto_loss(pol_lp, ref_lp, labels, kl_estimate, beta=0.1,
     return (is_pos * pos + (1 - is_pos) * neg).mean()
 ```
 
-**Tradeoff**: higher variance than DPO when pairs are available (KTO discards pair structure) but works on data DPO can't. The KL estimate is a moving target — re-estimate it periodically.
+**Tradeoff**: higher variance than DPO when pairs are available (KTO discards pair structure) but works on data DPO can't. The KL estimate is a moving target. Re-estimate it periodically.
 
 **Watch**: class balance (extreme imbalance → one sigmoid dominates). KL estimate drift between estimations means batch size too small.
 
@@ -652,7 +652,7 @@ def kto_loss(pol_lp, ref_lp, labels, kl_estimate, beta=0.1,
 
 ## ORPO
 
-Hong et al. 2024 (arXiv:2403.07691, EMNLP 2024). Combine SFT and preference optimization in one pass — no reference model.
+Hong et al. 2024 (arXiv:2403.07691, EMNLP 2024). Combine SFT and preference optimization in one pass: no reference model.
 
 **Loss**:
 ```
@@ -687,7 +687,7 @@ Meng, Xia, Chen 2024 (arXiv:2405.14734). Reference-free, length-normalized DPO v
 ```
 L_SimPO = - E [ log σ( β · ( (1/|y_w|) log π_θ(y_w|x) - (1/|y_l|) log π_θ(y_l|x) ) - γ ) ]
 ```
-`|y|` is response length in tokens; `γ` is a target reward margin (paper sweeps 0.5–2.0). No `π_ref` — the policy's own length-normalized log-prob is the reward.
+`|y|` is response length in tokens; `γ` is a target reward margin (paper sweeps 0.5–2.0). No `π_ref`. The policy's own length-normalized log-prob is the reward.
 
 ```python
 def simpo_loss(pol_lp_w, pol_lp_l, len_w, len_l, beta=2.0, gamma=1.0):
@@ -697,9 +697,9 @@ def simpo_loss(pol_lp_w, pol_lp_l, len_w, len_l, beta=2.0, gamma=1.0):
     return -F.logsigmoid(logits).mean()
 ```
 
-**Tradeoff**: length normalization counteracts DPO's bias toward longer responses (longer responses have larger absolute log-probs). Sensitive to `γ` — too large → loss saturates, no signal.
+**Tradeoff**: length normalization counteracts DPO's bias toward longer responses (longer responses have larger absolute log-probs). Sensitive to `γ`: too large → loss saturates, no signal.
 
-**Watch**: average response length on held-out prompts — growing means the length normalization isn't doing its job. Margin distribution should sit above `γ` for chosen responses.
+**Watch**: average response length on held-out prompts. Growing means the length normalization isn't doing its job. Margin distribution should sit above `γ` for chosen responses.
 
 ---
 
@@ -707,7 +707,7 @@ def simpo_loss(pol_lp_w, pol_lp_l, len_w, len_l, beta=2.0, gamma=1.0):
 
 Shao et al. 2024 (DeepSeekMath, arXiv:2402.03300). PPO without a critic: use the within-group mean reward as the baseline.
 
-**Setup**: for each prompt `x`, sample K completions `{y_1..y_K}` from `π_old`; score each with reward `r_i` (often a verifiable checker — see [Lecture 15](../lectures/15-rl-verifiable-rewards.md)).
+**Setup**: for each prompt `x`, sample K completions `{y_1..y_K}` from `π_old`; score each with reward `r_i` (often a verifiable checker; see [Lecture 15](../lectures/15-rl-verifiable-rewards.md)).
 
 **Advantage** (group-relative):
 ```
@@ -735,12 +735,12 @@ def grpo_loss(logp_new, logp_old, rewards, kl_per_seq,
     return policy + beta * kl_per_seq.mean()
 ```
 
-**Tradeoff**: higher variance than PPO-with-critic (group mean from K samples is noisy) but no critic to train. Sensitive to within-group reward variance — all-zero or all-one groups give zero advantage and no signal.
+**Tradeoff**: higher variance than PPO-with-critic (group mean from K samples is noisy) but no critic to train. Sensitive to within-group reward variance. All-zero or all-one groups give zero advantage and no signal.
 
 **Watch**:
-- Within-group reward variance — should be > 0 for most prompts; otherwise drop or rebalance the prompt mix.
+- Within-group reward variance: should be > 0 for most prompts; otherwise drop or rebalance the prompt mix.
 - Clip fraction (same as PPO).
-- KL to reference — runaway KL means `β` too low or the checker is gameable.
+- KL to reference: runaway KL means `β` too low or the checker is gameable.
 
 ---
 

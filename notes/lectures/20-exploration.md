@@ -1,8 +1,8 @@
 <!-- status: unreviewed | last-reviewed: never -->
 
-# Lecture 20: Exploration — from ε-greedy to intrinsic motivation
+# Lecture 20: Exploration: from ε-greedy to intrinsic motivation
 
-_Unreviewed — no one has checked this end to end. Treat the math, code, and citations as unverified._
+_Unreviewed: no one has checked this end to end. Treat the math, code, and citations as unverified._
 
 **Time**: ~3 h · **Prerequisites**: Lectures 01, 03
 
@@ -12,9 +12,9 @@ _Unreviewed — no one has checked this end to end. Treat the math, code, and ci
 
 [Lecture 01](./01-mdps-bellman.md) set up the MDP and the Bellman equations under the assumption that you already had a way to estimate `Q(s, a)` for every state-action pair you cared about. [Lecture 03](./03-value-functions-q-learning.md) introduced Q-learning and gestured at ε-greedy as the way the agent collected data. This lecture is about that gesture.
 
-Exploration is the part of RL that asks: how does the agent decide which state-action pairs to try? Every value-based method assumes the data distribution covers what matters. Every policy-gradient method assumes the policy will occasionally sample actions outside its current best estimate so the gradient has something to push against. When those assumptions hold by luck — small state space, dense reward, easy initialization — exploration looks like a non-problem. When they don't, no amount of clever updating fixes it: the agent never sees the reward at all, and there is nothing to update toward.
+Exploration is the part of RL that asks: how does the agent decide which state-action pairs to try? Every value-based method assumes the data distribution covers what matters. Every policy-gradient method assumes the policy will occasionally sample actions outside its current best estimate so the gradient has something to push against. When those assumptions hold by luck (small state space, dense reward, easy initialization), exploration looks like a non-problem. When they don't, no amount of clever updating fixes it: the agent never sees the reward at all, and there is nothing to update toward.
 
-The classical case study is Montezuma's Revenge. A DQN agent with ε-greedy exploration scores zero on Montezuma's Revenge after 200 million Atari frames, while reaching superhuman performance on most other Atari games in the same training budget (Mnih et al. 2015, doi:10.1038/nature14236; the Atari results are summarized in their Extended Data Table 2). The reason is not that DQN can't learn the game — once you give it any reward signal it does fine. The reason is that ε-greedy never accidentally finds the first key. The first reward in Montezuma's Revenge requires a roughly 100-step sequence of specific actions, and uniform random sampling has effectively zero probability of producing it.
+The classical case study is Montezuma's Revenge. A DQN agent with ε-greedy exploration scores zero on Montezuma's Revenge after 200 million Atari frames, while reaching superhuman performance on most other Atari games in the same training budget (Mnih et al. 2015, doi:10.1038/nature14236; the Atari results are summarized in their Extended Data Table 2). The reason is not that DQN can't learn the game: once you give it any reward signal it does fine. The reason is that ε-greedy never accidentally finds the first key. The first reward in Montezuma's Revenge requires a roughly 100-step sequence of specific actions, and uniform random sampling has effectively zero probability of producing it.
 
 This lecture covers the standard toolbox for that problem, then asks what changes when you swap an Atari-style environment for an LLM that has to discover good reasoning traces rather than good control trajectories.
 
@@ -29,7 +29,7 @@ The split is easy to state and hard to solve. At every decision point the agent 
 
 Greedy-only strategies fail because the estimates are wrong, especially early. A bandit pull with `Q(a) = 0.6` from one sample looks better than an unpulled arm with `Q(a) = 0`, but the unpulled arm could be 0.9. Pure exploration fails because it never commits to anything good: the agent spends all its samples on actions it already knows are bad.
 
-The classical formalization is the **multi-armed bandit** — one state, K actions, stochastic rewards drawn from unknown distributions. Even this stripped-down case is non-trivial. The full sequential decision problem (MDPs with state transitions) is strictly harder because the value of exploring an action depends on what state it puts you in, and that state-value depends on the policy from that state onward, which depends on its own exploration.
+The classical formalization is the **multi-armed bandit**: one state, K actions, stochastic rewards drawn from unknown distributions. Even this stripped-down case is non-trivial. The full sequential decision problem (MDPs with state transitions) is strictly harder because the value of exploring an action depends on what state it puts you in, and that state-value depends on the policy from that state onward, which depends on its own exploration.
 
 Two structural reasons exploration is hard in MDPs that don't exist in bandits:
 
@@ -71,7 +71,7 @@ A separate ε is sometimes kept for evaluation runs (often `ε_eval = 0.05` for 
 
 ### Why uniform random is the wrong primitive
 
-When ε does fire, what does ε-greedy do? It samples uniformly over actions. That's the cheapest thing — but it ignores everything the agent has learned about which non-greedy actions are at least plausible. If the current Q-values say `Q(s) = [10.0, 9.9, -50.0, -100.0]`, ε-greedy with `ε=0.1` will sometimes try action 3 (Q = -100). There is no reason to. Action 1 (Q = 9.9) is the candidate worth checking against the current greedy action; actions 2 and 3 are exploratory tax.
+When ε does fire, what does ε-greedy do? It samples uniformly over actions. That's the cheapest thing, but it ignores everything the agent has learned about which non-greedy actions are at least plausible. If the current Q-values say `Q(s) = [10.0, 9.9, -50.0, -100.0]`, ε-greedy with `ε=0.1` will sometimes try action 3 (Q = -100). There is no reason to. Action 1 (Q = 9.9) is the candidate worth checking against the current greedy action; actions 2 and 3 are exploratory tax.
 
 This motivates **Boltzmann (softmax) exploration**:
 
@@ -133,7 +133,7 @@ class UCB1Bandit:
 
     def select(self, c=math.sqrt(2)):
         # Pull each arm once to bootstrap. This is the standard UCB1
-        # initialization — without it the ln(t)/N(a) term is undefined.
+        # initialization: without it the ln(t)/N(a) term is undefined.
         for a in range(self.K):
             if self.counts[a] == 0:
                 return a
@@ -173,11 +173,11 @@ if __name__ == "__main__":
     run_demo()
 ```
 
-The interesting behavior to watch is the `pulls per arm` count. UCB1 spends most of its budget on the best arm (~80–90% of pulls in this configuration after T=10000) but keeps occasionally checking the others. The check rate falls as `1 / Δ²` per the regret analysis, which is why arms with means 0.27 and 0.25 get checked more often than the arm at 0.20 — they're closer to the optimum and so harder to rule out.
+The interesting behavior to watch is the `pulls per arm` count. UCB1 spends most of its budget on the best arm (~80–90% of pulls in this configuration after T=10000) but keeps occasionally checking the others. The check rate falls as `1 / Δ²` per the regret analysis, which is why arms with means 0.27 and 0.25 get checked more often than the arm at 0.20: they're closer to the optimum and so harder to rule out.
 
 ### Why UCB doesn't transplant to deep RL directly
 
-UCB needs `N(s, a)` — the number of times you've visited each state-action pair. In a tabular MDP that's a hash table. In Atari, the state is a stack of image frames, and `N(s, a) = 1` for almost every state you've ever seen — every frame is slightly different. The bonus term `sqrt(ln(t) / N(s, a))` would just be a constant, which isn't useful as a directional signal.
+UCB needs `N(s, a)`: the number of times you've visited each state-action pair. In a tabular MDP that's a hash table. In Atari, the state is a stack of image frames, and `N(s, a) = 1` for almost every state you've ever seen: every frame is slightly different. The bonus term `sqrt(ln(t) / N(s, a))` would just be a constant, which isn't useful as a directional signal.
 
 The deep RL exploration literature is largely about answering "what's the right generalization of `N(s, a)` when the state is a 210×160×3 image?" Three approaches: pseudo-counts from learned density models (Bellemare 2016), prediction error of a fixed random network (RND, Burda 2018), and prediction error of a learned forward model (ICM, Pathak 2017). All three replace explicit count with a proxy for novelty.
 
@@ -193,7 +193,7 @@ For Bernoulli rewards with a Beta prior, the posterior after `S_a` successes and
 
 Thompson sampling has the same `O(log T)` regret rate as UCB on stochastic bandits (Agrawal & Goyal 2012, arXiv:1111.1797) and tends to be slightly better in practice. The randomization smooths out the brittleness of UCB's deterministic tie-breaking. Thompson sampling also generalizes more naturally to contextual bandits and to structured action spaces where maintaining explicit confidence intervals is awkward.
 
-The downside in deep RL: maintaining a useful posterior over `Q(s, a)` parameterized by a neural network is hard. Approximate methods exist — Bayesian dropout, bootstrapped DQN (Osband et al. 2016, arXiv:1602.04621), ensemble methods — and they help, but none are as clean as the bandit case.
+The downside in deep RL: maintaining a useful posterior over `Q(s, a)` parameterized by a neural network is hard. Approximate methods exist (Bayesian dropout, bootstrapped DQN (Osband et al. 2016, arXiv:1602.04621), ensemble methods), and they help, but none are as clean as the bandit case.
 
 ---
 
@@ -203,13 +203,13 @@ The cheapest exploration trick that sometimes works: initialize `Q(s, a)` to a v
 
 For a tabular Q-table with rewards in `[0, 1]` and discount `γ = 0.99`, set `Q_init = 100` (well above the true max `1 / (1 - 0.99) = 100`, so all of them). The first action gets picked, returns some reward less than 100, and its `Q` value drops. The next greedy choice picks an as-yet-untried action. Eventually every action has been tried enough times for its `Q` to be roughly correct.
 
-This is closely related to UCB — both inject an optimism bias to encourage exploration. The difference is that optimistic initialization is a one-shot bias built into the initial values rather than a recurring bonus, so it decays naturally as the agent collects data. The downside: it doesn't recover from a bad start in non-stationary environments, and it's hard to get the initialization right for function approximators (initializing a deep Q-network to "high values everywhere" is not as simple as `Q_init = 100`).
+This is closely related to UCB: both inject an optimism bias to encourage exploration. The difference is that optimistic initialization is a one-shot bias built into the initial values rather than a recurring bonus, so it decays naturally as the agent collects data. The downside: it doesn't recover from a bad start in non-stationary environments, and it's hard to get the initialization right for function approximators (initializing a deep Q-network to "high values everywhere" is not as simple as `Q_init = 100`).
 
 ---
 
 ## The deep RL exploration problem
 
-The classical methods above all assume you can either count visits or maintain a posterior. Deep RL with high-dimensional state breaks both. The Atari hard-exploration suite — Montezuma's Revenge, Pitfall, Private Eye, Venture, Solaris, Gravitar — became the standard benchmark for whether a method actually helps where ε-greedy fails. Most papers in this section evaluate primarily on these games, with Montezuma's Revenge as the headline benchmark and Pitfall as the "even harder" benchmark (Pitfall has both sparse reward and deceptive reward, and goes negative for many actions).
+The classical methods above all assume you can either count visits or maintain a posterior. Deep RL with high-dimensional state breaks both. The Atari hard-exploration suite (Montezuma's Revenge, Pitfall, Private Eye, Venture, Solaris, Gravitar) became the standard benchmark for whether a method actually helps where ε-greedy fails. Most papers in this section evaluate primarily on these games, with Montezuma's Revenge as the headline benchmark and Pitfall as the "even harder" benchmark (Pitfall has both sparse reward and deceptive reward, and goes negative for many actions).
 
 For reference points, raw ε-greedy DQN scores zero on Montezuma's Revenge across full training runs (Mnih et al. 2015). Human players get around 4,367 (the average of the human baselines used in the same Nature paper). The methods below all try to close some of that gap.
 
@@ -235,9 +235,9 @@ r_intrinsic(s) = β / sqrt(N̂(s))
 
 with `β` a tuning constant. The total reward used for training is the environment reward plus the intrinsic bonus, and the policy is trained on that combined signal.
 
-The original paper used a CTS density model (a pixel-level autoregressive density model from earlier work). A follow-up (Ostrovski et al. 2017, *Count-Based Exploration with Neural Density Models*, arXiv:1703.01310) replaced the CTS model with PixelCNN and got substantially better results — they reported 3,705 on Montezuma's Revenge, which was state-of-the-art at the time.
+The original paper used a CTS density model (a pixel-level autoregressive density model from earlier work). A follow-up (Ostrovski et al. 2017, *Count-Based Exploration with Neural Density Models*, arXiv:1703.01310) replaced the CTS model with PixelCNN and got substantially better results: they reported 3,705 on Montezuma's Revenge, which was state-of-the-art at the time.
 
-What this buys you: a directional exploration signal in high-dimensional state space. On Montezuma's Revenge, the agent now seeks out frames it hasn't visited often, which leads it through the rooms to discover keys, doors, and eventually points. It does not solve Pitfall — that requires handling the deceptive reward, which a novelty bonus doesn't address.
+What this buys you: a directional exploration signal in high-dimensional state space. On Montezuma's Revenge, the agent now seeks out frames it hasn't visited often, which leads it through the rooms to discover keys, doors, and eventually points. It does not solve Pitfall: that requires handling the deceptive reward, which a novelty bonus doesn't address.
 
 What it costs: training a density model alongside the policy is expensive. The density model also has to be careful enough to actually distinguish "seen many times" from "seen once" in pixel space, which is hard when frames vary continuously. The pseudo-count gets noisy in regions of state space where the density model is poorly calibrated.
 
@@ -263,13 +263,13 @@ r_intrinsic_t = (η / 2) * || φ̂(s_{t+1}) - φ(s_{t+1}) ||²
 
 The total reward used for training the policy is `r_intrinsic + r_extrinsic` (often weighted).
 
-The trick is in the encoder. If `φ` were the identity (raw pixels), the agent would get high curiosity reward for any visual change, including TV-screen noise it can't predict but also can't influence. The inverse-model training forces `φ` to encode only the parts of the state that depend on the agent's actions — because that's what's needed to predict the action from two consecutive features. Effects of agent action are encoded; irrelevant background noise is mostly dropped. The forward-model error then reflects "things I did that I can't yet predict the consequences of," which is a useful curiosity signal.
+The trick is in the encoder. If `φ` were the identity (raw pixels), the agent would get high curiosity reward for any visual change, including TV-screen noise it can't predict but also can't influence. The inverse-model training forces `φ` to encode only the parts of the state that depend on the agent's actions, because that's what's needed to predict the action from two consecutive features. Effects of agent action are encoded; irrelevant background noise is mostly dropped. The forward-model error then reflects "things I did that I can't yet predict the consequences of," which is a useful curiosity signal.
 
 The paper's notable empirical claims: ICM agents successfully explore VizDoom and Super Mario Bros. levels with sparse or no extrinsic reward, learning to navigate and reach goals from intrinsic reward alone. On Montezuma's Revenge they show improvement over ε-greedy but don't claim state-of-the-art.
 
 ### The noisy-TV problem
 
-A robot in a room with a TV showing static. The TV is unpredictable — every frame is genuinely random — so a curiosity bonus based on prediction error rewards the agent for staring at the TV forever. The agent's actions don't influence the TV, but it can't predict it either. ICM's inverse-model encoder is designed to filter this out, but in practice the filter isn't perfect, and noisy-TV-style failure modes are a recurring problem for curiosity methods.
+A robot in a room with a TV showing static. The TV is unpredictable (every frame is genuinely random), so a curiosity bonus based on prediction error rewards the agent for staring at the TV forever. The agent's actions don't influence the TV, but it can't predict it either. ICM's inverse-model encoder is designed to filter this out, but in practice the filter isn't perfect, and noisy-TV-style failure modes are a recurring problem for curiosity methods.
 
 This is the motivation for the next method, which sidesteps the problem entirely by predicting a deterministic but arbitrary target.
 
@@ -327,7 +327,7 @@ class RND:
         self.device = device
 
     def intrinsic_reward(self, states):
-        """No gradient — just the prediction error per state."""
+        """No gradient: just the prediction error per state."""
         with torch.no_grad():
             target_out = self.target(states)
             pred_out = self.predictor(states)
@@ -357,7 +357,7 @@ A few practical points the original paper emphasizes:
 
 - **Normalize the observations** (running mean/std) before feeding into either network. Without this the prediction error is dominated by global brightness changes and other large-scale effects rather than meaningful novelty.
 - **Normalize the intrinsic reward** by a running standard deviation. The raw prediction errors have arbitrary scale; the policy gradient needs a roughly stable reward magnitude.
-- **Use two value heads** — one for extrinsic reward (the actual game score) and one for intrinsic reward — and combine them with separate discount factors. The extrinsic value head sees the real game reward and learns a long-horizon value; the intrinsic value head sees only the curiosity bonus and uses a shorter horizon since curiosity bonuses don't persist (once the predictor learns a state, the bonus goes to zero).
+- **Use two value heads**: one for extrinsic reward (the actual game score) and one for intrinsic reward, and combine them with separate discount factors. The extrinsic value head sees the real game reward and learns a long-horizon value; the intrinsic value head sees only the curiosity bonus and uses a shorter horizon since curiosity bonuses don't persist (once the predictor learns a state, the bonus goes to zero).
 - **Use PPO** with many parallel environments. RND was reported with 128 parallel actors. The exploration benefit compounds with rollout diversity.
 
 ---
@@ -366,7 +366,7 @@ A few practical points the original paper emphasizes:
 
 Badia et al. 2020, *Never Give Up: Learning Directed Exploration Strategies* (arXiv:2002.06038), addresses two problems that RND doesn't.
 
-First, RND's curiosity signal is **lifetime novelty** — once the predictor has seen a state, the bonus goes to zero forever, even if the agent visits a different part of the same episode that requires re-passing through that state. There's no within-episode notion of "I haven't seen this in *this* episode."
+First, RND's curiosity signal is **lifetime novelty**: once the predictor has seen a state, the bonus goes to zero forever, even if the agent visits a different part of the same episode that requires re-passing through that state. There's no within-episode notion of "I haven't seen this in *this* episode."
 
 Second, RND's intrinsic reward decays as training progresses, since the predictor gradually learns every reachable state. Late in training the curiosity signal is small everywhere, and the agent loses its exploration drive even on tasks where it hasn't yet found all the reward.
 
@@ -378,7 +378,7 @@ This is combined with an RND-style lifetime bonus for the cross-episode componen
 r_int = α_episodic * (1 + r_lifetime)
 ```
 
-The product structure means episodic novelty is gated by lifetime novelty — the agent doesn't waste effort on within-episode novelty if it's already a part of state space it's been to many times.
+The product structure means episodic novelty is gated by lifetime novelty: the agent doesn't waste effort on within-episode novelty if it's already a part of state space it's been to many times.
 
 NGU also trains an explicit ensemble of policies with different exploration intensities (different mixtures of intrinsic-to-extrinsic reward weight) using a shared value function with a discrete "exploration policy index." This lets the agent be more exploitative in some rollouts and more exploratory in others without needing to manually retune `β`.
 
@@ -390,17 +390,17 @@ NGU was the first agent to achieve non-zero scores on **Pitfall** without demons
 
 Ecoffet et al. 2019, *Go-Explore: a New Approach for Hard-Exploration Problems* (arXiv:1901.10995), takes a fundamentally different approach. Instead of injecting exploration via intrinsic reward, it separates exploration into two phases:
 
-1. **Explore until solved**. Maintain an archive of "interesting" states (typically: states with high score, or new state representations). At each iteration, pick a state from the archive, deterministically reset the simulator to that state (Go-Explore requires this — the environment must be deterministic and resettable), and run a random rollout from there. Add any new interesting states to the archive. Repeat.
+1. **Explore until solved**. Maintain an archive of "interesting" states (typically: states with high score, or new state representations). At each iteration, pick a state from the archive, deterministically reset the simulator to that state (Go-Explore requires this: the environment must be deterministic and resettable), and run a random rollout from there. Add any new interesting states to the archive. Repeat.
 
 2. **Robustify**. Once you have a trajectory that achieves high reward, train a policy (via imitation learning + RL) to follow that trajectory robustly, so the resulting policy doesn't need the simulator-reset trick.
 
 The first phase is essentially undirected exploration with checkpointing. The archive guarantees that exploration progress isn't lost: any productive trajectory becomes a starting point for further exploration. The second phase converts the trajectory-set into a policy that can run from the actual initial state.
 
-Go-Explore reported scores of **>2,000,000** on Montezuma's Revenge and **400,000** on Pitfall in its first paper, vastly exceeding all prior methods. Both numbers are essentially "solved" — past any reasonable threshold of human performance.
+Go-Explore reported scores of **>2,000,000** on Montezuma's Revenge and **400,000** on Pitfall in its first paper, vastly exceeding all prior methods. Both numbers are essentially "solved": past any reasonable threshold of human performance.
 
 The critical caveat: Go-Explore in the form described above requires environment-state save/restore. Standard Atari emulators allow this, but most real environments don't. A follow-up version of Go-Explore relaxes this requirement by using a goal-conditioned policy to "return" to an archived state instead of resetting, at the cost of more failed attempts at returning to deep parts of the state space.
 
-What Go-Explore demonstrates is that the hard-exploration Atari problems are tractable if you can separate "find any trajectory that gets reward" from "learn a robust policy that does the same thing." The classical exploration methods conflate these two problems by trying to find reward and learn from it simultaneously. Go-Explore decoupling them makes the search problem dramatically easier — at the cost of requiring the simulator interface.
+What Go-Explore demonstrates is that the hard-exploration Atari problems are tractable if you can separate "find any trajectory that gets reward" from "learn a robust policy that does the same thing." The classical exploration methods conflate these two problems by trying to find reward and learn from it simultaneously. Go-Explore decoupling them makes the search problem dramatically easier, at the cost of requiring the simulator interface.
 
 This is similar in spirit to how RLVR (Lecture 15) handles search for math: generate many candidate solutions, filter by verifier, then train on the filtered traces. The "explore broadly, then concentrate on what worked" structure is the same.
 
@@ -429,13 +429,13 @@ A related and underrated baseline: noisy networks (Fortunato et al. 2017, arXiv:
 
 ## What changes for LLM RL
 
-The exploration story for LLM RL — the GRPO / RLVR pipeline from [Lecture 15](./15-rl-verifiable-rewards.md) — looks almost nothing like the Atari story above. There are good reasons.
+The exploration story for LLM RL (the GRPO / RLVR pipeline from [Lecture 15](./15-rl-verifiable-rewards.md)) looks almost nothing like the Atari story above. There are good reasons.
 
 ### The "state space" is reasoning traces, not screens
 
-In Atari, the agent explores state space — different rooms, different positions, different game states. The set of states is vast and structured by the environment's dynamics, and exploration means traversing more of it.
+In Atari, the agent explores state space: different rooms, different positions, different game states. The set of states is vast and structured by the environment's dynamics, and exploration means traversing more of it.
 
-In LLM RL, the state at each step is the (prompt, partial response) prefix. The action is the next token. From the perspective of the RL machinery this looks like any other sequential decision problem, but the qualitative shape is different. "Exploration" in an LLM doesn't mean visiting unfamiliar tokens — every token has been seen during pre-training. It means exploring different *reasoning traces*: different chains of intermediate steps that the model could write before arriving at an answer.
+In LLM RL, the state at each step is the (prompt, partial response) prefix. The action is the next token. From the perspective of the RL machinery this looks like any other sequential decision problem, but the qualitative shape is different. "Exploration" in an LLM doesn't mean visiting unfamiliar tokens: every token has been seen during pre-training. It means exploring different *reasoning traces*: different chains of intermediate steps that the model could write before arriving at an answer.
 
 Two traces that start `Let me think about this problem...` could diverge in step 5 into a wrong calculation or step 5 into a correct one. From a state-space view, those are just two paths through the tree of token sequences. From a reasoning view, those are two strategies. Exploration in LLM RL is mostly about making sure the rollouts cover enough strategies for at least some of them to land on a correct answer that the verifier can score.
 
@@ -447,13 +447,13 @@ The standard sampling parameters double as the standard exploration controls.
 - **Top-p (nucleus) sampling**: at each step, keep only the smallest set of tokens whose cumulative probability exceeds `p`, renormalize, and sample. Common defaults are `p = 0.9` or `0.95`. This cuts the tail without flattening the head.
 - **Top-k**: keep only the top-k tokens. Sharper than top-p and used less often in recent practice.
 
-These are exploration in a structural sense — they directly determine the diversity of the rollouts you train on. If temperature is too low, every rollout for the same prompt is identical, the group standard deviation in GRPO is zero, and there is no gradient. If temperature is too high, rollouts include enough garbage that the verifier never gives correctness reward and the format reward dominates.
+These are exploration in a structural sense: they directly determine the diversity of the rollouts you train on. If temperature is too low, every rollout for the same prompt is identical, the group standard deviation in GRPO is zero, and there is no gradient. If temperature is too high, rollouts include enough garbage that the verifier never gives correctness reward and the format reward dominates.
 
 The DeepSeekMath paper reports that they tried different temperatures and found that around 0.6–0.7 worked well for math reasoning. Higher temperatures gave more diverse but lower-quality rollouts; lower temperatures gave less diversity but more reliable structure. The trade-off is direct: you want enough exploration to find correct solutions sometimes, but not so much that the rollouts are uninformative.
 
 ### Best-of-N as inference-time exploration
 
-A complementary lever is best-of-N at inference: sample N completions, score each with a verifier (or a reward model), return the highest-scoring one. Performance on math and code typically improves substantially with N — pass@64 is much higher than pass@1 for the same model — and this is essentially exploration applied at inference time rather than training time. The exploration here doesn't update the policy; it just multiplies the chances that any one sample is correct.
+A complementary lever is best-of-N at inference: sample N completions, score each with a verifier (or a reward model), return the highest-scoring one. Performance on math and code typically improves substantially with N (pass@64 is much higher than pass@1 for the same model), and this is essentially exploration applied at inference time rather than training time. The exploration here doesn't update the policy; it just multiplies the chances that any one sample is correct.
 
 This intersects with training-time exploration in a useful way: a model that produces diverse rollouts (high entropy) benefits more from best-of-N than a model that always produces the same answer. Low entropy means low pass@N relative to pass@1. The exploration-related failure mode in RLVR is **entropy collapse**, discussed in Lecture 15: the policy converges to a single reasoning style, group std collapses, and best-of-N gets you nothing.
 
@@ -478,9 +478,9 @@ You generally don't see count-based bonuses, RND-style novelty signals, or ICM-s
 - **The verifier already provides a strong signal**. In the RLVR setting, the verifier gives binary correctness on every rollout. That's a richer training signal than intrinsic curiosity, and adding more reward signals on top would dilute it without obvious gain.
 - **The hard-exploration analog isn't really sparse-reward Atari**. It's more like: "the model never produces a correct reasoning trace for hard problems." The fix is not to add curiosity to the rollouts; it's to either (a) get the model to a higher base capability via SFT or pre-training so its rollouts sometimes succeed (the DeepSeek-R1 cold-start SFT does this), or (b) seed the policy with high-quality demonstrations (rejection-sampling fine-tuning, STaR, etc., from Lecture 15).
 
-So the LLM RL story for exploration is "tune the sampling temperature, set the KL penalty, watch entropy, and hope your base model is good enough that some rollouts succeed." If they don't, the response is to improve the base model or do warm-start SFT — not to add an intrinsic-motivation term.
+So the LLM RL story for exploration is "tune the sampling temperature, set the KL penalty, watch entropy, and hope your base model is good enough that some rollouts succeed." If they don't, the response is to improve the base model or do warm-start SFT, not to add an intrinsic-motivation term.
 
-There is some early work on more elaborate exploration for reasoning RL — for instance, methods that explicitly maintain diversity across the K completions in a group, or that branch reasoning at intermediate steps using MCTS-style search. These haven't yet displaced the simple "temperature + KL + verifier" approach in published frontier-model training, and a person reading this lecture should treat claims about more sophisticated exploration as live research rather than settled practice.
+There is some early work on more elaborate exploration for reasoning RL, for instance, methods that explicitly maintain diversity across the K completions in a group, or that branch reasoning at intermediate steps using MCTS-style search. These haven't yet displaced the simple "temperature + KL + verifier" approach in published frontier-model training, and a person reading this lecture should treat claims about more sophisticated exploration as live research rather than settled practice.
 
 ### A note on coverage
 
@@ -497,7 +497,7 @@ This is closer in spirit to bandit exploration (which arm should I pull more?) t
 
 A self-contained experiment that doesn't need much compute, useful for building intuition for the trade-offs:
 
-Take a 4-armed Bernoulli bandit with means `[0.20, 0.25, 0.27, 0.30]` — all close, no obvious winner. Run for `T = 5000`. Compare four strategies:
+Take a 4-armed Bernoulli bandit with means `[0.20, 0.25, 0.27, 0.30]`, all close, no obvious winner. Run for `T = 5000`. Compare four strategies:
 
 1. **Pure greedy** (after one pull per arm to initialize). Will often lock onto the wrong arm.
 2. **ε-greedy with `ε = 0.1`** fixed.
@@ -506,7 +506,7 @@ Take a 4-armed Bernoulli bandit with means `[0.20, 0.25, 0.27, 0.30]` — all cl
 
 Plot cumulative regret over time for each, averaged over 100 seeds. The classical result is that greedy has linear regret (often locks onto a sub-optimal arm and stays there), ε-greedy has linear regret with smaller slope (the ε * (mean gap) tax never goes away), and UCB1 and Thompson have logarithmic regret. UCB1's regret line is bumpy due to deterministic tie-breaking; Thompson is smoother.
 
-The bandit case is where the regret theory is cleanest. The point of running this isn't to discover the result — it's to internalize the difference between linear and logarithmic regret. After you've seen ε-greedy never close the gap on this setup, the case for more careful exploration in deep RL is less abstract.
+The bandit case is where the regret theory is cleanest. The point of running this isn't to discover the result: it's to internalize the difference between linear and logarithmic regret. After you've seen ε-greedy never close the gap on this setup, the case for more careful exploration in deep RL is less abstract.
 
 A modest extension: rerun the same comparison on a small **gridworld** with a single rewarded state two-thirds of the way across, walls that funnel the agent away, and `γ = 0.99`. Use tabular Q-learning under (a) ε-greedy with `ε = 0.1`, (b) optimistic init with `Q_init = 10`, (c) ε-greedy with count-bonus `r' = r + β / sqrt(N(s, a))` for `β = 0.1`. The count-bonus version typically explores faster than the other two and reaches the rewarded state in fewer episodes. The gridworld is where you can still see and reason about the count `N(s, a)` directly, before everything becomes a learned approximation in pixel space.
 
@@ -517,7 +517,7 @@ A modest extension: rerun the same comparison on a small **gridworld** with a si
 A summary of where exploration breaks, regardless of method:
 
 - **Sparse reward and small budget**: if the agent never sees a reward, no exploration method helps. Even Go-Explore needs the simulator to produce reward when reached; if reward only triggers after a 10,000-step sequence and you have a 1M-step budget, even unbiased random search has very low probability of finding it. The fix is usually a reward shaping function, demonstration data, or a curriculum of easier sub-problems.
-- **Deceptive reward without dedicated handling**: novelty bonuses don't help when the agent has high intrinsic reward for finding the local optimum. Pitfall is the canonical example. Methods that explicitly handle this — Go-Explore, NGU — pay extra in either simulator requirements or architectural complexity.
+- **Deceptive reward without dedicated handling**: novelty bonuses don't help when the agent has high intrinsic reward for finding the local optimum. Pitfall is the canonical example. Methods that explicitly handle this (Go-Explore, NGU) pay extra in either simulator requirements or architectural complexity.
 - **Noisy-TV / stochastic environment**: curiosity methods rewarded for raw prediction error get trapped by genuinely random parts of the environment. ICM's inverse-model encoder is supposed to fix this but doesn't always. RND avoids it structurally because the prediction target is deterministic.
 - **Reward scale changes**: if the intrinsic reward grows or shrinks relative to extrinsic reward as training progresses, the effective exploration weight is moving without you controlling it. Most modern implementations normalize the intrinsic reward by a running standard deviation. Without this, the relative weight of `r_int` and `r_ext` drifts.
 - **LLM entropy collapse**: in RLVR, if the policy converges to one solution, group std goes to zero and gradients vanish. Watch entropy explicitly. Add an entropy bonus or raise temperature if it drops sharply.
@@ -562,7 +562,7 @@ Is this a bandit (single state)?
 
 For LLM RL with verifiable rewards:
   Tune temperature and KL penalty. Watch entropy.
-  Don't reach for intrinsic motivation — work on the base model and
+  Don't reach for intrinsic motivation: work on the base model and
   the verifier first, and adjust K (group size) and temperature.
 ```
 
@@ -574,46 +574,46 @@ All arXiv IDs verified against arxiv.org.
 
 **Classical**
 
-- Auer, Cesa-Bianchi, Fischer. 2002. "Finite-time Analysis of the Multiarmed Bandit Problem." *Machine Learning*, 47(2-3), 235–256. doi:10.1023/A:1013689704352. — The UCB1 algorithm and the `O(K ln T / Δ)` regret bound.
-- Agrawal, Goyal. 2012. "Analysis of Thompson Sampling for the Multi-armed Bandit Problem." arXiv:1111.1797. — First near-optimal regret bound for Thompson sampling.
-- Sutton, Barto. 2018. *Reinforcement Learning: An Introduction*, 2nd edition. MIT Press. — Chapter 2 (multi-armed bandits) and §13.4 (exploration vs exploitation in policy gradient) are the textbook references for everything in the first half of this lecture.
-- Lattimore, Szepesvári. 2020. *Bandit Algorithms*. Cambridge University Press. — The bandit reference if you want the full regret analysis for UCB and Thompson with clean proofs.
+- Auer, Cesa-Bianchi, Fischer. 2002. "Finite-time Analysis of the Multiarmed Bandit Problem." *Machine Learning*, 47(2-3), 235–256. doi:10.1023/A:1013689704352: The UCB1 algorithm and the `O(K ln T / Δ)` regret bound.
+- Agrawal, Goyal. 2012. "Analysis of Thompson Sampling for the Multi-armed Bandit Problem." arXiv:1111.1797: First near-optimal regret bound for Thompson sampling.
+- Sutton, Barto. 2018. *Reinforcement Learning: An Introduction*, 2nd edition. MIT Press: Chapter 2 (multi-armed bandits) and §13.4 (exploration vs exploitation in policy gradient) are the textbook references for everything in the first half of this lecture.
+- Lattimore, Szepesvári. 2020. *Bandit Algorithms*. Cambridge University Press: The bandit reference if you want the full regret analysis for UCB and Thompson with clean proofs.
 
 **Pseudo-counts and density-based exploration**
 
-- Bellemare, Srinivasan, Ostrovski, Schaul, Saxton, Munos. 2016. "Unifying Count-Based Exploration and Intrinsic Motivation." arXiv:1606.01868. — Defines pseudo-counts from a CTS density model, first non-trivial Montezuma's Revenge score.
-- Ostrovski, Bellemare, van den Oord, Munos. 2017. "Count-Based Exploration with Neural Density Models." arXiv:1703.01310. — Follows up with PixelCNN density model, ~3,700 on Montezuma.
-- Tang, Houthooft, Foote, Stooke, Chen, Duan, Schulman, De Turck, Abbeel. 2017. "#Exploration: A Study of Count-Based Exploration for Deep Reinforcement Learning." arXiv:1611.04717. — Hash-based count proxy instead of a density model.
+- Bellemare, Srinivasan, Ostrovski, Schaul, Saxton, Munos. 2016. "Unifying Count-Based Exploration and Intrinsic Motivation." arXiv:1606.01868: Defines pseudo-counts from a CTS density model, first non-trivial Montezuma's Revenge score.
+- Ostrovski, Bellemare, van den Oord, Munos. 2017. "Count-Based Exploration with Neural Density Models." arXiv:1703.01310: Follows up with PixelCNN density model, ~3,700 on Montezuma.
+- Tang, Houthooft, Foote, Stooke, Chen, Duan, Schulman, De Turck, Abbeel. 2017. "#Exploration: A Study of Count-Based Exploration for Deep Reinforcement Learning." arXiv:1611.04717: Hash-based count proxy instead of a density model.
 
 **Curiosity and prediction-error methods**
 
-- Stadie, Levine, Abbeel. 2015. "Incentivizing Exploration In Reinforcement Learning With Deep Predictive Models." arXiv:1507.00814. — Earlier prediction-error-as-curiosity work.
-- Pathak, Agrawal, Efros, Darrell. 2017. "Curiosity-driven Exploration by Self-supervised Prediction." arXiv:1705.05363. — ICM. Forward + inverse model for curiosity; noisy-TV problem is acknowledged here.
-- Burda, Edwards, Storkey, Klimov. 2018. "Exploration by Random Network Distillation." arXiv:1810.12894. — RND. Cleanest avoidance of noisy-TV; best Montezuma's Revenge score at publication.
+- Stadie, Levine, Abbeel. 2015. "Incentivizing Exploration In Reinforcement Learning With Deep Predictive Models." arXiv:1507.00814: Earlier prediction-error-as-curiosity work.
+- Pathak, Agrawal, Efros, Darrell. 2017. "Curiosity-driven Exploration by Self-supervised Prediction." arXiv:1705.05363: ICM. Forward + inverse model for curiosity; noisy-TV problem is acknowledged here.
+- Burda, Edwards, Storkey, Klimov. 2018. "Exploration by Random Network Distillation." arXiv:1810.12894: RND. Cleanest avoidance of noisy-TV; best Montezuma's Revenge score at publication.
 
 **Episodic memory and combined methods**
 
-- Badia, Sprechmann, Vitvitskyi, Guo, Piot, Kapturowski, Tieleman, Arjovsky, Pritzel, Bolt, Blundell. 2020. "Never Give Up: Learning Directed Exploration Strategies." arXiv:2002.06038. — NGU. Episodic + lifetime intrinsic reward, first non-zero Pitfall without demonstrations.
-- Badia, Piot, Kapturowski et al. 2020. "Agent57: Outperforming the Atari Human Benchmark." arXiv:2003.13350. — Builds on NGU to surpass human-baseline on all 57 Atari games.
+- Badia, Sprechmann, Vitvitskyi, Guo, Piot, Kapturowski, Tieleman, Arjovsky, Pritzel, Bolt, Blundell. 2020. "Never Give Up: Learning Directed Exploration Strategies." arXiv:2002.06038: NGU. Episodic + lifetime intrinsic reward, first non-zero Pitfall without demonstrations.
+- Badia, Piot, Kapturowski et al. 2020. "Agent57: Outperforming the Atari Human Benchmark." arXiv:2003.13350: Builds on NGU to surpass human-baseline on all 57 Atari games.
 
 **Archive-based methods**
 
-- Ecoffet, Huizinga, Lehman, Stanley, Clune. 2019. "Go-Explore: a New Approach for Hard-Exploration Problems." arXiv:1901.10995. — Archive of interesting states + simulator reset; effectively solves Montezuma's and Pitfall.
+- Ecoffet, Huizinga, Lehman, Stanley, Clune. 2019. "Go-Explore: a New Approach for Hard-Exploration Problems." arXiv:1901.10995: Archive of interesting states + simulator reset; effectively solves Montezuma's and Pitfall.
 
 **Other exploration mechanisms**
 
-- Fortunato, Azar, Piot et al. 2017. "Noisy Networks for Exploration." arXiv:1706.10295. — Parameter-space noise as exploration. Often beats ε-greedy on Atari.
-- Osband, Blundell, Pritzel, Van Roy. 2016. "Deep Exploration via Bootstrapped DQN." arXiv:1602.04621. — Ensemble of Q-networks; approximate Thompson sampling for deep RL.
-- Haarnoja, Zhou, Abbeel, Levine. 2018. "Soft Actor-Critic: Off-Policy Maximum Entropy Deep Reinforcement Learning with a Stochastic Actor." arXiv:1801.01290. — Maximum-entropy framework; the principle behind entropy regularization as an exploration mechanism in modern actor-critic.
+- Fortunato, Azar, Piot et al. 2017. "Noisy Networks for Exploration." arXiv:1706.10295: Parameter-space noise as exploration. Often beats ε-greedy on Atari.
+- Osband, Blundell, Pritzel, Van Roy. 2016. "Deep Exploration via Bootstrapped DQN." arXiv:1602.04621: Ensemble of Q-networks; approximate Thompson sampling for deep RL.
+- Haarnoja, Zhou, Abbeel, Levine. 2018. "Soft Actor-Critic: Off-Policy Maximum Entropy Deep Reinforcement Learning with a Stochastic Actor." arXiv:1801.01290: Maximum-entropy framework; the principle behind entropy regularization as an exploration mechanism in modern actor-critic.
 
 **Atari benchmark reference**
 
-- Mnih, Kavukcuoglu, Silver, Rusu, Veness, Bellemare, Graves, Riedmiller, Fidjeland, Ostrovski, Petersen, Beattie, Sadik, Antonoglou, King, Kumaran, Wierstra, Legg, Hassabis. 2015. "Human-level control through deep reinforcement learning." *Nature*, 518(7540), 529–533. doi:10.1038/nature14236. — DQN on Atari, including the Montezuma's Revenge zero score under ε-greedy.
+- Mnih, Kavukcuoglu, Silver, Rusu, Veness, Bellemare, Graves, Riedmiller, Fidjeland, Ostrovski, Petersen, Beattie, Sadik, Antonoglou, King, Kumaran, Wierstra, Legg, Hassabis. 2015. "Human-level control through deep reinforcement learning." *Nature*, 518(7540), 529–533. doi:10.1038/nature14236: DQN on Atari, including the Montezuma's Revenge zero score under ε-greedy.
 
 **For LLM RL exploration**
 
-- Shao et al. 2024. "DeepSeekMath: Pushing the Limits of Mathematical Reasoning in Open Language Models." arXiv:2402.03300. — GRPO, including sampling temperature settings used in practice. See also Lecture 15.
-- DeepSeek-AI. 2025. "DeepSeek-R1: Incentivizing Reasoning Capability in LLMs via Reinforcement Learning." arXiv:2501.12948. — R1-Zero and R1 training, where the cold-start SFT functions as an "exploration warm-up" that makes the rollouts useful enough for GRPO to find learning signal. Also covered in Lecture 15.
+- Shao et al. 2024. "DeepSeekMath: Pushing the Limits of Mathematical Reasoning in Open Language Models." arXiv:2402.03300: GRPO, including sampling temperature settings used in practice. See also Lecture 15.
+- DeepSeek-AI. 2025. "DeepSeek-R1: Incentivizing Reasoning Capability in LLMs via Reinforcement Learning." arXiv:2501.12948: R1-Zero and R1 training, where the cold-start SFT functions as an "exploration warm-up" that makes the rollouts useful enough for GRPO to find learning signal. Also covered in Lecture 15.
 
 There is likely relevant recent work specifically on exploration for reasoning RL (entropy regularization, branched rollouts, MCTS-style search) that this lecture doesn't cover; you should not treat the LLM-side coverage as comprehensive.
 

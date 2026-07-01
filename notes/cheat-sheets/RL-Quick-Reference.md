@@ -2,7 +2,7 @@
 
 # Deep RL Quick Reference & Cheat Sheet
 
-_Unreviewed — no one has checked this end to end. Treat the math, code, and citations as unverified._
+_Unreviewed: no one has checked this end to end. Treat the math, code, and citations as unverified._
 
 Quick reference for deep reinforcement learning algorithms, hyperparameters, and best practices.
 
@@ -541,21 +541,21 @@ pip install ray[rllib]
 
 ### Must-read papers (in order)
 
-1. **DQN (2015)**: Nature paper that started deep RL — arXiv:[1312.5602](https://arxiv.org/abs/1312.5602)
+1. **DQN (2015)**: Nature paper that started deep RL, arXiv:[1312.5602](https://arxiv.org/abs/1312.5602)
 2. **A3C (2016)**: Parallel actor-critic
-3. **TRPO (2015)**: Trust regions — arXiv:[1502.05477](https://arxiv.org/abs/1502.05477)
-4. **GAE (2015)**: Generalized advantage estimation — arXiv:[1506.02438](https://arxiv.org/abs/1506.02438)
-5. **PPO (2017)**: Practical policy gradients — arXiv:[1707.06347](https://arxiv.org/abs/1707.06347)
-6. **DDPG (2015)**: Deterministic continuous control — arXiv:[1509.02971](https://arxiv.org/abs/1509.02971)
-7. **TD3 (2018)**: Addressing function approximation errors — arXiv:[1802.09477](https://arxiv.org/abs/1802.09477)
-8. **SAC (2018)**: Maximum entropy RL — arXiv:[1801.01290](https://arxiv.org/abs/1801.01290)
-9. **Double DQN (2015)**: Reducing overestimation bias — arXiv:[1509.06461](https://arxiv.org/abs/1509.06461)
-10. **Dueling DQN (2015)**: Separate value/advantage streams — arXiv:[1511.06581](https://arxiv.org/abs/1511.06581)
-11. **DPO (2023)**: Direct preference optimization — arXiv:[2305.18290](https://arxiv.org/abs/2305.18290)
-12. **GRPO / DeepSeekMath (2024)**: Group relative policy optimization — arXiv:[2402.03300](https://arxiv.org/abs/2402.03300)
-13. **InstructGPT (2022)**: RLHF for LLM alignment — arXiv:[2203.02155](https://arxiv.org/abs/2203.02155)
-14. **Constitutional AI (2022)**: RLAIF — arXiv:[2212.08073](https://arxiv.org/abs/2212.08073)
-15. **DeepSeek-R1 (2025)**: RL for reasoning — arXiv:[2501.12948](https://arxiv.org/abs/2501.12948)
+3. **TRPO (2015)**: Trust regions, arXiv:[1502.05477](https://arxiv.org/abs/1502.05477)
+4. **GAE (2015)**: Generalized advantage estimation, arXiv:[1506.02438](https://arxiv.org/abs/1506.02438)
+5. **PPO (2017)**: Practical policy gradients, arXiv:[1707.06347](https://arxiv.org/abs/1707.06347)
+6. **DDPG (2015)**: Deterministic continuous control, arXiv:[1509.02971](https://arxiv.org/abs/1509.02971)
+7. **TD3 (2018)**: Addressing function approximation errors, arXiv:[1802.09477](https://arxiv.org/abs/1802.09477)
+8. **SAC (2018)**: Maximum entropy RL, arXiv:[1801.01290](https://arxiv.org/abs/1801.01290)
+9. **Double DQN (2015)**: Reducing overestimation bias, arXiv:[1509.06461](https://arxiv.org/abs/1509.06461)
+10. **Dueling DQN (2015)**: Separate value/advantage streams, arXiv:[1511.06581](https://arxiv.org/abs/1511.06581)
+11. **DPO (2023)**: Direct preference optimization, arXiv:[2305.18290](https://arxiv.org/abs/2305.18290)
+12. **GRPO / DeepSeekMath (2024)**: Group relative policy optimization, arXiv:[2402.03300](https://arxiv.org/abs/2402.03300)
+13. **InstructGPT (2022)**: RLHF for LLM alignment, arXiv:[2203.02155](https://arxiv.org/abs/2203.02155)
+14. **Constitutional AI (2022)**: RLAIF, arXiv:[2212.08073](https://arxiv.org/abs/2212.08073)
+15. **DeepSeek-R1 (2025)**: RL for reasoning, arXiv:[2501.12948](https://arxiv.org/abs/2501.12948)
 
 ### Resources
 

@@ -15,10 +15,10 @@ Run from the repo root, or adjust paths accordingly.
 1. Searches arXiv using queries defined in the `SEARCH_QUERIES` dictionary (topics include RL for code generation, RLHF and alignment, program synthesis with RL, and LLM reasoning).
 2. Filters results to papers from 2022 onward (configurable via `start_year`).
 3. Deduplicates across queries by arXiv ID.
-4. Writes one `PAPERS.md` per topic into `reference/papers/<topic>/` — these files are generated output, not hand-curated.
+4. Writes one `PAPERS.md` per topic into `reference/papers/<topic>/`. These files are generated output, not hand-curated.
 5. Writes a `papers_database.json` in the collector directory with all results for programmatic access.
 
-`papers_database.json` is large and fully regenerable — it is gitignored.
+`papers_database.json` is large and fully regenerable; it is gitignored.
 
 ## Customization
 
@@ -30,7 +30,7 @@ The script waits 3 seconds between arXiv API requests to stay within their rate 
 
 ## Requirements
 
-Python 3.6+. No external dependencies — uses only `urllib`, `xml.etree.ElementTree`, and `json` from the standard library.
+Python 3.6+. No external dependencies: uses only `urllib`, `xml.etree.ElementTree`, and `json` from the standard library.
 
 ## Future enhancements
 

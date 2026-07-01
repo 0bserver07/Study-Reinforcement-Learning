@@ -2,7 +2,7 @@
 
 # Lecture 08: Model-based reinforcement learning
 
-_Unreviewed — no one has checked this end to end. Treat the math, code, and citations as unverified._
+_Unreviewed: no one has checked this end to end. Treat the math, code, and citations as unverified._
 
 **Duration:** ~90 minutes
 **Prerequisites:** Lecture 03 (DQN), Lecture 06 (PPO), Lecture 07 (SAC)
@@ -12,7 +12,7 @@ _Unreviewed — no one has checked this end to end. Treat the math, code, and ci
 
 ## Why model-based RL
 
-All previous lectures used **model-free RL**: learn a policy or value function directly from environment interaction. This is sample-inefficient — it can require millions of steps — and the agent builds no internal understanding of the environment.
+All previous lectures used **model-free RL**: learn a policy or value function directly from environment interaction. This is sample-inefficient (it can require millions of steps) and the agent builds no internal understanding of the environment.
 
 **Model-based RL** takes a different approach: learn a model of the environment dynamics, then use that model for planning or for generating synthetic training data. This can be 10–100x more sample-efficient.
 
@@ -229,7 +229,7 @@ class DynaQAgent:
     """
 
     def __init__(self, state_dim, action_dim, n_planning_steps=10):
-        # Q-network (like DQN — see Lecture 03)
+        # Q-network (like DQN, see Lecture 03)
         self.q_network = QNetwork(state_dim, action_dim)
         self.q_optimizer = torch.optim.Adam(self.q_network.parameters(), lr=1e-3)
 
@@ -658,13 +658,13 @@ You've now covered the full RL spectrum:
 
 ## References
 
-1. **Sutton (1990)** — "Dyna, an integrated architecture for learning, planning, and reacting." SIGART Bulletin 2(4), pp. 160–163. (Also: ICML 1990 proceedings as "Integrated Architectures for Learning, Planning, and Reacting Based on Approximating Dynamic Programming".)
-2. **Ha & Schmidhuber (2018)** — "World Models." arXiv:1803.10122.
-3. **Chua et al. (2018)** — "Deep reinforcement learning in a handful of trials using probabilistic dynamics models" (PETS). NeurIPS 2018. arXiv:1805.12114.
-4. **Janner et al. (2019)** — "When to trust your model: model-based policy optimization" (MBPO). NeurIPS 2019. arXiv:1906.08253.
-5. **Hafner et al. (2020)** — "Dream to control: learning behaviors by latent imagination" (Dreamer). ICLR 2020. arXiv:1912.01603.
-6. **Hafner et al. (2021)** — "Mastering Atari with discrete world models" (DreamerV2). ICLR 2021. arXiv:2010.02193.
-7. **Schrittwieser et al. (2020)** — "Mastering Atari, Go, chess and shogi by planning with a learned model" (MuZero). Nature 588, pp. 604–609. arXiv:1911.08265.
+1. **Sutton (1990)**: "Dyna, an integrated architecture for learning, planning, and reacting." SIGART Bulletin 2(4), pp. 160–163. (Also: ICML 1990 proceedings as "Integrated Architectures for Learning, Planning, and Reacting Based on Approximating Dynamic Programming".)
+2. **Ha & Schmidhuber (2018)**: "World Models." arXiv:1803.10122.
+3. **Chua et al. (2018)**: "Deep reinforcement learning in a handful of trials using probabilistic dynamics models" (PETS). NeurIPS 2018. arXiv:1805.12114.
+4. **Janner et al. (2019)**: "When to trust your model: model-based policy optimization" (MBPO). NeurIPS 2019. arXiv:1906.08253.
+5. **Hafner et al. (2020)**: "Dream to control: learning behaviors by latent imagination" (Dreamer). ICLR 2020. arXiv:1912.01603.
+6. **Hafner et al. (2021)**: "Mastering Atari with discrete world models" (DreamerV2). ICLR 2021. arXiv:2010.02193.
+7. **Schrittwieser et al. (2020)**: "Mastering Atari, Go, chess and shogi by planning with a learned model" (MuZero). Nature 588, pp. 604–609. arXiv:1911.08265.
 
 Relevant papers also collected in `../../reference/papers/RLHF-and-Alignment/PAPERS.md`.
 
@@ -692,4 +692,4 @@ Model-based RL promises 10–100x sample efficiency, but delivering on that prom
 
 A reasonable heuristic: start with model-free (PPO or SAC). If you hit a hard sample efficiency wall, try model-based. For robotics with expensive hardware, model-based is often necessary from the start.
 
-The field is moving quickly — Dreamer and MuZero show model-based can match or beat model-free on hard benchmarks. It's a productive area to watch.
+The field is moving quickly; Dreamer and MuZero show model-based can match or beat model-free on hard benchmarks. It's a productive area to watch.

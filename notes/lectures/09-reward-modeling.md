@@ -2,7 +2,7 @@
 
 # Lecture 09: Reward modeling for RLHF
 
-_Unreviewed — no one has checked this end to end. Treat the math, code, and citations as unverified._
+_Unreviewed: no one has checked this end to end. Treat the math, code, and citations as unverified._
 
 **Time:** 3–4 hours | **Prerequisites:** Lectures 01–02, basic NLP
 
@@ -12,9 +12,9 @@ _Unreviewed — no one has checked this end to end. Treat the math, code, and ci
 
 You know how to do RL. But for LLMs, there's a foundational problem: what is the reward for "good" text generation?
 
-- Not BLEU score — correlation with quality is weak.
-- Not perplexity — it measures memorization, not helpfulness.
-- Not exact match — it penalizes valid paraphrases.
+- Not BLEU score: correlation with quality is weak.
+- Not perplexity: it measures memorization, not helpfulness.
+- Not exact match: it penalizes valid paraphrases.
 
 The solution is to learn the reward function from human preferences. This is the first half of RLHF. Get this right and you understand how ChatGPT learns "helpfulness."
 
@@ -167,7 +167,7 @@ class RewardModel(nn.Module):
             attention_mask: [batch_size, seq_len]
 
         Returns:
-            rewards: [batch_size] — scalar reward per example
+            rewards: [batch_size], scalar reward per example
         """
         outputs = self.transformer(
             input_ids=input_ids,
@@ -457,7 +457,7 @@ Labeler options: domain experts (expensive, high quality), crowd workers (cheap,
 
 ### Training details
 
-Learning rate: start at 1e-5 to 1e-6. Reward models are sensitive to this — too high overfits to training preferences, too low fails to generalize.
+Learning rate: start at 1e-5 to 1e-6. Reward models are sensitive to this: too high overfits to training preferences, too low fails to generalize.
 
 Always clip gradients:
 ```python
@@ -558,7 +558,7 @@ print(f"Response B reward: {reward_B:.3f}")
 
 ## Recap
 
-Human preferences are a practical signal for reward learning when hand-crafting a reward function is infeasible. The Bradley-Terry model converts pairwise comparisons into a cross-entropy training objective. The reward model is a standard classifier trained on these comparisons. The main failure modes — reward hacking, overoptimization, position bias, scale instability — all have known mitigations. InstructGPT showed this pipeline works at scale; DPO (Lecture 11) later showed you can skip the explicit reward model.
+Human preferences are a practical signal for reward learning when hand-crafting a reward function is infeasible. The Bradley-Terry model converts pairwise comparisons into a cross-entropy training objective. The reward model is a standard classifier trained on these comparisons. The main failure modes (reward hacking, overoptimization, position bias, scale instability) all have known mitigations. InstructGPT showed this pipeline works at scale; DPO (Lecture 11) later showed you can skip the explicit reward model.
 
 ---
 
@@ -580,21 +580,21 @@ Before moving on, make sure you:
 
 ### Foundational work
 
-**Bradley & Terry (1952)** — "Rank analysis of incomplete block designs: I. The method of paired comparisons." Biometrika 39(3–4), pp. 324–345.
+**Bradley & Terry (1952)**: "Rank analysis of incomplete block designs: I. The method of paired comparisons." Biometrika 39(3–4), pp. 324–345.
 
-**Christiano et al. (2017)** — "Deep reinforcement learning from human preferences." NeurIPS 2017. arXiv:1706.03741.
+**Christiano et al. (2017)**: "Deep reinforcement learning from human preferences." NeurIPS 2017. arXiv:1706.03741.
 First to apply RL from human preference comparisons at scale. Demonstrated on Atari and simulated locomotion.
 
-**Stiennon et al. (2020)** — "Learning to summarize from human feedback." NeurIPS 2020. arXiv:2009.01325.
+**Stiennon et al. (2020)**: "Learning to summarize from human feedback." NeurIPS 2020. arXiv:2009.01325.
 Applied the preference-learning pipeline to summarization; showed human-judged quality exceeds ROUGE-optimized baselines.
 
-**Ouyang et al. (2022)** — "Training language models to follow instructions with human feedback" (InstructGPT). NeurIPS 2022. arXiv:2203.02155.
+**Ouyang et al. (2022)**: "Training language models to follow instructions with human feedback" (InstructGPT). NeurIPS 2022. arXiv:2203.02155.
 Applied RLHF to GPT-3 with ~40k human comparisons; produced ChatGPT's predecessor.
 
-**Bai et al. (2022)** — "Constitutional AI: Harmlessness from AI Feedback." Anthropic. arXiv:2212.08073.
+**Bai et al. (2022)**: "Constitutional AI: Harmlessness from AI Feedback." Anthropic. arXiv:2212.08073.
 AI-generated feedback as a scalable alternative to human labeling.
 
-**Rafailov et al. (2023)** — "Direct Preference Optimization: Your Language Model is Secretly a Reward Model" (DPO). NeurIPS 2023. arXiv:2305.18290.
+**Rafailov et al. (2023)**: "Direct Preference Optimization: Your Language Model is Secretly a Reward Model" (DPO). NeurIPS 2023. arXiv:2305.18290.
 Eliminates the separate reward model; covered in Lecture 11.
 
 ---
@@ -603,7 +603,7 @@ Eliminates the separate reward model; covered in Lecture 11.
 
 A common bug: reward model always gives the same score. Often caused by frozen transformer layers. Check that `model.transformer.parameters()` have `requires_grad=True`.
 
-A common bug: validation accuracy stuck at 50%. Often caused by position bias in the dataset — the chosen response is always in the same position. Fix by randomizing response order.
+A common bug: validation accuracy stuck at 50%. Often caused by position bias in the dataset: the chosen response is always in the same position. Fix by randomizing response order.
 
 A common bug: rewards explode during PPO. Usually means reward normalization is missing. Add `(r - r.mean()) / (r.std() + 1e-8)` before passing rewards to the RL algorithm.
 

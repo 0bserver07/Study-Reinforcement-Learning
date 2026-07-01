@@ -2,7 +2,7 @@
 
 # Lecture 06: PPO - Proximal Policy Optimization
 
-_Unreviewed — no one has checked this end to end. Treat the math, code, and citations as unverified._
+_Unreviewed: no one has checked this end to end. Treat the math, code, and citations as unverified._
 
 PPO (Proximal Policy Optimization) is the standard RL algorithm for RLHF and was used to train InstructGPT and its successors. This lecture covers the algorithm, a full implementation, and practical tuning advice.
 
@@ -14,7 +14,7 @@ PPO (Proximal Policy Optimization) is the standard RL algorithm for RLHF and was
 
 PPO is the dominant on-policy RL algorithm. It was used to train OpenAI Five, InstructGPT, and a range of robotics systems. Its appeal is practical: it is stable enough to use with default hyperparameters on most tasks, works with both discrete and continuous action spaces, and scales from small Atari environments to billion-parameter LLMs.
 
-The core problem it solves: standard policy gradient methods can take catastrophically large update steps, breaking the policy and requiring a restart. TRPO (Lecture 05) fixes this with a constrained optimization that is expensive to compute. PPO approximates the same constraint with a simple clipping operation — first-order optimization, no conjugate gradients, nearly as stable.
+The core problem it solves: standard policy gradient methods can take catastrophically large update steps, breaking the policy and requiring a restart. TRPO (Lecture 05) fixes this with a constrained optimization that is expensive to compute. PPO approximates the same constraint with a simple clipping operation: first-order optimization, no conjugate gradients, nearly as stable.
 
 ---
 
@@ -476,7 +476,7 @@ Where `r_t(θ) = π_θ(a_t|s_t) / π_θ_old(a_t|s_t)`
 - Clip at 1-ε to prevent too large decrease
 - Result: **Conservative discouragement**
 
-**Note**: PPO is **pessimistic** in its objective. It takes the minimum of clipped and unclipped — always the safer option.
+**Note**: PPO is **pessimistic** in its objective. It takes the minimum of clipped and unclipped, always the safer option.
 
 ### Why Clipping Works
 
@@ -711,7 +711,7 @@ reward = reward_model(prompt, completion)
 
 ## Recap
 
-PPO clips the probability ratio so that policy updates are bounded at each step, approximating the trust-region constraint of TRPO without the expensive second-order optimization. It runs multiple gradient epochs per batch of on-policy data, making better use of each rollout. The actor-critic architecture provides a value baseline for GAE advantage estimation, which trades off bias and variance via λ. Default hyperparameters (lr=3e-4, ε=0.2, K=4, λ=0.95) are reliable starting points across a wide range of tasks, and the same algorithm — with a KL penalty to keep the policy near the SFT baseline — is used for RLHF in LLM alignment.
+PPO clips the probability ratio so that policy updates are bounded at each step, approximating the trust-region constraint of TRPO without the expensive second-order optimization. It runs multiple gradient epochs per batch of on-policy data, making better use of each rollout. The actor-critic architecture provides a value baseline for GAE advantage estimation, which trades off bias and variance via λ. Default hyperparameters (lr=3e-4, ε=0.2, K=4, λ=0.95) are reliable starting points across a wide range of tasks, and the same algorithm, with a KL penalty to keep the policy near the SFT baseline, is used for RLHF in LLM alignment.
 
 ---
 
