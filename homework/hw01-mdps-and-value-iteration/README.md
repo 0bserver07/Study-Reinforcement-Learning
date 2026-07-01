@@ -1,6 +1,6 @@
 <!-- status: unreviewed | last-reviewed: never -->
 
-# HW1 — MDPs, Bellman equations, value iteration
+# HW1: MDPs, Bellman equations, value iteration
 
 Goes with [Lecture 01](../../notes/lectures/01-mdps-bellman.md). Pairs with [`exercises/01-mdps/`](../../exercises/01-mdps/) (the coding part).
 
@@ -20,5 +20,5 @@ About 2.5 hours: ~1.5 h paper, ~45 min code, ~15 min reading.
 
 ## Files
 
-- [`problems.md`](./problems.md) — seven problems
-- [`solutions.md`](./solutions.md) — full solutions; try the problems first
+- [`problems.md`](./problems.md): seven problems
+- [`solutions.md`](./solutions.md): full solutions; try the problems first

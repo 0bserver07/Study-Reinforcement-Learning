@@ -2,13 +2,13 @@
 
 # HW1 problems
 
-Solutions are in [`solutions.md`](./solutions.md) — try every problem before looking.
+Solutions are in [`solutions.md`](./solutions.md): try every problem before looking.
 
 ---
 
-## Problem 1 — write down an MDP (warm-up, ~10 min)
+## Problem 1: write down an MDP (warm-up, ~10 min)
 
-Frame each of the following as an MDP. For each, state explicitly what `S`, `A`, `P(s' | s, a)`, `R(s, a, s')`, and `γ` are. Note where a Markov state isn't obvious — what would you have to add to the state for the Markov property to hold?
+Frame each of the following as an MDP. For each, state explicitly what `S`, `A`, `P(s' | s, a)`, `R(s, a, s')`, and `γ` are. Note where a Markov state isn't obvious: what would you have to add to the state for the Markov property to hold?
 
 (a) A robot navigating a 5×5 gridworld to reach a goal cell. Each step costs 1; reaching the goal pays 10; the goal is terminal. The actions are {up, right, down, left}; movement off the grid is clamped.
 
@@ -18,7 +18,7 @@ Frame each of the following as an MDP. For each, state explicitly what `S`, `A`,
 
 ---
 
-## Problem 2 — derive the Bellman expectation equation (theory, ~20 min)
+## Problem 2: derive the Bellman expectation equation (theory, ~20 min)
 
 Starting from the definition
 
@@ -37,7 +37,7 @@ V^π(s) = Σ_a π(a | s) Σ_{s'} P(s' | s, a) [R(s, a, s') + γ V^π(s')]
 
 ---
 
-## Problem 3 — value iteration converges (theory, ~30 min)
+## Problem 3: value iteration converges (theory, ~30 min)
 
 Define the Bellman optimality operator `T : R^|S| → R^|S|` by
 
@@ -62,7 +62,7 @@ You will need the inequality `|max_a f(a) - max_a g(a)| ≤ max_a |f(a) - g(a)|`
 
 ---
 
-## Problem 4 — V* on the deterministic gridworld (numeric, ~15 min)
+## Problem 4: V* on the deterministic gridworld (numeric, ~15 min)
 
 The 5×5 deterministic gridworld from problem 1(a): goal at row 0, column 4; reward −1 per step; +10 for the transition that lands on the goal; γ = 0.99; the goal is terminal so `V*(goal) = 0`.
 
@@ -74,7 +74,7 @@ The 5×5 deterministic gridworld from problem 1(a): goal at row 0, column 4; rew
 
 ---
 
-## Problem 5 — implement value iteration (coding, ~45 min)
+## Problem 5: implement value iteration (coding, ~45 min)
 
 Do [`exercises/01-mdps/`](../../exercises/01-mdps/):
 
@@ -91,7 +91,7 @@ Submit: your filled-in `starter.py`. Look at `solution/value_iteration.py` only 
 
 ---
 
-## Problem 6 — γ matters (conceptual, ~15 min)
+## Problem 6: γ matters (conceptual, ~15 min)
 
 In the deterministic gridworld of problem 4:
 
@@ -99,11 +99,11 @@ In the deterministic gridworld of problem 4:
 
 (b) Sketch (in words or numbers) how `V*` would look with γ = 0.5. Which cells still have meaningfully positive value? Which are essentially zero?
 
-(c) Now imagine the grid has no terminal goal — instead, the agent receives reward +1 every time it stands on the goal cell, and continues forever. With γ = 0.99, what is `V*(goal)`? With γ = 1?
+(c) Now imagine the grid has no terminal goal: instead, the agent receives reward +1 every time it stands on the goal cell, and continues forever. With γ = 0.99, what is `V*(goal)`? With γ = 1?
 
 ---
 
-## Problem 7 — policy iteration vs. value iteration (reading, ~15 min)
+## Problem 7: policy iteration vs. value iteration (reading, ~15 min)
 
 Read Sutton & Barto sections 4.3 and 4.4. In your own words, ~3–5 sentences each:
 
