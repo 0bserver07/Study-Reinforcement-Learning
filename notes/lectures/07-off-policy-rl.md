@@ -751,7 +751,7 @@ Off-policy methods store experience in a replay buffer and can reuse past transi
 
 ## What's Next?
 
-**Next lecture (08):** Model-Based RL - Learn a model of the environment
+**Next lecture:** [Lecture 08: Model-based reinforcement learning](./08-model-based-rl.md): learn a model of the environment.
 
 **The connection:** Model-free (TD3/SAC) is sample inefficient. Model-based learns environment dynamics to be even more efficient!
 

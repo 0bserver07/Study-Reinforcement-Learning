@@ -655,3 +655,7 @@ Common failure modes when scaling RL training, and what they look like in practi
 - **All rollouts in a group score identically (zero advantage)**. GRPO can't learn from this. The problem is either too easy (all 1.0) or too hard (all 0.0). Curriculum sampling: drop prompts the model has saturated, sample harder ones. Same dynamic as [Lecture 15](./15-rl-verifiable-rewards.md).
 
 If a training run looks fine for the first 100 steps and then collapses, check the weight sync schedule and the clip fraction first. The most common large-scale RL failure is silently growing staleness between actor and learner, which looks like normal training right up until it doesn't.
+
+## Next lecture
+
+[Lecture 30: RL inference infrastructure for LLMs](./30-rl-inference-infra.md): the rollout side of this stack, and why decode dominates the wall-clock time.

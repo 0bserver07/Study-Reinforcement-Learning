@@ -644,4 +644,4 @@ All arXiv IDs verified by resolving against arxiv.org during writing.
 
 ## Next lecture
 
-There's no lecture 22 yet. Plausible directions: imperfect-information game-solving (CFR, regret minimization), exploration in MARL (intrinsic motivation in multi-agent settings), or a deeper treatment of opponent modeling and meta-learning across opponents.
+[Lecture 22: World models](./22-world-models.md). Further directions from here: imperfect-information game-solving (CFR, regret minimization), exploration in MARL (intrinsic motivation in multi-agent settings), or a deeper treatment of opponent modeling and meta-learning across opponents.

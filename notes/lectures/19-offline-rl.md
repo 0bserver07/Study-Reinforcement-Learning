@@ -443,6 +443,10 @@ Offline RL is where the series closes the loop. The foundations lectures (01–0
 
 For the full index of lectures see [`../README.md`](../README.md). For the curriculum order and topic map see [`../../CURRICULUM.md`](../../CURRICULUM.md).
 
+## Next lecture
+
+[Lecture 20: Exploration: from ε-greedy to intrinsic motivation](./20-exploration.md), next in [`CURRICULUM.md`](../../CURRICULUM.md).
+
 ---
 
 _End of Lecture 19._

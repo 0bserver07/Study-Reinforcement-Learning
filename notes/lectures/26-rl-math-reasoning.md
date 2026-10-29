@@ -705,4 +705,4 @@ If you're reading the primary sources end-to-end: start with the Hendrycks MATH 
 
 ## Next lecture
 
-This is part of the late-stage curriculum covering specific application domains. The neighboring lectures cover other RL-for-LLM specializations: see `notes/README.md` for the current index.
+[Lecture 27: RLAIF and synthetic preferences at scale](./27-rlaif.md). This is part of the late-stage curriculum covering specific application domains. The neighboring lectures cover other RL-for-LLM specializations: see [`notes/README.md`](../README.md) for the current index.

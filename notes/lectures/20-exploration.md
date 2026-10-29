@@ -621,4 +621,4 @@ There is likely relevant recent work specifically on exploration for reasoning R
 
 ## Next lecture
 
-This is the final numbered lecture in the current series. The reading lists in [`reference/papers/`](../../reference/papers/) cover topics that don't have dedicated lectures yet, including more recent work on exploration for reasoning models.
+[Lecture 21: Multi-agent RL and self-play](./21-multi-agent-rl.md). The reading lists in [`reference/papers/`](../../reference/papers/) cover topics that don't have dedicated lectures yet, including more recent work on exploration for reasoning models.

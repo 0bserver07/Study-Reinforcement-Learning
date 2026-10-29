@@ -698,4 +698,4 @@ The OpenAI Sora technical report ("Video generation models as world simulators,"
 
 ## What's next
 
-Lecture 22 closes out the explicit model-based block. The lectures above this number (in the planned curriculum) move into open exploration, intrinsic motivation, and large-scale RL infrastructure. World models reappear as a building block whenever sample efficiency is the binding constraint: keep this lecture nearby when you hit one.
+Lecture 22 closes out the explicit model-based block. Next in [`CURRICULUM.md`](../../CURRICULUM.md): [Lecture 32: Meta-RL and in-context RL](./32-meta-rl-in-context.md). World models reappear as a building block whenever sample efficiency is the binding constraint: keep this lecture nearby when you hit one.

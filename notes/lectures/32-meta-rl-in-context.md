@@ -598,6 +598,10 @@ The practical upshot for an LLM-oriented reader: when you reason about what an i
 
 **Brown et al. (2020)**. "Language Models are Few-Shot Learners." NeurIPS 2020. arXiv:2005.14165. Verified. The GPT-3 paper; documents in-context few-shot learning and explicitly discusses the meta-learning frame for what large language models do at inference time.
 
+## Next lecture
+
+[Lecture 33: Robotics RL](./33-robotics-rl.md), next in [`CURRICULUM.md`](../../CURRICULUM.md).
+
 ---
 
 _End of Lecture 32._

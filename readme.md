@@ -11,7 +11,7 @@ This is a personal study repo, not a library. It mixes notes a person wrote (som
 - **[`notes/cs294-2017/`](./notes/cs294-2017/)**: personal student notes from CS 294 Deep RL (Berkeley, Spring 2017; Levine, Schulman, Finn). 246 lines of real-time notes from the field being built. Idiosyncratic, opinionated, with the cannon-trajectory aside. Kept as written.
 - **[`notes/sutton-barto-digest/`](./notes/sutton-barto-digest/)**: short distillation of the four elements of an RL system, from Sutton & Barto.
 - **Talks, books, courses**: the curated external links below. The Pineau intro, Abbeel's deep RL talk, David Silver's UCL course, Sutton & Barto's book, CS285, Spinning Up. Here since 2015. Still the best place to start if you're new.
-- **[`exercises/`](./exercises/)**: five small coding exercises with `pytest` tests and reference solutions, verified to pass. Implement REINFORCE on CartPole, Q-learning on FrozenLake, value iteration on a gridworld, actor-critic, a tiny GRPO loop on a verifiable arithmetic task.
+- **[`exercises/`](./exercises/)**: nine small coding exercises with `pytest` tests and reference solutions, verified to pass. Implement value iteration on a gridworld, REINFORCE on CartPole, Q-learning on FrozenLake, actor-critic, PPO, a Bradley-Terry reward model, DPO, a tiny GRPO loop on a verifiable arithmetic task, and RND exploration on a sparse-reward chain.
 
 **AI-drafted, useful as scaffold (`unreviewed`, treat with skepticism):**
 
@@ -25,7 +25,7 @@ This is a personal study repo, not a library. It mixes notes a person wrote (som
 ## Start here
 
 - **New to RL?** Start with the talks/books/courses below: Pineau's intro, then Sutton & Barto for foundations, then David Silver's UCL course or CS285 (Berkeley's current version of CS294). The 2017 CS294 notes ([`notes/cs294-2017/`](./notes/cs294-2017/)) give you one student's working notes through the same material if you like that genre.
-- **Want hands-on?** Do the [`exercises/`](./exercises/). They're tested and they actually run. Five of them, a couple of hours each.
+- **Want hands-on?** Do the [`exercises/`](./exercises/). They're tested and they actually run. Nine of them, a couple of hours each.
 - **Curious about modern LLM RL?** The 34-lecture series in [`notes/lectures/`](./notes/lectures/) covers RLHF, DPO, GRPO, RLVR, agentic, offline. Drafts; cross-check the claims against the cited papers.
 - **Working in this repo with Claude Code or Codex?** Read [`AGENTS.md`](./AGENTS.md) first.
 
@@ -35,7 +35,7 @@ Everything in the lecture series is the same underlying object: an MDP, where an
 
 The map below shows where each family fits. The lectures fill in the details; [`CURRICULUM.md`](./CURRICULUM.md) is the suggested order.
 
-![The landscape: six reward sources, one MDP. Where each RL family fits: classical RL, RLHF, RLAIF, RLVR, agentic RL, and offline RL.](./notes/diagrams/svg/landscape.svg)
+![The landscape: six families, one MDP. Where each RL family fits: classical RL, RLHF, RLAIF, RLVR, agentic RL, and offline RL, with the lectures that cover each.](./notes/diagrams/svg/landscape.svg)
 
 ---
 

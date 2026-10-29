@@ -584,7 +584,7 @@ All arXiv IDs and venues verified against arxiv.org and primary sources.
 
 ## Next lecture
 
-You're past the main sequence. Related material in the curriculum: Lecture 22 (world models) covers Dreamer-style latent-dynamics learning that's relevant to model-based robotics; Lecture 24 (computer-use agents) covers the digital-action counterpart to physical robot policies; Lecture 28 (reward hacking) goes deeper on the reward-design pitfalls that show up especially badly on hardware.
+Next in [`CURRICULUM.md`](../../CURRICULUM.md): [Lecture 23: Process reward models vs outcome reward models](./23-process-reward-models.md), where the language-model thread picks back up. Related material in the curriculum: Lecture 22 (world models) covers Dreamer-style latent-dynamics learning that's relevant to model-based robotics; Lecture 24 (computer-use agents) covers the digital-action counterpart to physical robot policies; Lecture 28 (reward hacking) goes deeper on the reward-design pitfalls that show up especially badly on hardware.
 
 ---
 

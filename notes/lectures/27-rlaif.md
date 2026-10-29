@@ -688,7 +688,7 @@ Practically, in 2024-2025: bootstrap small policies with strong judges, use synt
 
 ## Next lecture
 
-There is no formal "next lecture": the planned curriculum after Lecture 19 is still loose. Sensible directions from here: distillation of preference-trained models (extending Lecture 18 to the preference setting), multi-objective RLHF/RLAIF (combining helpfulness, harmlessness, and task-specific rewards), or scalable oversight techniques (debate, recursive reward modeling) for the regime where judges are weaker than policies.
+[Lecture 28: Reward hacking and verifier design](./28-reward-hacking.md). Other directions from here: distillation of preference-trained models (extending Lecture 18 to the preference setting), multi-objective RLHF/RLAIF (combining helpfulness, harmlessness, and task-specific rewards), or scalable oversight techniques (debate, recursive reward modeling) for the regime where judges are weaker than policies.
 
 Before moving on, make sure you can:
 

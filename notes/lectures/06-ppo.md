@@ -724,9 +724,9 @@ Before moving on:
 - [ ] Compare to REINFORCE (Lecture 02)
 - [ ] Visualize advantage computation
 
-**Next Lecture**: [Lecture 10: PPO for Language Models](./10-ppo-for-llms.md)
+**Next Lecture**: [Lecture 07: Off-Policy Learning - SAC and TD3](./07-off-policy-rl.md)
 
-Where we'll apply PPO to LLMs for complete RLHF!
+**Here for the LLM material?** Read [Lecture 09: Reward modeling for RLHF](./09-reward-modeling.md) first, then [Lecture 10: PPO for Language Models](./10-ppo-for-llms.md), where we'll apply PPO to LLMs for complete RLHF. Lecture 10 trains against the reward model from 09.
 
 ---
 

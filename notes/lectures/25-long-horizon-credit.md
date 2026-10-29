@@ -747,4 +747,4 @@ These are projects, not 30-minute problems. Treat them as integration exercises 
 
 ## Next lecture
 
-Forthcoming. Possibilities include: persistent memory and retrieval in agentic RL; safety and reward-hacking in long-horizon settings; or a deeper treatment of search-based RL for formal mathematics.
+[Lecture 26: RL for mathematical reasoning](./26-rl-math-reasoning.md). Other directions from here: persistent memory and retrieval in agentic RL; safety and reward-hacking in long-horizon settings ([Lecture 28](./28-reward-hacking.md) covers reward hacking in general); or a deeper treatment of search-based RL for formal mathematics.

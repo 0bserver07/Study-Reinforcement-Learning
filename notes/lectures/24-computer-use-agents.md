@@ -615,4 +615,4 @@ These are exploratory, like the Lecture 16 exercises. Don't expect a clean test 
 
 ## Next lecture
 
-There is no Lecture 25 in this repo at the time of writing. The natural next topics (multi-agent RL, long-horizon planning, world models for embodied agents) are open territory.
+[Lecture 25: Long-horizon credit assignment](./25-long-horizon-credit.md). The other natural next topics have their own lectures too: multi-agent RL ([Lecture 21](./21-multi-agent-rl.md)) and world models ([Lecture 22](./22-world-models.md)).

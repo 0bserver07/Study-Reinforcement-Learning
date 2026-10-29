@@ -606,4 +606,4 @@ All arXiv IDs verified against arxiv.org during writing.
 
 ## Next lecture
 
-The series doesn't have a fixed Lecture 32 yet. A natural sequel would be the RL training stack itself (how OpenRLHF, TRL, verl, and similar orchestrate the actor/learner split), but that's not written. For now, the closest existing material is in the `reference/papers/` notes.
+This is the last lecture in the order [`CURRICULUM.md`](../../CURRICULUM.md) suggests. The RL training stack itself (how OpenRLHF, TRL, verl, and similar orchestrate the actor/learner split) is in [Lecture 29: Distributed RL systems](./29-distributed-rl-systems.md); the `reference/papers/` notes go further.
