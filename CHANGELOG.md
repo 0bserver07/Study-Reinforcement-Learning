@@ -2,6 +2,13 @@
 
 Notable changes to the repo. Not a release log (there are no releases), just a record of what moved and why.
 
+## 2026-10-30: fix broken links in the diagrams collection and the math cheat sheet
+
+Found by checking every link on a site built from this repo. Both files are still `unreviewed`; only the link targets and one bracket changed.
+
+- **`notes/diagrams/RL-Algorithm-Diagrams.md`.** Eight of the twelve entries in its table of contents went nowhere: they pointed at shortened anchors (`#5-actor-critic`) instead of the headings' real ones (`#5-actor-critic-architecture`). Each now matches its heading.
+- **`notes/cheat-sheets/RL-Math-Formulas.md`.** `S[π_θ](s_t)`, the entropy term under the PPO objective, rendered as a link to a file called `s_t`. The opening bracket is escaped, so it renders as written.
+
 ## 2026-10-29: fix lecture navigation, the all-exercises test command, stale counts, and the landscape diagram
 
 Context: a review found that the lecture series couldn't be followed end to end, `pytest exercises/` didn't work, and the README diagram placed several methods in the wrong family. Nothing was deleted; every lecture is still `unreviewed`.

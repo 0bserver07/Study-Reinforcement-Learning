@@ -18,14 +18,14 @@ _Unreviewed: no one has checked this end to end. Treat the math, code, and citat
 2. [Bellman Backup](#2-bellman-backup)
 3. [Policy Iteration Loop](#3-policy-iteration-loop)
 4. [REINFORCE Algorithm](#4-reinforce-algorithm)
-5. [Actor-Critic Architecture](#5-actor-critic)
-6. [PPO Training Pipeline](#6-ppo-pipeline)
-7. [RLHF Full Pipeline](#7-rlhf-pipeline)
-8. [DPO vs PPO Comparison](#8-dpo-vs-ppo)
-9. [GRPO Sampling & Ranking](#9-grpo-sampling)
-10. [Reward Model Training](#10-reward-model)
-11. [LLM Alignment Timeline](#11-alignment-timeline)
-12. [Method Decision Tree](#12-decision-tree)
+5. [Actor-Critic Architecture](#5-actor-critic-architecture)
+6. [PPO Training Pipeline](#6-ppo-training-pipeline)
+7. [RLHF Full Pipeline](#7-rlhf-full-pipeline)
+8. [DPO vs PPO Comparison](#8-dpo-vs-ppo-comparison)
+9. [GRPO Sampling & Ranking](#9-grpo-sampling--ranking)
+10. [Reward Model Training](#10-reward-model-training)
+11. [LLM Alignment Timeline](#11-llm-alignment-timeline)
+12. [Method Decision Tree](#12-method-decision-tree)
 
 ---
 
