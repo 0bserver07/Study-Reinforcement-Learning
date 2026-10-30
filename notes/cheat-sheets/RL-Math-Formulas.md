@@ -388,7 +388,7 @@ L^CLIP+VF+S(θ) = E_t [L^CLIP(θ) - c_1 L^VF(θ) + c_2 S[π_θ](s_t)]
 
 Where:
 - L^VF(θ) = (V_θ(s_t) - V_t^target)²
-- S[π_θ](s_t) = -Σ_a π_θ(a|s_t) log π_θ(a|s_t) (entropy)
+- S\[π_θ](s_t) = -Σ_a π_θ(a|s_t) log π_θ(a|s_t) (entropy)
 
 ---
 
