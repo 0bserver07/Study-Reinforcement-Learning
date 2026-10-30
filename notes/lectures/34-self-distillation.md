@@ -766,4 +766,4 @@ These are things to try locally; no `exercises/` directory.
 
 ## Next lecture
 
-Next in sequence depends on what's been written. The lectures in this directory go through 29 as of writing. This lecture inserts at position 34 in the planned ordering. The curriculum will need to update to reflect where it sits relative to the other recent additions.
+[Lecture 29: Distributed RL systems](./29-distributed-rl-systems.md), next in [`CURRICULUM.md`](../../CURRICULUM.md) and the first of the systems lectures: how LLM-RL training actually runs.

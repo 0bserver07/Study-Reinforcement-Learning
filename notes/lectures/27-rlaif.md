@@ -65,7 +65,7 @@ For d-RLAIF specifically, the cost trade is the obvious one: you avoid training 
 
 The thing that makes RLAIF practically interesting is the cost per label.
 
-A human labeler doing a careful preference comparison takes minutes per example and, in the US/EU at production-quality, costs on the order of $1-$3 per pair. Anthropic's InstructGPT-era dataset of ~40k comparisons (Ouyang et al. 2022, arXiv:2203.02155) represents a substantial labor investment. UltraFeedback (Cui et al. 2023, arXiv:2310.01377) is ~64k prompts with multiple rated completions each; a human-labeled equivalent would be infeasible for most academic groups.
+A human labeler doing a careful preference comparison takes minutes per example and, in the US/EU at production-quality, costs on the order of $1-$3 per pair. OpenAI's InstructGPT reward-model dataset (33k training prompts, each with 4 to 9 responses ranked by a labeler; Ouyang et al. 2022, arXiv:2203.02155) represents a substantial labor investment. UltraFeedback (Cui et al. 2023, arXiv:2310.01377) is ~64k prompts with multiple rated completions each; a human-labeled equivalent would be infeasible for most academic groups.
 
 An LLM judge using a 7B or 8B open-weights model running on a single GPU costs on the order of $0.001 per pair, three orders of magnitude less than human labeling. A larger judge (Llama 3 70B, or a closed API call) is more expensive but still in the $0.01 range. The numbers vary with hardware, throughput optimization, and prompt length, but the order of magnitude difference holds across reasonable configurations.
 
@@ -688,7 +688,7 @@ Practically, in 2024-2025: bootstrap small policies with strong judges, use synt
 
 ## Next lecture
 
-There is no formal "next lecture": the planned curriculum after Lecture 19 is still loose. Sensible directions from here: distillation of preference-trained models (extending Lecture 18 to the preference setting), multi-objective RLHF/RLAIF (combining helpfulness, harmlessness, and task-specific rewards), or scalable oversight techniques (debate, recursive reward modeling) for the regime where judges are weaker than policies.
+[Lecture 28: Reward hacking and verifier design](./28-reward-hacking.md). Other directions from here: distillation of preference-trained models (extending Lecture 18 to the preference setting), multi-objective RLHF/RLAIF (combining helpfulness, harmlessness, and task-specific rewards), or scalable oversight techniques (debate, recursive reward modeling) for the regime where judges are weaker than policies.
 
 Before moving on, make sure you can:
 

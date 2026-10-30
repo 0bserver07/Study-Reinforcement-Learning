@@ -654,6 +654,8 @@ You've now covered the full RL spectrum:
 - Lecture 08: Model-based (Dyna, MBPO, Dreamer)
 - Lectures 09–13: Applications to LLMs and code
 
+**Next lecture:** [Lecture 09: Reward modeling for RLHF](./09-reward-modeling.md), the start of the language-model lectures.
+
 ---
 
 ## References

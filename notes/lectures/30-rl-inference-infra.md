@@ -569,6 +569,8 @@ Get the rollout infrastructure right and the rest of RL training becomes tractab
 
 ## Where to look next
 
+**Next lecture:** [Lecture 31: Hardware for RL](./31-hardware-for-rl.md).
+
 - **[Lecture 10](./10-ppo-for-llms.md)** has the PPO-LLM algorithm this infrastructure feeds.
 - **[Lecture 15](./15-rl-verifiable-rewards.md)** has GRPO, which is the dominant algorithm pairing with this infrastructure as of 2025.
 - **[Lecture 16](./16-agentic-rl.md)** extends the rollout model to multi-turn tool-use; the orchestrator becomes much more complex.

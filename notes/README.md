@@ -14,7 +14,7 @@ These are old (2017) and informal, but they're a real person's understanding, no
 **AI-drafted, useful as scaffold (`unreviewed`: treat with skepticism):**
 
 - **[`lectures/`](./lectures/)**: a 34-lecture series taking RL from MDPs through RLHF / DPO / GRPO / RLVR / agentic / offline and on into reasoning, systems, and applications. Lectures 01–19 have had an editorial pass: broken links fixed, code bugs caught (`import gym` → `gymnasium`, missing imports, old-API `env.step` calls), citations checked or removed when they didn't resolve, fake-first-person framing stripped. Lectures 20–34 are newer drafts without that pass. **In no case has a person read a lecture end to end and signed off.** Cross-check the math against the cited papers; treat the code as a starting point that needs verification. Index and per-lecture review status below.
-- **[`cheat-sheets/`](./cheat-sheets/)**: `RL-Math-Formulas.md` and `RL-Quick-Reference.md`. Audited (caught a wrong KL direction; fixed). Same caveat.
+- **[`cheat-sheets/`](./cheat-sheets/)**: `RL-Math-Formulas.md` and `RL-Quick-Reference.md`. Audited (caught a wrong KL direction; fixed). Four newer sheets are listed further down. Same caveat.
 - **[`diagrams/`](./diagrams/)**: `RL-Algorithm-Diagrams.md`. Audited (caught and fixed a wrong DPO loss diagram and a wrong GRPO advantage diagram). Same caveat.
 
 [`../CURRICULUM.md`](../CURRICULUM.md) is the suggested order through everything. [`../AGENTS.md`](../AGENTS.md) explains the `<!-- status: ... -->` convention every doc carries.

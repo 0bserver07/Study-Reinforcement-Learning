@@ -674,6 +674,6 @@ All arXiv IDs verified against arxiv.org abstracts.
 
 ## Next lecture
 
-This is a topical lecture: there is no fixed "lecture 29." If you're following the curriculum, the next thing to read after this is whatever your applications are: agentic RL ([Lecture 16](./16-agentic-rl.md)) if you're building agents that touch tools; distillation ([Lecture 18](./18-distillation-reasoning.md)) if you're trying to compress a reasoning model; offline RL ([Lecture 19](./19-offline-rl.md)) if you're working with logged data. Reward hacking is a concern in all of them, in flavors specific to each.
+Next in [`CURRICULUM.md`](../../CURRICULUM.md): [Lecture 34: Self-distillation and self-improvement loops](./34-self-distillation.md). If you'd rather follow your application: agentic RL ([Lecture 16](./16-agentic-rl.md)) if you're building agents that touch tools; distillation ([Lecture 18](./18-distillation-reasoning.md)) if you're trying to compress a reasoning model; offline RL ([Lecture 19](./19-offline-rl.md)) if you're working with logged data. Reward hacking is a concern in all of them, in flavors specific to each.
 
 If you want one paper to read in full after this lecture, read Gao, Schulman, Hilton 2022 (arXiv:2210.10760). The curves in that paper are the clearest visualization of why you should care about overoptimization and why the KL penalty matters in the specific way it does.

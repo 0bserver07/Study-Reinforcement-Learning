@@ -383,4 +383,4 @@ These don't require an `exercises/` directory; they're things to try locally.
 
 ## Next lecture
 
-[Lecture 19: Offline RL](./19-offline-rl.md): being written in parallel. Target filename `19-offline-rl.md`.
+[Lecture 19: Offline RL](./19-offline-rl.md): learning from a fixed dataset with no new interaction (BCQ, CQL, IQL, Decision Transformer), and why DPO counts as offline preference learning.

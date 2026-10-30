@@ -2,6 +2,24 @@
 
 Notable changes to the repo. Not a release log (there are no releases), just a record of what moved and why.
 
+## 2026-10-29: fix lecture navigation, the all-exercises test command, stale counts, and the landscape diagram
+
+Context: a review found that the lecture series couldn't be followed end to end, `pytest exercises/` didn't work, and the README diagram placed several methods in the wrong family. Nothing was deleted; every lecture is still `unreviewed`.
+
+- **Next-lecture links.** 20 lectures had a missing or wrong pointer. Lectures 20–34 were drafted in parallel, so several said the series ended or that the next lecture didn't exist yet ("There's no lecture 22 yet", "This is the final numbered lecture"). Lecture 06 pointed at 10, skipping 09, which 10 depends on. Each now points to the next lecture in `CURRICULUM.md`'s order (01 → … → 19 → 20 → 21 → 22 → 32 → 33 → 23 → … → 28 → 34 → 29 → 30 → 31). Only the wrong sentence changed; the suggestions and checklists around it stayed. Checked by walking the chain from 01 to 31 and resolving every relative link in `notes/lectures/`.
+- **`pytest exercises/`.** It failed at import for 8 of 9 exercises: each exercise names its module `starter`, and Python reused the first one it loaded. Added `exercises/conftest.py`, which drops the cached module before each test file is collected. All 84 tests now collect from the repo root (was 5 collected, 8 errors), and with each reference solution copied over its starter, all 84 pass in one `pytest exercises/` run (about 5.5 minutes on a laptop CPU).
+- **Stale counts.** `readme.md` said five exercises; there are nine. `notes/README.md`'s top list named two cheat sheets; it now points to the four newer ones. `AGENTS.md` said 19 lectures; there are 34.
+- **Lecture 27 misattribution.** It called InstructGPT's preference data "Anthropic's" and put it at ~40k comparisons. InstructGPT is OpenAI's, and the paper (arXiv:2203.02155, §3.2) gives the reward-model set as 33k training prompts, each with 4 to 9 responses ranked by a labeler. Fixed against the paper.
+- **Landscape diagram** (`notes/diagrams/svg/landscape.svg`), content only, same layout:
+  - GRPO was listed under "DPO & cousins". It's an online policy-gradient method and was already under RLVR; SimPO takes its slot.
+  - AlphaCode and CodeRL were under RLHF. Neither uses human preference labels, so they moved to RLVR as "code: run the tests" (CodeRL uses test results as reward; AlphaCode uses tests to filter samples).
+  - "Distillation (R1 → small models)" was under RLAIF. It's supervised fine-tuning on a teacher's outputs, so it moved to offline RL as "imitate the data".
+  - WebGPT was listed as a benchmark. It's a model trained with human feedback, so it moved to a new "browsers & screens" row; WebArena takes the benchmark slot. "ToolFormer" is now "Toolformer".
+  - The offline column said its reward source was "none". Offline datasets do carry rewards; it now says "rewards logged in a fixed dataset".
+  - Lectures 20–34 added to the lecture numbers under each family, plus a "beyond the basics" row under classical RL and an "AI feedback at scale" row under RLAIF.
+  - The one-line takeaways under each family went from about 2.1:1 contrast to about 5.6:1. Text size is unchanged; the diagram still renders small at README width, which a redesign will need to fix.
+  - The 8 em dashes are gone (the earlier sweep covered `.md` files only).
+
 ## 2026-05-15: promote the hand-written notes out of Archive/
 
 The trusted, hand-written 2017 notes had been sitting in a folder called `Archive/`, which connotes "old/dead", while the unreviewed AI-drafted lecture series occupied `notes/`. Backwards. Fixed:

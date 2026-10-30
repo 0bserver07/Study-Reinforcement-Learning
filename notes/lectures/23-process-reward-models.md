@@ -604,4 +604,4 @@ If you're reading the sources: Uesato et al. (arXiv:2211.14275) is the cleanest 
 
 ## Next lecture
 
-There is no Lecture 24 yet. Topics that would extend this naturally: generative reward models, LLM-as-judge in detail (the bias side beyond what Lecture 14 covered), or process supervision via execution traces for code-generating agents.
+[Lecture 24: Computer use and browser agents](./24-computer-use-agents.md). Topics that would extend this lecture: generative reward models, LLM-as-judge in detail (the bias side beyond what Lecture 14 covered; [Lecture 27](./27-rlaif.md) goes further), or process supervision via execution traces for code-generating agents.
