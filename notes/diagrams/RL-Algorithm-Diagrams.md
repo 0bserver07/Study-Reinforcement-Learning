@@ -88,13 +88,13 @@ graph TB
 ```mermaid
 graph LR
     subgraph Current
-        V[V(s)]
+        V["V(s)"]
         R1[r]
     end
 
     subgraph Next_State
-        V'[V(s')]
-        G[γ × V(s')]
+        V'["V(s')"]
+        G["γ × V(s')"]
     end
 
     subgraph Bellman_Update
@@ -241,13 +241,13 @@ graph TB
 
     subgraph Actor[Actor Network]
         A_NN[Neural Network]
-        A_OUT[π_θ(a|s)]
+        A_OUT["π_θ(a|s)"]
         A_SAMPLE[Sample action a_t]
     end
 
     subgraph Critic[Critic Network]
         C_NN[Neural Network]
-        C_OUT[V_φ(s_t)]
+        C_OUT["V_φ(s_t)"]
     end
 
     subgraph Environment
@@ -575,8 +575,8 @@ graph TB
     subgraph Model[Reward Model Architecture]
         ENCODER[Transformer Encoder]
         HEAD[Reward Head]
-        R_CHOSEN[r_φ(chosen)]
-        R_REJECT[r_φ(rejected)]
+        R_CHOSEN["r_φ(chosen)"]
+        R_REJECT["r_φ(rejected)"]
     end
 
     subgraph BT_Loss[Bradley-Terry Loss]
