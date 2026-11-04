@@ -2,6 +2,8 @@
 
 Notes, lectures, and exercises for learning reinforcement learning and how it's used to train language models, from MDPs and policy gradients through RLHF, DPO, and GRPO.
 
+**As a website:** [rl.yad.codes](https://rl.yad.codes) has the lectures, exercises, and notes from this repo, plus a Q-learning agent you can watch learn in your browser. The site's code is in [rl-study-site](https://github.com/0bserver07/rl-study-site).
+
 This is a personal study repo, not a library. It mixes notes a person wrote (some going back to a 2017 Berkeley course) with a newer lecture series that hasn't been reviewed yet. Every doc under `notes/` and `reference/` says at the top whether it's `hand-written`, `reviewed`, or `unreviewed`. See [`AGENTS.md`](./AGENTS.md) for how the repo is organized and how to work in it, with a coding agent or solo.
 
 ## What's here
@@ -10,7 +12,7 @@ This is a personal study repo, not a library. It mixes notes a person wrote (som
 
 - **[`notes/cs294-2017/`](./notes/cs294-2017/)**: personal student notes from CS 294 Deep RL (Berkeley, Spring 2017; Levine, Schulman, Finn). 246 lines of real-time notes from the field being built. Idiosyncratic, opinionated, with the cannon-trajectory aside. Kept as written.
 - **[`notes/sutton-barto-digest/`](./notes/sutton-barto-digest/)**: short distillation of the four elements of an RL system, from Sutton & Barto.
-- **Talks, books, courses**: the curated external links below. The Pineau intro, Abbeel's deep RL talk, David Silver's UCL course, Sutton & Barto's book, CS285, Spinning Up. Here since 2015. Still the best place to start if you're new.
+- **Talks, books, courses**: the curated external links below. The Pineau intro, Abbeel's deep RL talk, David Silver's UCL course, Sutton & Barto's book, CS285, Spinning Up. Here since 31 December 2016. Still the best place to start if you're new.
 - **[`exercises/`](./exercises/)**: nine small coding exercises with `pytest` tests and reference solutions, verified to pass. Implement value iteration on a gridworld, REINFORCE on CartPole, Q-learning on FrozenLake, actor-critic, PPO, a Bradley-Terry reward model, DPO, a tiny GRPO loop on a verifiable arithmetic task, and RND exploration on a sparse-reward chain.
 
 **AI-drafted, useful as scaffold (`unreviewed`, treat with skepticism):**

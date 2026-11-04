@@ -1,6 +1,15 @@
 # Changelog
 
-Notable changes to the repo. Not a release log (there are no releases), just a record of what moved and why.
+Notable changes to the repo: what moved, and why. Releases are tagged from v1.0.0 (3 November 2026) on.
+
+## 2026-11-03: v1.0.0, the first tagged release
+
+Tagged so the site and anyone citing the repo can name a version instead of a commit. At this tag: the talks, books, and courses list started on 31 December 2016, the 2017 CS 294 notes, the Sutton & Barto digest, 34 lectures (all still `unreviewed`), 9 exercises with 84 tests, 7 homework sets, the cheat sheets, and the diagrams.
+
+- **A link to the site.** `readme.md` now points to [rl.yad.codes](https://rl.yad.codes), which is built from this repo, and to the site's code, [rl-study-site](https://github.com/0bserver07/rl-study-site).
+- **2015 → 2016.** `readme.md` said the talks, books, and courses list had been here since 2015. The repo's first commit (`45032bb`, "added the initial list") is from 31 December 2016.
+- **Diagram labels.** In `notes/diagrams/RL-Algorithm-Diagrams.md`, node labels with parentheses, like `V(s')` and `π_θ(a|s)`, are now quoted, so all 13 diagrams render in Mermaid (#16).
+- **No key in the source.** `tools/content-pipeline/generators/test_ollama.py` had an Ollama Cloud API key written into it. It now reads `OLLAMA_API_KEY` from the environment, the same variable `tools/lit-builder` uses.
 
 ## 2026-10-30: fix broken links in the diagrams collection and the math cheat sheet
 
