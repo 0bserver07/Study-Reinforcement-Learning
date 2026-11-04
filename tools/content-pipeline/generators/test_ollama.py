@@ -10,8 +10,8 @@ import sys
 import json
 from pathlib import Path
 
-# Ollama credentials
-OLLAMA_KEY = "f1f55b29520c411ca42370b8d9619ea0.TbznNbrG3PhFSNfpb0GQOrj-"
+# Ollama Cloud API key, read from the environment (keys: https://ollama.com/settings/keys)
+OLLAMA_KEY = os.environ.get("OLLAMA_API_KEY", "")
 
 # Available models
 OLLAMA_MODELS = [
