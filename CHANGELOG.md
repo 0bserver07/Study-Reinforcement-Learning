@@ -2,6 +2,18 @@
 
 Notable changes to the repo: what moved, and why. Releases are tagged from v1.0.0 (3 November 2026) on.
 
+## 2026-11-10: v1.1.0, fixes the lecture figures turned up, and exercise 20 rebuilt
+
+Building an interactive figure for each lecture with an exercise (on [rl.yad.codes](https://rl.yad.codes)) meant checking each one against a separate Python implementation. That turned up errors in four lectures and an exercise whose premise didn't hold.
+
+- **Exercise 20 (exploration) is rebuilt on a combination lock.** Its old chain only looked hard: plain ε-greedy failed because `np.argmax` broke every tie toward "left" while all its Q-values were 0. With ties broken at random, a random walk reached the goal in about 10% of 100-step episodes (the README said "roughly 1%"), and the RND solution first reached it at a median of episode 134, with 3 of 20 seeds never reaching it in 200 (the README said "within 100"). The new environment is the lock from the site's lecture 20 figure: 16 squares, a wrong move ends the episode, +1 at the end. Plain ε-greedy reached the goal within 200 episodes in 8 of 2,000 seeds (exact odds 0.61%); the RND solution first reached it at a median of episode 22 over 1,000 seeds. Ties break at random, every episode end is a real terminal, and no bonus is paid on a move that ends the episode. The README says what the numbers show, including that any positive bonus opens this lock, not only a novelty bonus. 19 tests, under 4 seconds.
+- **06 (PPO):** "Decrease eps_clip (allow more change)" was backwards (a smaller ε allows less change), and "Increase gradient clip (try 1.0)" under "unstable" loosened the 0.5 clip the code uses. The use and don't-use lists were emoji lines that rendered as one paragraph and claimed "PPO almost always works"; they're plain bullets now. "Real-world usage" said DeepMind used PPO for AlphaStar and Agent57, which it didn't; it now cites the papers that did use PPO.
+- **11 (DPO):** Part 6 and the debugging notes had β backwards. β weights the KL term, so a small β lets the policy drift from the reference and a large one holds it close.
+- **15 (GRPO):** `compute_group_advantages` returned NaN for a group of one. The exercise paragraph called exercise 15 "planned" and described a transformer; it now describes the exercise as it is.
+- **04 (actor-critic):** "Always normalize advantages" is now "many implementations do"; the exercise section describes exercise 04 as it is (two networks, Monte Carlo returns minus V).
+- **Lists:** lines meant as lists in lectures 05, 06 and 08 and the formulas cheat sheet had no list markers, so they rendered as one paragraph.
+- **readme:** the CS 294 link went to a dead Fall 2017 page; it now goes to the Spring 2017 course page at its current address.
+
 ## 2026-11-03: v1.0.0, the first tagged release
 
 Tagged so the site and anyone citing the repo can name a version instead of a commit. At this tag: the talks, books, and courses list started on 31 December 2016, the 2017 CS 294 notes, the Sutton & Barto digest, 34 lectures (all still `unreviewed`), 9 exercises with 84 tests, 7 homework sets, the cheat sheets, and the diagrams.
