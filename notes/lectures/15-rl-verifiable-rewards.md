@@ -196,6 +196,9 @@ def compute_group_advantages(rewards: torch.Tensor, eps: float = 1e-8) -> torch.
     Returns:
         advantages: shape [batch, K], zero-mean and unit-std within each group.
     """
+    if rewards.shape[1] < 2:
+        # A group of one has nothing to compare against (and torch's std would be NaN).
+        return torch.zeros_like(rewards)
     group_mean = rewards.mean(dim=1, keepdim=True)          # [batch, 1]
     group_std = rewards.std(dim=1, keepdim=True) + eps      # [batch, 1]
     advantages = (rewards - group_mean) / group_std          # [batch, K]
@@ -517,7 +520,7 @@ RLVR is probably not the right approach when:
 
 ## Exercises
 
-A tested exercise implementing GRPO on a verifiable toy arithmetic task is planned at `exercises/15-grpo-rlvr/`. That exercise will walk through setting up a small policy (a tiny transformer or MLP over digit tokens), a ground-truth arithmetic checker as the reward function, and the full GRPO training loop from the reference code above.
+[Exercise 15](../../exercises/15-grpo-rlvr/) implements GRPO on nine toy addition questions, with a checker as the reward. The policy is a table of logits, one row per question (an `nn.Embedding`), not a transformer. You write the group advantages (including the cases that give zero advantage: a group of one, or a group where every reward is equal), the PPO-clipped loss and the training loop, trained with Adam. It leaves out the KL term from the reference code above.
 
 Other things worth implementing:
 

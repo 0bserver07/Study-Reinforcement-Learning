@@ -444,15 +444,18 @@ if __name__ == "__main__":
 ### β tuning
 
 ```python
-# β too small (e.g., 0.01):
-#   - Policy stays too close to reference
-#   - Doesn't learn much from preferences
-#   - Underfit
+# β weights the KL term in the objective DPO is derived from:
+# it sets how strongly the policy is held to the reference.
 
-# β too large (e.g., 1.0):
-#   - Policy drifts far from reference
+# β too small (e.g., 0.01):
+#   - Weak pull toward the reference: the policy can drift far from it
 #   - Can overfit to preferences
 #   - May forget language modeling
+
+# β too large (e.g., 1.0):
+#   - Strong pull toward the reference: the policy stays too close to it
+#   - Doesn't learn much from preferences
+#   - Underfit
 
 # Sweet spot: 0.1 to 0.5
 # Start with 0.1, tune if needed
@@ -529,7 +532,7 @@ Before moving on:
 
 Common bugs:
 
-- **β too large (e.g. 1.0)**: Policy drifts far from reference; outputs become incoherent. Start at 0.1.
+- **β too small (e.g. 0.01)**: Weak pull toward the reference, so the policy can drift far from it, overfit the pairs and lose fluency. Start at 0.1.
 - **Reference model not frozen**: Gradients flow through it, defeating the KL regularization. Always call `ref_model.requires_grad_(False)` (or `ref_model.eval()` with `torch.no_grad()` around reference forward passes).
 - **Log probs computed over full sequence including prompt**: Model "learns" to repeat the prompt rather than improve the response. Mask prompt tokens before summing log probs.
 

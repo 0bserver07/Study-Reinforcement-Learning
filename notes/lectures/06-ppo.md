@@ -38,10 +38,10 @@ The core problem it solves: standard policy gradient methods can take catastroph
 ```
 
 **What we want**:
-- ✅ Large updates when safe (learn fast)
-- ✅ Small updates when risky (stay stable)
-- ✅ First-order optimization (just gradients)
-- ✅ Easy to implement
+- Large updates when safe (learn fast)
+- Small updates when risky (stay stable)
+- First-order optimization (just gradients)
+- Easy to implement
 
 **PPO gives us all of this.**
 
@@ -61,8 +61,8 @@ Imagine you're hiking in fog:
 - Want to improve (go uphill)
 - But can only trust local information
 
-**TRPO's approach**: "Don't move more than δ distance"
-**PPO's approach**: "Clip your step size if it's too large"
+- **TRPO's approach**: "Don't move more than δ distance"
+- **PPO's approach**: "Clip your step size if it's too large"
 
 ### The Clipping Mechanism
 
@@ -142,9 +142,9 @@ A_t = Σ_{l=0}^∞ (γλ)^l δ_{t+l}
 where δ_t = r_t + γV(s_{t+1}) - V(s_t)
 ```
 
-**λ = 0**: Pure TD (low variance)
-**λ = 1**: Pure Monte Carlo (high variance)
-**λ = 0.95**: Sweet spot (most common)
+- **λ = 0**: Pure TD (low variance)
+- **λ = 1**: Pure Monte Carlo (high variance)
+- **λ = 0.95**: Sweet spot (most common)
 
 **2. Value Function**
 
@@ -592,8 +592,8 @@ value_loss = torch.clamp(value_loss, -10, 10)
 L = min(ratio * A, clip(ratio, 1-ε, 1+ε) * A)
 ```
 
-**Pros**: Simple, effective, most common
-**Cons**: ε is a hyperparameter
+- **Pros**: Simple, effective, most common
+- **Cons**: ε is a hyperparameter
 
 ### PPO-Penalty (Alternative)
 
@@ -601,8 +601,8 @@ L = min(ratio * A, clip(ratio, 1-ε, 1+ε) * A)
 L = ratio * A - β * KL(π_θ || π_old)
 ```
 
-**Pros**: Adaptive KL penalty
-**Cons**: More hyperparameters (β, KL target)
+- **Pros**: Adaptive KL penalty
+- **Cons**: More hyperparameters (β, KL target)
 
 ### PPO-Adaptive (Research)
 
@@ -620,25 +620,24 @@ elif KL < KL_target / 1.5:
 
 ### Use PPO When:
 
-✅ **Need reliability** - PPO almost always works
-✅ **Have on-policy data** - Collecting new data each update
-✅ **Want good performance** - SOTA on many tasks
-✅ **Continuous or discrete** - Works for both
-✅ **Have compute** - Requires multiple epochs per batch
+- **You can collect fresh on-policy data**: PPO learns from rollouts of the current policy, gathered again for each update.
+- **You want a common, well-tested default**: many libraries and papers start from it.
+- **Actions are continuous or discrete**: it handles both.
+- **You can afford several passes over each batch**: PPO runs multiple epochs on every batch of rollouts.
 
 ### Don't Use PPO When:
 
-❌ **Off-policy learning** - Use SAC or TD3 instead
-❌ **Extreme sample efficiency** - Model-based might be better
-❌ **Simple problem** - DQN might suffice
-❌ **Need simplicity** - For alignment, DPO is simpler
+- **You need to learn from old or logged data (off-policy)**: SAC or TD3 suit continuous control better.
+- **Samples are very expensive**: model-based methods can be more sample efficient.
+- **The problem is small and discrete**: DQN may be enough.
+- **You're aligning a language model on preference pairs and want no RL loop**: DPO ([Lecture 11](./11-dpo.md)) is simpler.
 
 ### Real-World Usage:
 
-**OpenAI**: PPO for everything (Dota 2, robotics, ChatGPT)
-**DeepMind**: PPO + variants (AlphaStar, Agent57)
-**Anthropic**: PPO for RLHF (Claude)
-PPO is a reasonable default starting point for any new on-policy RL problem.
+- OpenAI Five, which played Dota 2, was trained with PPO ([Berner et al. 2019](https://arxiv.org/abs/1912.06680)), and so was OpenAI's robot hand that learned to reorient a block ([OpenAI et al. 2018](https://arxiv.org/abs/1808.00177)).
+- InstructGPT used PPO for its RLHF step ([Ouyang et al. 2022](https://arxiv.org/abs/2203.02155)), and so did Anthropic's 2022 helpful and harmless assistant ([Bai et al. 2022](https://arxiv.org/abs/2204.05862)).
+
+PPO is a reasonable default starting point for a new on-policy RL problem.
 
 ---
 
@@ -663,7 +662,7 @@ PPO(
 **If learning is unstable**:
 - Decrease lr (try 1e-4)
 - Decrease eps_clip (try 0.1)
-- Increase gradient clip (try 1.0)
+- Clip the gradient norm harder (the code above clips it at 0.5)
 
 **If learning is too slow**:
 - Increase lr (try 1e-3)
@@ -672,7 +671,6 @@ PPO(
 
 **If policy is too deterministic**:
 - Increase c2 (more entropy)
-- Decrease eps_clip (allow more change)
 
 **If sample inefficient**:
 - Increase K_epochs (reuse data more)

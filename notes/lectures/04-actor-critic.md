@@ -692,13 +692,13 @@ def update_with_gae(self, next_state=None):
 
 ### Gotcha 1: Advantage normalization
 
-Always normalize advantages:
+Many implementations normalize advantages within each batch:
 
 ```python
 advantages = (advantages - advantages.mean()) / (advantages.std() + 1e-8)
 ```
 
-Without this, training is unstable (some advantages dominate).
+It keeps a few large advantages from dominating an update, and PPO implementations usually do it. It isn't required: exercise 04's reference solution doesn't normalize.
 
 ### Gotcha 2: Value loss coefficient
 
@@ -801,11 +801,10 @@ See also `../../reference/papers/`.
 
 ## Exercises
 
-Implement A2C and train on CartPole:
+[Exercise 04](../../exercises/04-actor-critic/) has you write the simplest version on CartPole: a policy network and a separate value network, Monte Carlo returns, and the advantage `returns - values`, detached so the policy gradient doesn't flow into the critic. It doesn't use TD advantages, GAE or a shared network.
 
-1. Start with the basic actor-critic network above
-2. Add advantage estimation
-3. Train for 500 episodes
-4. Compare to REINFORCE (Lecture 02) and DQN (Lecture 03)
+Going further:
 
-Then add GAE and compare λ=0 vs λ=0.95 vs λ=1 to see how variance changes.
+1. Train for 500 episodes and compare with REINFORCE (Lecture 02) and DQN (Lecture 03).
+2. Replace the Monte Carlo advantage with the TD error, then with GAE, and compare λ=0, λ=0.95 and λ=1 to see how the variance changes.
+3. Share one network between actor and critic (two heads), as in the code above.

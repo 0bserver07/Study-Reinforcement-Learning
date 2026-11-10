@@ -578,8 +578,8 @@ Computing Fisher exactly is expensive. Use **empirical Fisher**:
 
 ### Gotcha 2: Conjugate gradient steps
 
-Too few steps: Poor solution
-Too many steps: Numerical instability
+- Too few steps: Poor solution
+- Too many steps: Numerical instability
 
 Good default: 10-20 steps
 

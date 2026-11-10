@@ -38,8 +38,8 @@ for episode in range(n_episodes):
         update_policy(obs, action, reward, obs)
 ```
 
-**Pros:** Simple, works for complex dynamics.
-**Cons:** Sample-inefficient, no internal model of environment.
+- **Pros:** Simple, works for complex dynamics.
+- **Cons:** Sample-inefficient, no internal model of environment.
 
 ### Model-based
 
@@ -63,8 +63,8 @@ for episode in range(n_episodes):
     update_policy(synthetic_data)  # Learn from imagined experience
 ```
 
-**Pros:** Sample-efficient, potentially transferable, more interpretable.
-**Cons:** Model errors compound; harder to implement correctly.
+- **Pros:** Sample-efficient, potentially transferable, more interpretable.
+- **Cons:** Model errors compound; harder to implement correctly.
 
 ---
 

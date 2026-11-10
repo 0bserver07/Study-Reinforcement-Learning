@@ -160,7 +160,7 @@ The map below shows where each family fits. The lectures fill in the details; [`
 	* Lecture 9: Exploration and Exploitation
 	* Lecture 10: Case Study: RL in Classic Games
 
-* [CS 294: Deep Reinforcement Learning, Spring 2017](https://rll.berkeley.edu/deeprlcourse-fa17/) by Sergey Levine, John Schulman, Chelsea Finn. My notes from taking it are at [`notes/cs294-2017/`](./notes/cs294-2017/).
+* [CS 294: Deep Reinforcement Learning, Spring 2017](https://rail.eecs.berkeley.edu/deeprlcoursesp17/) by Sergey Levine, John Schulman, Chelsea Finn. My notes from taking it are at [`notes/cs294-2017/`](./notes/cs294-2017/).
 
 * [CS 285: Deep Reinforcement Learning (Berkeley)](https://rail.eecs.berkeley.edu/deeprlcourse/), the current version of CS294, updated each year.
 

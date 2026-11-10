@@ -672,8 +672,8 @@ H(Cat(p)) = -Σ_i p_i log p_i
 Beta(x; α, β) = x^{α-1}(1-x)^{β-1} / B(α,β)
 ```
 
-**Mean**: μ = α/(α+β)
-**Variance**: σ² = αβ/[(α+β)²(α+β+1)]
+- **Mean**: μ = α/(α+β)
+- **Variance**: σ² = αβ/[(α+β)²(α+β+1)]
 
 Used for: Modeling probabilities, Thompson sampling
 
