@@ -4,32 +4,30 @@ Read one at a time. Try after each before reading the next.
 
 ---
 
-**Hint 1: `ChainEnv.step`.** All of it:
+**Hint 1: `CombinationLock.step`.** All of it:
 
 ```python
-if action == 1:
-    self.state = min(self.state + 1, self.n_states - 1)
-else:
-    self.state = max(self.state - 1, 0)
-self.steps += 1
+if action == 0:  # the wrong move
+    return self.state, 0.0, True, {}
+self.state += 1
 reached_goal = self.state == self.n_states - 1
-timed_out = self.steps >= self.max_steps
 reward = 1.0 if reached_goal else 0.0
-done = reached_goal or timed_out
-return self.state, reward, done, {}
+return self.state, reward, reached_goal, {}
 ```
 
-Two things people get wrong here. (1) Forgetting the `min`/`max` clamps: without them, action 0 at state 0 goes to -1, then `self.q[-1]` becomes "the last row" because numpy negative indices are valid, and your bug looks like a hard-to-reproduce learning failure rather than an out-of-bounds error. (2) Computing `reached_goal` before updating `self.state`, so the goal-arrival is registered one step late. Update `self.state` first.
+Two things people get wrong here. (1) Making left step back a square (`max(self.state - 1, 0)`), as on an ordinary chain. On the lock, left ends the episode on every square, square 0 included. With a step back instead, nothing ends an episode except the goal, so even plain ε-greedy wanders until it gets there. (2) Computing `reached_goal` before moving. Then arriving on square 15 doesn't register, and the +1 only comes with a 16th right, onto a square that doesn't exist. Move first.
 
 ---
 
-**Hint 2: `QLearningAgent.act` and `.update`.** Two-liners:
+**Hint 2: `QLearningAgent.act` and `.update`.** Short ones:
 
 ```python
 def act(self, state):
     if self.rng.random() < self.epsilon:
         return int(self.rng.integers(self.n_actions))
-    return int(np.argmax(self.q[state]))
+    q = self.q[state]
+    best = np.flatnonzero(q == q.max())  # every action tied for the max
+    return int(self.rng.choice(best))
 
 def update(self, s, a, r, s_next, done):
     target = r if done else r + self.gamma * np.max(self.q[s_next])
@@ -38,7 +36,11 @@ def update(self, s, a, r, s_next, done):
     return float(td)
 ```
 
-The `done` branch matters. Bootstrapping off `max(Q[s_next])` on a terminal transition is the classic bug: `Q[s_next]` for the terminal state is whatever you initialized it to, and you'll either learn nonsense or accidentally learn fine (if the init happens to be 0 and you have no other terminal transitions, you're getting lucky). The `if done` branch makes the target correct even on the goal step.
+The tie-break matters on this lock. Q starts at 0, so at first every greedy choice is a tie, and `int(np.argmax(self.q[state]))` returns the first tied action: 0, the wrong move. Plain ε-greedy with that tie rule goes left 95% of the time. The bonus agent still gets there, because ε sometimes picks right on the frontier square, but slowly: over 100 seeds its first +1 came at a median of episode 407, against 22 with random tie-breaking.
+
+The `done` branch matters too. Bootstrapping off `max(Q[s_next])` on a move that ends the episode is the classic bug. After the wrong move `s_next` is the square the agent failed on, so the bug pushes Q(s, left) toward γ · Q(s, right): the wrong move ends up looking nearly as good as the right one. The integration test checks that Q(s, left) stays exactly 0.
+
+This lock has no time limit, so `done` always means the episode really ended. If you add a step limit to an environment, a timeout is a different case: the episode stops, but the state still has a future, so the update should bootstrap. Keep the two apart. (gymnasium's `step` returns them separately, as `terminated` and `truncated`.)
 
 ---
 
@@ -53,7 +55,7 @@ return err / std
 
 The `_raw_error` helper already wraps the forward passes in `torch.no_grad()` and returns the scalar mean squared error. You don't backprop through this: it's just a number you feed into the Q-update. The reason to call `_update_running_stats` here (instead of in `update`) is that you want the running stats to reflect *every* error you ever query, not only the ones that get a gradient step.
 
-Why not return the raw error and skip the normalization? Try it and see: at the start of training the raw errors are huge (the predictor knows nothing) and after a few states are learned they drop to nearly zero on those states but stay big elsewhere. The effective `intrinsic_coef` swings by orders of magnitude as a result. Normalizing keeps the relative novelty signal stable.
+Why normalize at all? At the start of training the raw errors are large everywhere (the predictor knows nothing). After a few states are learned, the errors on those states drop by orders of magnitude, while on states the predictor hasn't trained on they fall much less. Without normalization, the weight of the bonus against the extrinsic reward moves with that drift, and you don't control it. On this lock the weight happens not to matter, since any positive bonus opens it (see the README), but it matters whenever the bonus has to be traded off against the extrinsic reward.
 
 ---
 
@@ -79,17 +81,18 @@ Why `.detach()` on `target_out` even though the target's parameters have `requir
 ```python
 a = agent.act(s)
 s_next, r_ext, done, _ = env.step(a)
-r_int = rnd.intrinsic_reward(s_next)
-r_combined = r_ext + intrinsic_coef * r_int
-agent.update(s, a, r_combined, s_next, done)
-rnd.update(s_next)
+r_int = 0.0
+if not done:
+    r_int = rnd.intrinsic_reward(s_next)
+    rnd.update(s_next)
+agent.update(s, a, r_ext + intrinsic_coef * r_int, s_next, done)
 s = s_next
 total_ext += r_ext
 ```
 
-Two design choices worth understanding. (1) Why intrinsic reward at `s_next`, not `s`? Because the "reward you got for taking action `a` in state `s`" includes "you landed in state `s_next`, which is novel": the credit goes to the transition, and the novelty is a property of the landing state. (2) Why `total_ext += r_ext` and not `r_combined`? The test measures whether the agent actually reaches the goal. If you accumulate `r_combined`, you're reporting the bonus inflation as if it were real reward, and the test threshold becomes meaningless. Train on combined, report on extrinsic.
+Three design choices worth understanding. (1) Why the bonus at `s_next`, not `s`? The credit goes to the move, and what makes a move worth taking is that it lands somewhere new: the novelty belongs to the landing square. (2) Why no bonus when `done`? A move that ends the episode leads nowhere, so there's nothing to explore from. On this lock it's also what keeps the wrong move worth exactly 0. If you score the square the agent failed on as the wrong move's bonus, Q(s, left) turns positive, and on the frontier square, where right hasn't been tried and is still worth 0, the greedy move becomes the wrong one. Over 200 seeds, paying the bonus on moves that end the episode got the agent to the goal within 200 episodes in 16.5% of runs, against 100% without. (3) Why `total_ext += r_ext` and not the combined reward? The test measures whether the agent actually reaches the goal. If you accumulate the combined reward, you're reporting the bonus as if it were real reward, and the test threshold becomes meaningless. Train on combined, report on extrinsic.
 
-If your test fails with a returned value near zero, the most likely cause is forgetting to call `rnd.update(s_next)`: then the predictor never learns anything, the bonus stays maxed at every state forever, and Q-learning chases the bonus instead of the goal because the bonus rewards revisiting just as much as visiting new states.
+If the integration test says Q(s, left) isn't 0, either the bonus is being paid when `done` is True, or `update` bootstraps on `done=True` (hint 2). If it says the predictor never changed, you forgot `rnd.update(s_next)`. The agent opens the lock without it, because any positive bonus does here, but the bonus no longer shrinks with visits, so RND is reduced to a random but fixed bonus per square.
 
 ---
 

@@ -1,4 +1,4 @@
-"""Intrinsic-motivation exploration on a sparse-reward chain MDP — starter.
+"""Exploration with an RND novelty bonus on a combination lock: starter.
 
 Fill in the TODOs, then from the repo root:
 
@@ -6,29 +6,30 @@ Fill in the TODOs, then from the repo root:
     pytest exercises/20-exploration/
 
 See README.md for the task and HINTS.md if you're stuck. The reference
-implementation is in solution/exploration.py — look after you've tried.
+implementation is in solution/exploration.py; look after you've tried.
 
 The setup:
-  - ChainEnv: a 1D chain of N states. Agent starts at state 0. Actions are
-    {left, right}. Reward is 1.0 only on entering the goal at state N-1.
-  - With epsilon-greedy exploration at epsilon=0.1 on a length-20 chain
-    capped at 100 steps per episode, vanilla Q-learning never sees the
-    goal in 200 episodes. The mean return stays at 0.
-  - RND (Random Network Distillation): two MLPs that map a one-hot state
-    to a feature vector. The target is randomly initialized and frozen;
-    the predictor is trained to match the target's output on visited
-    states. The intrinsic reward is the squared L2 distance between the
-    two outputs. Novel states have large error; well-visited states have
-    small error.
-  - Q-learning trained on `r_extrinsic + intrinsic_coef * r_intrinsic`
-    reliably reaches the goal.
+  - CombinationLock: 16 squares in a row, start on square 0. Right moves to
+    the next square. Left is the wrong move: it ends the episode with reward
+    0. Reaching the last square gives +1 and ends the episode.
+  - Plain epsilon-greedy Q-learning keeps every Q-value at exactly 0 until its
+    first +1, so until then it moves at random, and fifteen rights in a row
+    come once in 2^15 = 32,768 episodes.
+  - RND (Random Network Distillation): two MLPs that map a one-hot state to
+    a feature vector. The target is randomly initialized and frozen; the
+    predictor is trained to match the target's output on visited states.
+    The bonus is the squared L2 distance between the two outputs: large on
+    new states, small on well-visited ones.
+  - Q-learning trained on `r_extrinsic + intrinsic_coef * r_intrinsic` opens
+    the lock in a few dozen episodes.
 
 You implement:
-  1. ChainEnv.step  — the environment transition.
-  2. QLearningAgent.act / .update — epsilon-greedy + Q-learning update.
-  3. RNDIntrinsicReward.intrinsic_reward / .update — RND forward and one
+  1. CombinationLock.step: the environment transition.
+  2. QLearningAgent.act / .update: epsilon-greedy with random tie-breaking,
+     and the Q-learning update.
+  3. RNDIntrinsicReward.intrinsic_reward / .update: RND forward and one
      gradient step on the predictor.
-  4. train_with_intrinsic — the loop that combines them.
+  4. train_with_intrinsic: the loop that combines them.
 """
 
 from __future__ import annotations
@@ -42,44 +43,41 @@ import torch.nn.functional as F
 # ── environment ───────────────────────────────────────────────────────────────
 
 
-class ChainEnv:
-    """1D chain MDP. States 0..n_states-1. Agent starts at 0. Goal at n_states-1.
+class CombinationLock:
+    """Squares 0..n_states-1 in a row. The agent starts on square 0.
 
     Actions: 0 = left, 1 = right.
-    Reward: 1.0 on entering the goal state, 0.0 everywhere else.
-    Episode ends on reaching the goal or after max_steps steps.
+    Right moves to the next square. Entering the last square gives reward 1.0
+    and ends the episode.
+    Left is the wrong move on every square, square 0 included: the episode ends
+    with reward 0 and the agent stays where it was.
 
-    Boundary: action 0 at state 0 stays at state 0 (don't fall off the chain).
+    So an episode lasts at most n_states - 1 moves. There's no time limit, and
+    every done=True is a real ending.
     """
 
-    def __init__(self, n_states: int = 20, max_steps: int = 100):
+    def __init__(self, n_states: int = 16):
         self.n_states = n_states
-        self.max_steps = max_steps
         self.state = 0
-        self.steps = 0
 
     def reset(self) -> int:
         self.state = 0
-        self.steps = 0
         return self.state
 
     def step(self, action: int) -> tuple:
-        """Take one step. Return (next_state, reward, done, info).
+        """Take one move. Return (next_state, reward, done, info).
 
         TODO:
-          - if action == 1: new state = min(self.state + 1, self.n_states - 1)
-          - if action == 0: new state = max(self.state - 1, 0)
-          - self.steps += 1
-          - reached_goal = (new state == self.n_states - 1)
-          - timed_out   = (self.steps >= self.max_steps)
-          - reward      = 1.0 if reached_goal else 0.0
-          - done        = reached_goal or timed_out
-          - self.state  = new state
-          - return self.state, reward, done, {}
+          - if action == 0 (the wrong move): the episode ends where the agent
+            stands, so return self.state, 0.0, True, {}
+          - otherwise move right: self.state += 1
+          - reached_goal = (self.state == self.n_states - 1)
+          - reward       = 1.0 if reached_goal else 0.0
+          - return self.state, reward, reached_goal, {}
         """
         assert action in (0, 1), f"action must be 0 (left) or 1 (right), got {action}"
         # TODO
-        raise NotImplementedError("ChainEnv.step")
+        raise NotImplementedError("CombinationLock.step")
 
 
 # ── Q-learning ────────────────────────────────────────────────────────────────
@@ -88,8 +86,9 @@ class ChainEnv:
 class QLearningAgent:
     """Tabular Q-learning over (state, action) with epsilon-greedy.
 
-    Q is initialized to zeros — on this env, optimistic init would mask the
-    exploration problem you're supposed to fix with RND, so don't add it.
+    Q is initialized to zeros. Optimistic init would do the exploring for you
+    on this lock (every untried move would look good), which hides the
+    problem you're supposed to fix with RND, so don't add it.
     """
 
     def __init__(
@@ -110,11 +109,17 @@ class QLearningAgent:
         self.rng = np.random.default_rng(seed)
 
     def act(self, state: int) -> int:
-        """epsilon-greedy action selection. Return a Python int.
+        """epsilon-greedy action selection, ties broken at random. Return a Python int.
 
         TODO:
           - with probability self.epsilon, return int(self.rng.integers(self.n_actions))
-          - otherwise, return int(np.argmax(self.q[state]))
+          - otherwise find every action whose Q-value equals max(self.q[state])
+            (np.flatnonzero helps), pick one of them with self.rng.choice, and
+            return it as an int
+
+        Why not np.argmax: it returns the first of several tied actions. Q
+        starts at 0, so at first every greedy choice is a tie, and np.argmax
+        would pick action 0, the wrong move, every time.
         """
         # TODO
         raise NotImplementedError("QLearningAgent.act")
@@ -127,8 +132,11 @@ class QLearningAgent:
         td_error = target - self.q[s, a]
         self.q[s, a] += self.alpha * td_error
 
+        On this lock done=True always means the episode really ended (a wrong
+        move or the goal), so there's no future to bootstrap from.
+
         Note `r` here is the COMBINED reward (extrinsic + intrinsic_coef * intrinsic).
-        The agent doesn't know which part came from where — it just learns
+        The agent doesn't know which part came from where; it just learns
         a Q-function over the combined signal.
         """
         # TODO
@@ -141,7 +149,7 @@ class QLearningAgent:
 class _MLP(nn.Module):
     """Small MLP. One-hot state -> hidden -> feature vector.
 
-    Don't change this — both the target and the predictor use it. The point
+    Don't change this: both the target and the predictor use it. The point
     of RND is that they have the *same* architecture but different weights;
     the target is frozen at its random init, the predictor learns to match.
     """
@@ -181,7 +189,7 @@ class RNDIntrinsicReward:
         torch.manual_seed(seed)
         self.target = _MLP(n_states, hidden, feature_dim)
         self.predictor = _MLP(n_states, hidden, feature_dim)
-        # Freeze the target — never updates.
+        # Freeze the target: it never updates.
         for p in self.target.parameters():
             p.requires_grad = False
         self.optimizer = torch.optim.Adam(self.predictor.parameters(), lr=lr)
@@ -199,7 +207,7 @@ class RNDIntrinsicReward:
     def _raw_error(self, state: int) -> torch.Tensor:
         """Squared L2 distance between predictor and target outputs at `state`.
 
-        Returns a scalar tensor under torch.no_grad — the intrinsic reward
+        Returns a scalar tensor under torch.no_grad: the intrinsic reward
         is just a number plugged into Q-learning, not a backprop signal.
         """
         x = self._onehot(state).unsqueeze(0)  # (1, n_states)
@@ -219,7 +227,7 @@ class RNDIntrinsicReward:
 
         Why normalize: early in training, raw errors can be O(1); after the
         predictor has learned a few states they fall to O(0.01). Without
-        normalization the effective intrinsic-reward weight is moving without
+        normalization the effective intrinsic-reward weight moves without
         you controlling it. Dividing by a running std keeps the *relative*
         novelty signal stable.
         """
@@ -239,7 +247,7 @@ class RNDIntrinsicReward:
 
         TODO:
           - x = self._onehot(state).unsqueeze(0)
-          - target_out = self.target(x).detach()   # frozen — detach is belt and braces
+          - target_out = self.target(x).detach()   # frozen; detach is belt and braces
           - pred_out   = self.predictor(x)
           - loss = F.mse_loss(pred_out, target_out)
           - self.optimizer.zero_grad()
@@ -255,18 +263,17 @@ class RNDIntrinsicReward:
 
 
 def train_q_learning_alone(
-    n_states: int = 20,
+    n_states: int = 16,
     n_episodes: int = 200,
-    max_steps: int = 100,
     seed: int = 0,
 ) -> list:
     """Plain Q-learning, no intrinsic reward. The failure baseline.
 
-    Given to you — you don't have to change this. Run it after you've
-    finished ChainEnv and QLearningAgent to confirm vanilla Q-learning
-    flatlines at 0 returns on this env.
+    Given to you; you don't have to change this. Run it after you've
+    finished CombinationLock and QLearningAgent to confirm that plain
+    Q-learning almost never reaches the goal.
     """
-    env = ChainEnv(n_states=n_states, max_steps=max_steps)
+    env = CombinationLock(n_states=n_states)
     agent = QLearningAgent(n_states=n_states, seed=seed)
 
     episode_returns = []
@@ -285,9 +292,8 @@ def train_q_learning_alone(
 
 
 def train_with_intrinsic(
-    n_states: int = 20,
+    n_states: int = 16,
     n_episodes: int = 200,
-    max_steps: int = 100,
     intrinsic_coef: float = 0.1,
     seed: int = 0,
 ) -> tuple:
@@ -296,27 +302,30 @@ def train_with_intrinsic(
     Returns:
         (extrinsic_returns_per_episode, agent, rnd)
 
-    The intrinsic reward at each transition is computed at the *next* state
-    (the state you just landed in — that's the one whose novelty you want
-    to credit). Then take one RND predictor update on that state so its
-    bonus shrinks over time.
+    The intrinsic reward for a move is computed at the *next* state (the
+    square you just landed on: that's the one whose novelty you want to
+    credit). Then take one RND predictor update on that square so its bonus
+    shrinks over time.
 
-    TODO — fill in the inner loop:
+    A move that ends the episode gets no bonus: there's no next square to
+    explore from. On this lock that keeps the wrong move worth exactly 0.
+
+    TODO: fill in the inner loop:
         a = agent.act(s)
         s_next, r_ext, done, _ = env.step(a)
-        r_int = rnd.intrinsic_reward(s_next)
-        r_combined = r_ext + intrinsic_coef * r_int
-        agent.update(s, a, r_combined, s_next, done)
-        rnd.update(s_next)
+        r_int = 0.0
+        if not done:
+            r_int = rnd.intrinsic_reward(s_next)
+            rnd.update(s_next)
+        agent.update(s, a, r_ext + intrinsic_coef * r_int, s_next, done)
         s = s_next
         total_ext += r_ext
 
-    Important: accumulate total_ext from r_ext, not r_combined. The
-    integration test measures extrinsic-only return — you want to see
-    that the agent actually reaches the goal, not that it's chasing the
-    novelty bonus.
+    Important: accumulate total_ext from r_ext, not the combined reward. The
+    integration test measures extrinsic-only return: you want to see that
+    the agent actually reaches the goal, not that it's collecting bonus.
     """
-    env = ChainEnv(n_states=n_states, max_steps=max_steps)
+    env = CombinationLock(n_states=n_states)
     agent = QLearningAgent(n_states=n_states, seed=seed)
     rnd = RNDIntrinsicReward(n_states=n_states, seed=seed)
 
@@ -334,11 +343,20 @@ def train_with_intrinsic(
 
 # ── main ──────────────────────────────────────────────────────────────────────
 
+
+def _first_goal(returns: list):
+    """1-based episode of the first +1, or None if there wasn't one."""
+    return next((i + 1 for i, r in enumerate(returns) if r > 0), None)
+
+
 if __name__ == "__main__":
     plain = train_q_learning_alone(seed=0)
-    last50_plain = sum(plain[-50:]) / 50
-    print(f"plain Q-learning   mean(last 50) = {last50_plain:.3f}")
+    print(f"plain Q-learning   reached the goal in {int(sum(plain))} of {len(plain)} episodes")
 
-    rnd_returns, _, _ = train_with_intrinsic(seed=0)
-    last50_rnd = sum(rnd_returns[-50:]) / 50
-    print(f"Q-learning + RND   mean(last 50) = {last50_rnd:.3f}  (goal reward = 1.0)")
+    rnd_returns, agent, _ = train_with_intrinsic(seed=0)
+    print(
+        f"Q-learning + RND   reached the goal in {int(sum(rnd_returns))} of {len(rnd_returns)} "
+        f"episodes, the first at episode {_first_goal(rnd_returns)}"
+    )
+    greedy = "".join("R" if agent.q[s, 1] > agent.q[s, 0] else "L" for s in range(agent.n_states - 1))
+    print(f"greedy move on squares 0-{agent.n_states - 2} after training: {greedy}")
