@@ -28,6 +28,7 @@ It is a learning environment, not a library or a product. A person is working th
 | `drafts/` | Scratch space for new material before a person reviews it | Yes: new drafts land here first |
 | `CURRICULUM.md` | The ordered syllabus | Yes |
 | `readme.md`, `CHANGELOG.md` | Repo front matter | Yes |
+| `assets/` | Images for the readme: the site's home page, recorded in light and dark | Yes |
 
 ## Review status
 
