@@ -4,10 +4,12 @@ Notes, lectures, and exercises for learning reinforcement learning and how it's 
 
 **As a website:** [rl.yad.codes](https://rl.yad.codes) has the lectures, exercises, and notes from this repo, plus a Q-learning agent you can watch learn in your browser. The site's code is in [rl-study-site](https://github.com/0bserver07/rl-study-site).
 
-<a href="https://rl.yad.codes"><picture>
-  <source media="(prefers-color-scheme: dark)" srcset="./assets/rl-yad-codes-dark.gif">
-  <img alt="The home page of rl.yad.codes. A red dot learns a small grid by Q-learning: it wanders at first, and after 50 episodes of training it heads for the +1." src="./assets/rl-yad-codes-light.gif">
-</picture></a>
+<a href="https://rl.yad.codes">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="./assets/rl-yad-codes-dark.gif">
+    <img alt="The home page of rl.yad.codes. A red dot learns a small grid by Q-learning: it wanders at first, and after 50 episodes of training it heads for the +1." src="./assets/rl-yad-codes-light.gif">
+  </picture>
+</a>
 
 This is a personal study repo, not a library. It mixes notes a person wrote (some going back to a 2017 Berkeley course) with a newer lecture series that hasn't been reviewed yet. Every doc under `notes/` and `reference/` says at the top whether it's `hand-written`, `reviewed`, or `unreviewed`. See [`AGENTS.md`](./AGENTS.md) for how the repo is organized and how to work in it, with a coding agent or solo.
 
